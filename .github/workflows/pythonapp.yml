@@ -1,0 +1,103 @@
+name: Python application
+
+on: [push, pull_request]
+
+jobs:
+  lint_test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.x
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip virtualenv wheel setuptools
+    - name: Lint with pycodestyle
+      run: |
+        python3 -m pip install flake8
+        python3 -m flake8 . --count --ignore=E125,E126,E127,E128,E402,E741,E731,W503,F401,W504,F841 --show-source --statistics --max-line-length=80 --exclude=__pycache__,.tox,.git/,doc/
+
+  linux_test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.x
+    - name: Make sdist
+      run: python3 setup.py sdist --formats=gztar
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip virtualenv wheel setuptools
+        python3 -m pip install torch torchvision torchaudio -f https://download.pytorch.org/whl/cpu/torch_stable.html
+    - name: Install project
+      run: python3 -m pip install -e .[dev]
+    - name: Make wheel
+      run: python3 setup.py bdist_wheel --universal
+    - name: Upload wheels as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: wheels
+        path: dist
+    - name: Upload to GitHub Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        files: dist/*
+        draft: true
+    - name: Test with pytest
+      run: |
+        python3 -m pytest --cov=sapicore --cov-report term --cov-branch sapicore/test
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.x
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip virtualenv wheel setuptools
+        python3 -m pip install torch torchvision torchaudio -f https://download.pytorch.org/whl/cpu/torch_stable.html
+        python3 -m pip install -e .[dev]
+    - name: Generate docs
+      run: |
+        cd docs
+        make html
+    - name: Upload docs as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: docs
+        path: docs/build/html
+    - name: gh-pages upload
+      if: false && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        cp -r docs/build/html ~/docs_temp
+
+        git config --global user.email "cplab@cornell.edu"
+        git config --global user.name "CPLab"
+        git remote rm origin || true
+        git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/cplab/sapicore.git"
+
+        git checkout --orphan gh-pages
+        cp -r .git ~/docs_git
+        cd ..
+        rm -rf sapicore
+        mkdir sapicore
+        cd sapicore
+        cp -r ~/docs_git .git
+        cp -r ~/docs_temp/* .
+        touch .nojekyll
+
+        git add .
+        git commit -a -m "Docs for git-$GITHUB_SHA"
+        git push origin gh-pages -f
