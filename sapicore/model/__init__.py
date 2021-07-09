@@ -26,13 +26,13 @@ class SapicoreModel(SapicoreNetwork):
         List[Tuple[SapicoreNetwork, Dict[SapicoreNeuron, SapicoreNeuron]]]] = {}
     """A dict mapping networks contained in the model to other networks
     in the model.
-    
+
     Each value is a list of 2-tuples of ``(target_network, neurons)``.
     ``target_network`` is the network to which the source network in the key is
     connected. ``neurons`` is a dict whose keys and values are each a neuron
     from the source and target networks, respectively that connects the
     network.
-    
+
     E.g. given ``network1`` and ``network2``, and neurons ``n1``, ``n2`` in
     ``network1`` that are respectively connected to neurons ``n3``, ``n4`` in
     ``network2``. Then :attr:`networks` is

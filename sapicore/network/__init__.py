@@ -26,15 +26,15 @@ class SapicoreNetwork(Loggable, Configurable, nn.Module):
 
     neurons: Dict[SapicoreNeuron, List[SapicoreSynapse]] = {}
     """Dict whose keys are all the :class:`~sapicore.neuron.SapicoreNeuron` in
-    the network and the corresponding values is a list of 
+    the network and the corresponding values is a list of
     :class:`~sapicore.synapse.SapicoreSynapse` going out from the
     :class:`~sapicore.neuron.SapicoreNeuron`.
     """
 
     synapses: Dict[SapicoreSynapse, List[SapicoreNeuron]] = {}
-    """Dict whose keys are all the :class:`~sapicore.synapse.SapicoreSynapse` 
-    in the network and the corresponding values is a list of 
-    :class:`~sapicore.neuron.SapicoreNeuron` into which the 
+    """Dict whose keys are all the :class:`~sapicore.synapse.SapicoreSynapse`
+    in the network and the corresponding values is a list of
+    :class:`~sapicore.neuron.SapicoreNeuron` into which the
     :class:`~sapicore.synapse.SapicoreSynapse` is terminating.
     """
 

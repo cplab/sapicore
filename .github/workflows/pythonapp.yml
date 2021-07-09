@@ -69,6 +69,7 @@ jobs:
         python3 -m pip install -e .[dev]
     - name: Generate docs
       run: |
+        cp README.rst docs/source/readme.rst
         cd docs
         make html
     - name: Upload docs as artifact

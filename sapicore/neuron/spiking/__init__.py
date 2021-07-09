@@ -15,7 +15,7 @@ class SpikingNeuron(SapicoreNeuron):
 
     integrator: Integration = None
     """The integrator to use for the neuron.
-    
+
     It is automatically set during :meth:`post_config_applied` by looking up
     :attr:`integrator_name` in
     :class:`~sapicore.neuron.spiking.integrate.IntegratorFactory`.
