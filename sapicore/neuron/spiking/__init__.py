@@ -1,5 +1,5 @@
-"""Analog neuron
-================
+"""Spiking neuron
+=================
 """
 from sapicore.neuron import SapicoreNeuron
 from sapicore.neuron.spiking.integrate import Integration, IntegratorFactory

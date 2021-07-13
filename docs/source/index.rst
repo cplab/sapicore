@@ -13,6 +13,8 @@ Welcome to Sapicore's documentation!
    readme.rst
    api_guide.rst
 
+   example_code/example_code.rst
+
    api/api.rst
 
 

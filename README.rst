@@ -3,6 +3,9 @@ Sapicore
 
 A PyTorch-based modeling framework for neuromorphic olfaction.
 
+Please see `here <https://cplab.github.io/sapicore/index.html>`_
+for complete documentation.
+
 Sapicore is a framework which provides a high level abstractions for writing
 neuromorphic models using pytorch. Sapicore does not contain any concrete models,
 instead each model should have its own repo that implements the Sapicore
