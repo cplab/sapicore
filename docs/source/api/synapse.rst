@@ -1,3 +1,6 @@
+**********
+Synapse
+**********
 
 .. automodule:: sapicore.synapse
    :members:

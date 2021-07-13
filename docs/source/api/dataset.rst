@@ -1,3 +1,7 @@
+**********
+Dataset
+**********
+
 .. automodule:: sapicore.dataset
    :members:
    :show-inheritance:

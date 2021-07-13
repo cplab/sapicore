@@ -1,3 +1,6 @@
+**********
+Neuron
+**********
 
 .. automodule:: sapicore.neuron
    :members:

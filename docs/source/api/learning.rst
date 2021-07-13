@@ -1,3 +1,7 @@
+**********
+Learning
+**********
+
 .. automodule:: sapicore.learning
    :members:
    :show-inheritance:

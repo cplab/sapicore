@@ -1,3 +1,7 @@
+"""A basic, but complete example showing how to write a neuron, synapse,
+learning algorithm, and model, how to configure and log it, and how to
+run training.
+"""
 from os.path import join
 import torch
 from torch.utils.tensorboard import SummaryWriter
@@ -16,32 +20,53 @@ from sapicore.logging import load_save_get_loggable_properties, \
     get_loggable_properties
 
 
+# enable config to read torch/numpy data types
+register_numpy_yaml_support()
+register_torch_yaml_support()
+
+
 class SimpleNeuron(AnalogNeuron):
+    """Basic neuron that represents a matrix of sub-neurons and clips the
+    voltage passed into it to a max/min provided value.
+    """
 
     _config_props_ = ('clip_min', 'clip_max')
+    """This is how we declare properties that are configurable."""
 
     _loggable_props_ = ('activation', 'intensity')
+    """This is how we declare properties that are loggable."""
 
     activation: torch.Tensor
-    """The neuron activation."""
+    """The neuron activation tensor of the last iteration.
+    """
 
     clip_min = -2.
+    """The min value to clip the neuron at.
+    """
 
     clip_max = 2.
+    """The max value to clip the neuron at.
+    """
 
     intensity = 0
+    """The sum of the neurons activation at the last iteration."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.activation = torch.zeros(0)
 
     def forward(self, data: torch.tensor) -> torch.tensor:
+        """Called during a forward pass to process the input.
+        """
         self.activation = torch.clip(data, self.clip_min, self.clip_max)
         self.intensity = torch.sum(self.activation)
         return self.activation
 
 
 class SimpleSynapse(SapicoreSynapse):
+    """Basic synapse that represents a matrix of sub-synapses that connects
+    neurons. It multiplies its input by the weight, that is normal-distributed.
+    """
 
     _config_props_ = ('std', 'mean')
 
@@ -51,11 +76,13 @@ class SimpleSynapse(SapicoreSynapse):
     """The value in the synapse."""
 
     weight: torch.Tensor
-    """Added to the input."""
+    """The weight by it multiplies the input to get the output."""
 
     std = 1.
+    """The std dev of the weight vector to be sampled."""
 
     mean = 0.
+    """The mean of the weight vector to be sampled."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -65,51 +92,75 @@ class SimpleSynapse(SapicoreSynapse):
         self.activation = torch.zeros(0)
 
     def initialize_state(self, model_size, **kwargs):
+        """Called before the model is trained to init the synapse."""
         super().initialize_state(**kwargs)
         self.weight = torch.normal(self.mean, self.std, size=(model_size, ))
 
     def forward(self, data: torch.tensor) -> torch.tensor:
+        """Called during a forward pass to process the input."""
         self.activation = data * self.weight
         return self.activation
 
 
 class SimpleLearning(SapicoreLearning):
+    """A synapse learning algorithm that updates the weight of a synapse
+    by the multiplication of the pre and post neuron absolute activation
+    after the iteration.
+    """
 
     _config_props_ = ('attenuation', )
 
     attenuation = 1
+    """The multiplier by which to multiply the per-post neurons.
+    """
 
     def apply_learning(
             self, pre_neuron: SimpleNeuron, synapse: SimpleSynapse,
             post_neuron: SimpleNeuron, **kwargs):
+        """Called to apply learning to the given neurons."""
         synapse.weight *= torch.abs_(pre_neuron.activation) * \
             torch.abs_(post_neuron.activation) * self.attenuation
 
 
 class MyModel(SapicoreModel):
+    """A model containing 2 groups of neurons (1 and 2) connected to each other
+    in parallel via a synapse.
+    """
 
     _config_props_ = ('model_size', )
+    """This is how we declare properties that are configurable."""
 
     _config_children_ = {
         'neuron 1': 'neuron_1', 'synapse': 'synapse', 'neuron 2': 'neuron_2',
         'learning': 'learning'
     }
+    """This is how we declare children objects that have properties that are
+    configurable."""
 
     _loggable_props_ = ('activation_sum', )
+    """This is how we declare properties that are loggable."""
 
     _loggable_children = _config_children_
+    """This is how we declare children objects that have properties that are
+    loggable."""
 
     model_size = 3
+    """The number of neurons in each neuron/synapse."""
 
     neuron_1: SimpleNeuron
+    """The input neuron."""
 
     synapse: SimpleSynapse
+    """The synapse connecting the input to the output neuron."""
 
     neuron_2: SimpleNeuron
+    """The output neuron."""
 
     learning: SimpleLearning
+    """Object that applies learning to the synapse."""
 
     activation_sum = 0
+    """The sum of the network output at the last iteration."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -125,13 +176,16 @@ class MyModel(SapicoreModel):
         self.add_learning_rule('learning', self.learning)
 
     def initialize_state(self, **kwargs):
+        """Called before the model is trained to init the everything."""
         # pass model size to the neurons/synapse so it can set the right size
         super().initialize_state(model_size=self.model_size, **kwargs)
 
     def initialize_learning_state(self) -> None:
+        """Called before the model is trained to init the learning algorithm."""
         self.learning.initialize_state()
 
     def forward(self, data: torch.tensor) -> torch.tensor:
+        """Called during a forward pass to process the input."""
         data = self.neuron_1(data)
         data = self.synapse(data)
         data = self.neuron_2(data)
@@ -140,10 +194,12 @@ class MyModel(SapicoreModel):
         return data
 
     def apply_learning(self, **kwargs) -> None:
+        """Called to apply learning to the model."""
         self.learning.apply_learning(self.neuron_1, self.synapse, self.neuron_2)
 
 
 class SimplePipeline(PipelineBase):
+    """A pipeline that trains the model."""
 
     root_path = ''
     """Where we'll save the logs.
@@ -243,6 +299,7 @@ class SimplePipeline(PipelineBase):
         model.to(self.cuda_device)
 
     def run_iteration(self, i):
+        """Runs an individual training iteration."""
         model = self.model
         # these models don't use gradients
         with torch.no_grad():
