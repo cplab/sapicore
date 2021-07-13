@@ -5,7 +5,6 @@ import argparse
 from tree_config.yaml import register_torch_yaml_support, \
     register_numpy_yaml_support
 from tree_config import load_apply_save_config
-import nixio as nix
 
 from sapicore.model import SapicoreModel
 from sapicore.neuron.analog import AnalogNeuron
@@ -13,15 +12,15 @@ from sapicore.synapse import SapicoreSynapse
 from sapicore.pipeline import PipelineBase
 from sapicore.learning import SapicoreLearning
 from sapicore.logging import load_save_get_loggable_properties, \
-    log_tensor_board, log_nix, load_nix_log, create_nix_file, \
-    create_nix_logging_block
+    log_tensor_board, NixLogWriter, NixLogReader, read_loggable_from_object, \
+    get_loggable_properties
 
 
 class SimpleNeuron(AnalogNeuron):
 
     _config_props_ = ('clip_min', 'clip_max')
 
-    _loggable_props_ = ('activation', )
+    _loggable_props_ = ('activation', 'intensity')
 
     activation: torch.Tensor
     """The neuron activation."""
@@ -30,14 +29,15 @@ class SimpleNeuron(AnalogNeuron):
 
     clip_max = 2.
 
+    intensity = 0
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # register randomness as part of the state so it is saved with the model
-        self.register_buffer("randomness", torch.zeros(0))
         self.activation = torch.zeros(0)
 
     def forward(self, data: torch.tensor) -> torch.tensor:
         self.activation = torch.clip(data, self.clip_min, self.clip_max)
+        self.intensity = torch.sum(self.activation)
         return self.activation
 
 
@@ -61,14 +61,14 @@ class SimpleSynapse(SapicoreSynapse):
         super().__init__(**kwargs)
         # register weight as part of the state so it is saved with the model
         self.register_buffer("weight", torch.zeros(0))
+        self.weight = torch.zeros(0)
+        self.activation = torch.zeros(0)
 
     def initialize_state(self, model_size, **kwargs):
         super().initialize_state(**kwargs)
         self.weight = torch.normal(self.mean, self.std, size=(model_size, ))
-        self.activation = torch.zeros(0)
 
     def forward(self, data: torch.tensor) -> torch.tensor:
-        # add the noise to the incoming signal
         self.activation = data * self.weight
         return self.activation
 
@@ -146,22 +146,43 @@ class MyModel(SapicoreModel):
 class SimplePipeline(PipelineBase):
 
     root_path = ''
+    """Where we'll save the logs.
+    """
 
     seed = 0
+    """Used to init the random number generators.
+    """
 
     num_iterations = 3
+    """Number of training iterations.
+    """
 
     cuda_device: torch.device = None
+    """The cude device to use. Defaults to GPU if available, otherwise CPU.
+    """
 
     model: MyModel = None
+    """The network model.
+    """
 
-    nix_file: nix.File = None
+    nix_writer: NixLogWriter = None
+    """Object used to log debug to nix file.
+    """
 
-    nix_counter_block = None
+    property_arrays = None
+    """Property objects used to debug log selected properties to the nix file.
+    """
 
-    nix_prop_block = None
+    tensorboard_writer: SummaryWriter = None
+    """The tensor board log writer.
+    """
+
+    tensor_loggable_properties = None
+    """The properties to be logged by tensorboard"""
 
     def parse_cmd(self):
+        """Read cmd args.
+        """
         parser = argparse.ArgumentParser()
         parser.add_argument("--root", type=str, default='.')
         parser.add_argument("--seed", type=int, default=0)
@@ -173,6 +194,8 @@ class SimplePipeline(PipelineBase):
         self.num_iterations = args.num_iterations
 
     def init_torch(self):
+        """Init torch library.
+        """
         use_cuda = torch.cuda.is_available()
         self.cuda_device = torch.device("cuda:0" if use_cuda else "cpu")
         # Sets up Gpu use
@@ -182,42 +205,73 @@ class SimplePipeline(PipelineBase):
             torch.manual_seed(self.seed)
 
     def init_model(self):
+        """Create and init the model.
+        """
         model = self.model = MyModel()
 
+        # create if needed and then load the user config options for the model
         config_filename = join(self.root_path, 'config.yaml')
         config = load_apply_save_config(model, config_filename)
 
+        # create a logging config file to dump debug data to a nix file. The
+        # file lets you select which property to log
         debug_logging_filename = join(self.root_path, 'debug_logging.yaml')
         debug_logging = load_save_get_loggable_properties(
             model, debug_logging_filename, default_value=True)
 
+        # create writer and file for logging the debug data
         h5_filename = join(self.root_path, 'debug_logging.h5')
-        nix_file = self.nix_file = create_nix_file(
-            h5_filename, config_data=config)
-        self.nix_counter_block, self.nix_prop_block = create_nix_logging_block(
-            nix_file, 'simple_example', debug_logging)
+        writer = self.nix_writer = NixLogWriter(h5_filename, config_data=config)
+        writer.create_file()
+        writer.create_block('simple_example')
+        self.property_arrays = writer.get_property_arrays(
+            'simple_example', debug_logging)
 
+        # create a log config dict to log small data to tensorboard, and select
+        # to log just one property. Tensorboard supports only brief logs
+        log_opts = read_loggable_from_object(model, False)
+        # only log intensity of neuron 1
+        log_opts['neuron 1']['intensity'] = True
+        self.tensor_loggable_properties = get_loggable_properties(
+            model, log_opts)
+        self.tensorboard_writer = SummaryWriter(
+            log_dir=join(self.root_path, 'tensorboardx'))
+
+        # now init the model
         model.initialize_state()
         model.initialize_learning_state()
         model.to(self.cuda_device)
 
     def run_iteration(self, i):
         model = self.model
+        # these models don't use gradients
         with torch.no_grad():
             # fake data
             data = torch.normal(0, 1, size=(model.model_size, ))
+            # pass it through the model
             model.forward(data)
+            # apply model learning
             model.apply_learning()
 
-            log_nix(self.nix_counter_block, self.nix_prop_block, i)
+            # log data for this iteration
+            self.nix_writer.log(self.property_arrays, i)
+            log_tensor_board(
+                self.tensorboard_writer, self.tensor_loggable_properties,
+                global_step=i, prefix='simple_example')
 
     def teardown(self):
+        """Close pipeline.
+        """
+        # dump trained model state to a file.
         model_filename = join(self.root_path, 'model.torch')
         torch.save(self.model.state_dict(), model_filename)
 
-        self.nix_file.close()
+        self.nix_writer.close_file()
+        self.tensorboard_writer.close()
 
     def run(self) -> None:
+        """Runs a full training session.
+        """
         self.parse_cmd()
         self.init_torch()
         self.init_model()
@@ -229,5 +283,22 @@ class SimplePipeline(PipelineBase):
 
 
 if __name__ == '__main__':
+    # create and run the model
     pipeline = SimplePipeline()
     pipeline.run()
+
+    # print logged data
+    with NixLogReader(join(pipeline.root_path, 'debug_logging.h5')) as reader:
+        print('Logged experiments: ', reader.get_experiment_names())
+        print('Logged properties: ',
+              reader.get_experiment_property_paths('simple_example'))
+
+        print('Logged neuron 1 intensity: ',
+              reader.get_experiment_property_data(
+                  'simple_example', ('neuron_1', 'intensity')))
+        print('Logged neuron 1 activation: ',
+              reader.get_experiment_property_data(
+                  'simple_example', ('neuron_1', 'activation')))
+        print('Logged model activation_sum: ',
+              reader.get_experiment_property_data(
+                  'simple_example', ('activation_sum', )))

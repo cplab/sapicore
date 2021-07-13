@@ -17,12 +17,12 @@ from tree_config import dump_config, read_config_from_file
 __all__ = (
     'Loggable', 'read_loggable_from_object', 'get_loggable_properties',
     'read_loggable_from_file', 'update_loggable_from_object', 'dump_loggable',
-    'log_tensor_board', 'load_save_get_loggable_properties', 'create_nix_file',
-    'create_nix_logging_block', 'log_nix', 'load_nix_log')
+    'log_tensor_board', 'load_save_get_loggable_properties', 'NixLogWriter',
+    'NixLogReader')
 
 FlatLoggableProps = List[Tuple[List[str], Any, str, bool]]
 LogDataItem = Tuple[
-    Any, str, nix.DataArray, Optional[nix.DataArray], Optional[nix.DataArray]]
+    Any, str, nix.DataArray, nix.DataArray, nix.DataArray, nix.DataArray]
 
 
 class Loggable:
@@ -72,7 +72,7 @@ class Loggable:
                     if prop in props:
                         continue
 
-                    if not hasattr(cls, prop):
+                    if not hasattr(self, prop):
                         raise Exception('Missing attribute <{}> in <{}>'.
                                         format(prop, cls.__name__))
                     props[prop] = None
@@ -121,7 +121,7 @@ class Loggable:
                     if name in children:
                         continue
 
-                    if not hasattr(cls, prop):
+                    if not hasattr(self, prop):
                         raise Exception('Missing attribute <{}> in <{}>'.
                                         format(prop, cls.__name__))
                     children[name] = prop
@@ -202,22 +202,26 @@ def read_loggable_from_object(
 
 
 def _get_loggable_from_declared_objects(
-        path: List[str], classes: Dict[str, Any], loggable: Dict[str, Any]
+        property_path: List[str], classes: Dict[str, Any],
+        friendly_names: Dict[str, str], loggable: Dict[str, Any]
 ) -> FlatLoggableProps:
     loggable_properties = []
     for name, obj in classes.items():
         if obj is None:
             continue
 
-        if name in loggable:
+        friendly_name = friendly_names.get(name, name)
+        if friendly_name in loggable:
             loggable_properties.extend(
-                get_loggable_properties(obj, path + [name], loggable[name]))
+                get_loggable_properties(
+                    obj, loggable[friendly_name], property_path + [name]))
 
     return loggable_properties
 
 
 def get_loggable_properties(
-        obj: Loggable, path: List[str], loggable: Dict[str, Any]
+        obj: Loggable, loggable: Dict[str, Any],
+        property_path: Optional[List[str]] = None
 ) -> FlatLoggableProps:
     """Takes the loggable data read with :func:`read_loggable_from_object`
     or :func:`read_loggable_from_file`, filters those properties that should
@@ -227,13 +231,14 @@ def get_loggable_properties(
     to be logged, by iterating the list.
 
     :param obj: The object from which to get the loggables.
-    :param path: A list of strings, indicating the object children names,
-        starting from some root object that lead to the ``obj``. Should just
-        be an empty list in user code.
     :param loggable: The the loggable data read with
         :func:`read_loggable_from_object` or :func:`read_loggable_from_file`.
-    :returns: A list of 4-tuples, each containing ``(path, item, prop, value)``.
-        ``path`` is the list of strings, indicating the object children names,
+    :param property_path: A list of strings, indicating the object children
+        names, starting from some root object that lead to the ``obj``. Should
+        just be None (default) in user code.
+    :returns: A list of 4-tuples, each containing
+        ``(property_path, item, prop, value)``. ``property_path`` is the list
+        of strings, indicating the object children names,
         starting from some root object that lead to the ``item``. ``item`` is
         the object or child whose property ``prop`` is being considered.
         ``value`` is a bool indicating whether to log the property.
@@ -267,25 +272,28 @@ def get_loggable_properties(
         >>> d = read_loggable_from_object(model, False)
         {'the box': {'volume': False}, 'name': False'}
         >>> d['the box']['volume'] = True
-        >>> get_loggable_properties(model, [], d)
+        >>> get_loggable_properties(model, d)
         [(['the box', 'volume'], <Box at 0x16f0b2b5320>, 'volume', True)]
     """
+    property_path = property_path or []
     loggable_properties = []
     # get all the loggable classes used by the obj
     objects = {
-        name: getattr(obj, prop)
+        prop: getattr(obj, prop)
         for name, prop in obj.loggable_children.items()}
+    friendly_names = {v: k for k, v in obj.loggable_children.items()}
     props = set(obj.loggable_props)
 
     loggable_properties.extend(
-        _get_loggable_from_declared_objects(path, objects, loggable))
+        _get_loggable_from_declared_objects(
+            property_path, objects, friendly_names, loggable))
 
     loggable_values = {
         k: v for k, v in loggable.items() if k not in objects and k in props}
 
     for k, v in loggable_values.items():
         if v:
-            loggable_properties.append((path + [k], obj, k, v))
+            loggable_properties.append((property_path + [k], obj, k, v))
 
     return loggable_properties
 
@@ -407,11 +415,15 @@ def log_tensor_board(
 
         value = getattr(obj, prop)
         if prefix:
-            names = [prefix] + names
+            names = [prefix] + list(names)
         tag = '/'.join(names)
 
         if isinstance(value, torch.Tensor):
             value = value.cpu().numpy()
+        else:
+            value = np.asarray(value)
+
+        if value.shape:
             if isinstance(selection, (list, tuple)):
                 flat_idx = np.ravel_multi_index(
                     np.array(selection).T, value.shape)
@@ -426,7 +438,7 @@ def log_tensor_board(
                 tag, items, global_step=global_step, walltime=walltime)
         else:
             writer.add_scalar(
-                tag, value, global_step=global_step, walltime=walltime)
+                tag, value.item(), global_step=global_step, walltime=walltime)
 
 
 def load_save_get_loggable_properties(
@@ -495,107 +507,203 @@ def load_save_get_loggable_properties(
     loggable = read_loggable_from_file(filename)
     dump_loggable(
         filename, update_loggable_from_object(obj, loggable, default_value))
-    return get_loggable_properties(obj, [], loggable)
+
+    return get_loggable_properties(obj, loggable)
 
 
-def create_nix_file(
-        filename: Union[str, Path], git_hash='',
-        compression=nix.Compression.Auto, metadata: Optional[dict] = None,
-        config_data: Optional[dict] = None) -> nix.File:
-    f = nix.File.open(filename, compression=compression)
+class NixLogWriter:
 
-    sec = f.create_section('config', 'configuration')
-    sec['sapicore_version'] = sapicore.__version__
-    sec['current_utc_time'] = str(datetime.datetime.utcnow())
-    sec['git_hash'] = git_hash
-    sec['config_data'] = yaml_dumps(config_data or {})
+    nix_file: Optional[nix.File] = None
 
-    metadata_sec = sec.create_section('metadata', 'metadata')
-    for key, value in (metadata or {}).items():
-        metadata_sec[key] = yaml_dumps(value)
-    return f
+    filename: Union[str, Path] = ''
 
+    git_hash = ''
 
-def create_nix_logging_block(
-        nix_file: nix.File, name: str, loggable_properties: FlatLoggableProps
-) -> Tuple[nix.DataArray, List[LogDataItem]]:
-    counter_block = nix_file.create_block(f'{name}_counter', 'counter')
-    counter_data = counter_block.create_data_array(
-        'counter', 'counter', dtype=np.int64, data=[])
+    compression = nix.Compression.Auto
 
-    shape_len_block = nix_file.create_block(f'{name}_data_shape_len', 'shape')
-    shape_block = nix_file.create_block(f'{name}_data_shape', 'shape')
-    data_block = nix_file.create_block(f'{name}_data', 'data')
+    metadata: Optional[dict] = None
 
-    property_data = []
-    for names, obj, prop, selection in loggable_properties:
-        if not selection:
-            continue
+    config_data: Optional[dict] = None
 
-        value = getattr(obj, prop)
-        tag = ':'.join(names)
+    def __init__(
+            self, filename: Union[str, Path], git_hash='',
+            compression=nix.Compression.Auto, metadata: Optional[dict] = None,
+            config_data: Optional[dict] = None):
+        self.filename = filename
+        self.git_hash = git_hash
+        self.compression = compression
+        self.metadata = metadata
+        self.config_data = config_data
 
-        tensor = False
-        if isinstance(value, torch.Tensor):
-            dtype = value.cpu().numpy().dtype
-            tensor = True
-        else:
-            if isinstance(value, int):
-                dtype = np.int64
-            elif isinstance(value, float):
-                dtype = np.float64
+    def __enter__(self):
+        self.create_file()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close_file()
+
+    def create_file(self):
+        if os.path.exists(self.filename):
+            raise ValueError(f'{self.filename} already exists')
+
+        self.nix_file = f = nix.File.open(
+            str(self.filename), compression=self.compression,
+            mode=nix.FileMode.Overwrite)
+
+        sec = f.create_section('config', 'configuration')
+        sec['sapicore_version'] = sapicore.__version__
+        sec['current_utc_time'] = str(datetime.datetime.utcnow())
+        sec['git_hash'] = self.git_hash
+        sec['config_data'] = yaml_dumps(self.config_data or {})
+
+        metadata_sec = sec.create_section('metadata', 'metadata')
+        for key, value in (self.metadata or {}).items():
+            metadata_sec[key] = yaml_dumps(value)
+
+    def close_file(self):
+        if self.nix_file is not None:
+            self.nix_file.close()
+            self.nix_file = None
+
+    def create_block(self, name: str) -> None:
+        self.nix_file.create_block(f'{name}_data_shape_len', 'shape')
+        self.nix_file.create_block(f'{name}_data_shape', 'shape')
+        self.nix_file.create_block(f'{name}_data_log', 'data')
+        self.nix_file.create_block(f'{name}_data_counter', 'counter')
+
+    def get_property_arrays(
+            self, name: str, loggable_properties: FlatLoggableProps
+    ) -> List[LogDataItem]:
+        shape_len_block: nix.Block = self.nix_file.blocks[
+            f'{name}_data_shape_len']
+        shape_block = self.nix_file.blocks[f'{name}_data_shape']
+        data_block = self.nix_file.blocks[f'{name}_data_log']
+        counter_block = self.nix_file.blocks[f'{name}_data_counter']
+
+        property_data = []
+        for names, obj, prop, selection in loggable_properties:
+            if not selection:
+                continue
+
+            value = getattr(obj, prop)
+            tag = ':'.join(names)
+
+            if isinstance(value, torch.Tensor):
+                dtype = value.cpu().numpy().dtype
             else:
-                raise ValueError(
-                    f'Unrecognized data type for value <{value}>, with data '
-                    f'type {type(value)} for {obj} property {prop}')
+                if isinstance(value, (int, float)):
+                    dtype = np.float64
+                else:
+                    raise ValueError(
+                        f'Unrecognized data type for value <{value}>, with data '
+                        f'type {type(value)} for {obj} property {prop}')
 
-        shape_len = shape = None
-        if tensor:
-            shape_len = shape_len_block.create_data_array(
-                tag, 'shape', dtype=np.int8, data=[])
-            shape = shape_block.create_data_array(
-                tag, 'shape', dtype=np.int32, data=[])
+            if tag in data_block.data_arrays:
+                data = data_block.data_arrays[tag]
+                counter = counter_block.data_arrays[tag]
+                shape_len = shape_len_block.data_arrays[tag]
+                shape = shape_block.data_arrays[tag]
+            else:
+                data = data_block.create_data_array(
+                    tag, 'data', dtype=dtype, data=[])
+                counter = counter_block.create_data_array(
+                    tag, 'counter', dtype=np.int64, data=[])
+                shape_len = shape_len_block.create_data_array(
+                    tag, 'shape_len', dtype=np.int8, data=[])
+                shape = shape_block.create_data_array(
+                    tag, 'shape', dtype=np.int32, data=[])
 
-        data = data_block.create_data_array(tag, 'data', dtype=dtype, data=[])
-        property_data.append((obj, prop, data, shape_len, shape))
+            property_data.append((obj, prop, counter, data, shape_len, shape))
 
-    return counter_data, property_data
+        return property_data
 
+    @staticmethod
+    def log(property_arrays: List[LogDataItem], counter: int) -> None:
+        for obj, prop, counter_array, data, shape_len, shape in property_arrays:
+            counter_array.append(counter)
 
-def log_nix(
-        counter_data: nix.DataArray, property_data: List[LogDataItem],
-        counter: int) -> None:
-    counter_data.append(counter)
+            value = getattr(obj, prop)
+            if isinstance(value, torch.Tensor):
+                value = value.cpu().numpy()
+            value = np.asarray(value)
 
-    for obj, prop, data, shape_len, shape in property_data:
-        value = getattr(obj, prop)
-
-        if shape is None:
-            # it's not a tensor
-            data.append(value)
-        else:
-            data = value.cpu().numpy()
-            shape_len.append(len(data.shape))
-            shape.append(data.shape)
-            data.append(np.ravel(data))
+            n = len(value.shape)
+            shape_len.append(n)
+            if n:
+                shape.append(value.shape)
+            data.append(np.ravel(value))
 
 
-def load_nix_log(filename):
-    f = nix.File.open(filename, mode=nix.FileMode.ReadOnly)
-    block_names = [
-        block.name[:-5] for block in f.blocks if block.name.endswith('_data')]
-    blocks = {}
+class NixLogReader:
 
-    for name in block_names:
-        counter = f.blocks[f'{name}_counter']
-        shape = f.blocks[f'{name}_data_shape']
-        data = f.blocks[f'{name}_data']
+    nix_file: Optional[nix.File] = None
 
-        arrays = {}
-        for data_array in data.data_arrays:
-            arrays[data_array.name] = (
-                data_array, shape.data_arrays[data_array.name])
+    filename: Union[str, Path] = ''
 
-        blocks[name] = counter, arrays
+    def __init__(self, filename: Union[str, Path]):
+        self.filename = filename
 
-    return {}, {}, blocks
+    def __enter__(self):
+        self.open_file()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close_file()
+
+    def open_file(self):
+        self.nix_file = nix.File.open(
+            str(self.filename), mode=nix.FileMode.ReadOnly)
+
+    def close_file(self):
+        if self.nix_file is not None:
+            self.nix_file.close()
+            self.nix_file = None
+
+    def get_experiment_names(self) -> List[str]:
+        f = self.nix_file
+        return [
+            block.name[:-9]
+            for block in f.blocks if block.name.endswith('_data_log')]
+
+    def get_experiment_property_paths(self, name: str) -> List[Tuple[str]]:
+        data_block: nix.Block = self.nix_file.blocks[f'{name}_data_log']
+        properties = []
+        for arr in data_block.data_arrays:
+            properties.append(tuple(arr.name.split(':')))
+
+        return properties
+
+    def get_experiment_property_data(
+            self, name: str, property_path: Tuple[str, ...]
+    ) -> Tuple[np.ndarray, List[Union[np.ndarray, float, int]]]:
+        shape_len_block: nix.Block = self.nix_file.blocks[
+            f'{name}_data_shape_len']
+        shape_block = self.nix_file.blocks[f'{name}_data_shape']
+        data_block = self.nix_file.blocks[f'{name}_data_log']
+        counter_block = self.nix_file.blocks[f'{name}_data_counter']
+
+        tag = ':'.join(property_path)
+
+        counter = np.asarray(counter_block.data_arrays[tag])
+
+        data = np.asarray(data_block.data_arrays[tag])
+        shape_len = np.asarray(shape_len_block.data_arrays[tag])
+        shape = np.asarray(shape_block.data_arrays[tag])
+
+        items = [0, ] * len(shape_len)
+        shape_s = 0
+        data_s = 0
+        for i, n in enumerate(shape_len):
+            if not n:
+                items[i] = data[data_s].item()
+                data_s += 1
+                continue
+
+            dim = shape[shape_s:shape_s + n]
+            k = np.multiply.reduce(dim)
+            items[i] = np.reshape(data[data_s:data_s + k], dim)
+
+            shape_s += n
+            data_s += k
+
+        return counter, items
