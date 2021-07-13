@@ -595,8 +595,8 @@ class NixLogWriter:
                     dtype = np.float64
                 else:
                     raise ValueError(
-                        f'Unrecognized data type for value <{value}>, with data '
-                        f'type {type(value)} for {obj} property {prop}')
+                        f'Unrecognized data type for value <{value}>, with '
+                        f'data type {type(value)} for {obj} property {prop}')
 
             if tag in data_block.data_arrays:
                 data = data_block.data_arrays[tag]

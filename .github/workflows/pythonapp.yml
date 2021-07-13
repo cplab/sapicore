@@ -78,7 +78,7 @@ jobs:
         name: docs
         path: docs/build/html
     - name: gh-pages upload
-      if: false && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
