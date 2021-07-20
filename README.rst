@@ -22,6 +22,11 @@ requirements.
 Models Sapicore common to a lab can be placed in a package outside the
 framework and re-used by other projects that want to use these common models.
 
+Sapicore supports user model configuration using the ``tree-config`` package.
+Similarly, Sapicore supports annotating variables and buffers for logging
+to e.g. ``tensorboardx`` for live display or using ``nixio`` HDF5 based
+files for later analysis or debugging.
+
 Installation
 ------------
 
@@ -42,7 +47,23 @@ Sapicore has minimal requirements. It requires
 Once the dependencies are installed, to install Sapicore in the current
 conda/pip environment:
 
-* Clone sapicore::
+User install
+************
+
+You can install the latest stable Sapicore with::
+
+    pip install sapicore
+
+To install the latest Sapicore from github, do::
+
+    pip install https://github.com/cplab/sapicore/archive/refs/heads/main.zip
+
+Development install
+*******************
+
+To install Sapicore for development and editing Sapicore itself:
+
+* Clone sapicore from github::
 
       git clone https://github.com/cplab/sapicore.git
 

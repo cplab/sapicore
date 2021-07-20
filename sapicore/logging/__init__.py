@@ -1,5 +1,67 @@
 """Logging
 ==========
+
+:mod:`~sapicore.logging` provides the tools to configure the logging of
+Sapicore models. It supports logging of simple properties to tensorboard as
+well as arbitrary properties, including tensors and arrays to a H5 file.
+Individual properties can be included or excluded from logging using a config
+dict that can be saved to a yaml file, similarly to :mod:`tree-config`
+configuration.
+
+Loggable
+--------
+
+The main API is the :class:`~sapicore.Loggable` that defines an API for
+properties to support opting-in to logging. One lists all the properties that
+can potentially be logged in :attr:`~sapicore.Loggable._loggable_props_`, on
+a per class basis. Sub classing extends
+:attr:`~sapicore.Loggable._loggable_props_`, and to get the list of potentially
+loggable properties it accumulates all the properties listed in all the
+:attr:`~sapicore.Loggable._loggable_props_` of all the super classes in
+:attr:`~sapicore.Loggable.loggable_props`.
+
+To supper logging of objects nested in other objects, we use
+:attr:`~sapicore.Loggable._loggable_children_` to list all the properties that
+are objects that should be inspected for loggable properties.
+These are similarly all listed in :attr:`~sapicore.Loggable.loggable_children`.
+
+Configuration
+-------------
+
+:func:`read_loggable_from_object`, :func:`read_loggable_from_file`,
+:func:`update_loggable_from_object`, :func:`dump_loggable`,
+:func:`load_save_get_loggable_properties`, and
+:func:`get_loggable_properties` provide the functions to get all the loggable
+properties either as a yaml file or dict that can be edited, or as a flat list
+of the properties. They all
+provide a mapping from the property name to a bool indicting whether the
+property should be logged.
+
+E.g. a model such as:
+
+. code-block:: python
+
+    class Model(Loggable):
+
+        _loggable_props_ = ('name', )
+
+        name = 'chair'
+
+would generate the dict ``{'name': True}`` using
+``read_loggable_from_object(Model(), True)`` and a yaml file containing
+``name: true`` when dumped using
+``dump_config('loggable.yaml', read_loggable_from_object(Model(), True))``.
+
+Logging
+-------
+
+:func:`log_tensor_board` supports taking the flat list of properties and
+logging all the properties that are set to be logged to the tensorboard
+format on disk using a ``torch.utils.tensorboard.SummaryWriter`` instance.
+
+Similarly, :class:`NixLogWriter` supports logging arbitrary tensors and numpy
+arrays to a nix HDF5 file. :class:`NixLogReader` can then be used to load the
+data from the nix file into scalars or numpy arrays of the original shape.
 """
 from typing import Tuple, List, Dict, Any, Union, Optional
 from pathlib import Path
@@ -26,6 +88,31 @@ LogDataItem = Tuple[
 
 
 class Loggable:
+    """The :class:`Loggable` can be used as a base-class for objects that need
+    to control which of its properties can be logged. E.g. when getting
+    all the properties that need to be logged, :func:`read_loggable_from_object`
+    will call :meth:`loggable_props` and :meth:`loggable_children`, which looks
+    up all the properties from :attr:`_loggable_props_` and
+    :attr:`_loggable_children_`.
+
+    For example:
+
+    .. code-block:: python
+
+        class LoggableModel(Loggable):
+
+            _loggable_props_ = ('frame', 'color')
+
+            frame = 'square'
+            color = 'blue'
+
+    Then:
+
+    .. code-block:: python
+
+        >>> read_loggable_from_object(LoggableModel(), True)
+        {'frame': True, 'color': True}
+    """
 
     _loggable_props_: Tuple[str] = ()
 
@@ -39,7 +126,7 @@ class Loggable:
     def loggable_props(self) -> List[str]:
         """A property containing the list of the names of all the properties of
         the instance that could be loggable (i.e. listed in
-        ``_loggable_props_``).
+        ``_loggable_props_`` of the class and it's super classes).
 
         E.g.:
 
@@ -84,7 +171,7 @@ class Loggable:
     def loggable_children(self) -> Dict[str, str]:
         """A property containing the dict of the friendly/property names of
         all the children objects of this instance that could be loggable (i.e.
-        listed in ``_loggable_children_``).
+        listed in ``_loggable_children_`` of the class and it's super classes).
 
     E.g.:
 
@@ -153,7 +240,8 @@ def read_loggable_from_object(
     :param obj: The object from which to get the loggables.
     :param default_value: A bool (True/False), indicating whether to default
         the loggable properties to True (they are logged) or False (they are
-        not logged).
+        not logged). The individual properties can subsequently be set either
+        way manually in the dict.
 
     E.g.:
 
@@ -181,8 +269,11 @@ def read_loggable_from_object(
 
         >>> model = Model()
         >>> model.box = Box()
-        >>> read_loggable_from_object(model, False)
+        >>> loggables = read_loggable_from_object(model, False)
+        >>> loggables
         {'the box': {'volume': False}, 'name': False'}
+        >>> # to log name
+        >>> loggables['name'] = True
     """
     # TODO: break infinite cycle if obj is listed in its nested loggable
     #  classes
@@ -225,17 +316,21 @@ def get_loggable_properties(
 ) -> FlatLoggableProps:
     """Takes the loggable data read with :func:`read_loggable_from_object`
     or :func:`read_loggable_from_file`, filters those properties that should
-    be logged (i.e. those that are True) and flattens them into a single list.
+    be logged (i.e. those that are True) and flattens them into a single flat
+    list.
 
     This list could be used to efficiently log all the properties that need
     to be logged, by iterating the list.
 
     :param obj: The object from which to get the loggables.
-    :param loggable: The the loggable data read with
+    :param loggable: The loggable data previously read with
         :func:`read_loggable_from_object` or :func:`read_loggable_from_file`.
     :param property_path: A list of strings, indicating the object children
-        names, starting from some root object that lead to the ``obj``. Should
-        just be None (default) in user code.
+        names, starting from some root object that lead to the ``obj``.
+        This can be used to reconstruct the full object path to each property
+        starting from ``obj``.
+
+        Should just be None (default) in user code.
     :returns: A list of 4-tuples, each containing
         ``(property_path, item, prop, value)``. ``property_path`` is the list
         of strings, indicating the object children names,
@@ -338,7 +433,8 @@ def update_loggable_from_object(
         :func:`read_loggable_from_object` or :func:`read_loggable_from_file`.
     :param default_value: A bool (True/False), indicating whether to default
         the new loggable properties to True (they are logged) or False (they are
-        not logged).
+        not logged). The individual properties can subsequently be set either
+        way manually in the dict.
     :returns: The updated loggable dict.
     """
     # TODO: break infinite cycle if obj is listed in its nested loggable
@@ -373,10 +469,10 @@ def read_loggable_from_file(filename: Union[str, Path]) -> Dict[str, Any]:
         >>>     _loggable_props_ = ('name', )
         >>>     name = 'chair'
         >>> model = Model()
-        >>> d = read_loggable_from_object(model)
+        >>> d = read_loggable_from_object(model, True)
         >>> dump_loggable('loggable.yaml', d)
         >>> read_loggable_from_file('loggable.yaml')
-        {'name': 'chair'}
+        {'name': True}
     """
     return read_config_from_file(filename)
 
@@ -396,19 +492,36 @@ def dump_loggable(filename: Union[str, Path], data: Dict[str, Any]) -> None:
         >>>     _config_props_ = ('name', )
         >>>     name = 'chair'
         >>> model = Model()
-        >>> d = read_loggable_from_object(model)
+        >>> d = read_loggable_from_object(model, True)
         >>> dump_config('loggable.yaml', d)
         >>> with open('loggable.yaml') as fh:
         ...     print(fh.read())
 
-    Which prints ``name: chair``.
+    Which prints ``name: true``.
     """
     dump_config(filename, data)
 
 
 def log_tensor_board(
-        writer, loggable_properties, global_step=None, walltime=None,
-        prefix=''):
+        writer, loggable_properties: FlatLoggableProps,
+        global_step: Optional[int] = None, walltime: Optional[float] = None,
+        prefix: str = '') -> None:
+    """Logs the current value of all the given properties to the TensorBoard
+    writer object for live display.
+
+    Properties that are arrays are logged as a sequence of scalars, which is
+    inefficient. It is suggested to use :class:`NixLogWriter` for complex
+    data and :func:`log_tensor_board` only for scalars.
+
+    :param writer: An instantiated ``torch.utils.tensorboard.SummaryWriter``
+        object to which the data will be written.
+    :param loggable_properties: The list of properties (in the format of
+        :func:`get_loggable_properties`) to read and log.
+    :param global_step: The optional global timestep, which must be
+        monotonically increasing if providing.
+    :param walltime: The optional wall time.
+    :param prefix: An optional prefix used to log the data under.
+    """
     for names, obj, prop, selection in loggable_properties:
         if not selection:
             continue
@@ -454,15 +567,15 @@ def load_save_get_loggable_properties(
 
     This can be used to get the loggable properties, but also making sure the
     file contains the current loggables including any new properties not
-    previously there or properties that changed.
+    previously there.
 
-    :param obj: The configurable object.
+    :param obj: The loggable object.
     :param filename: The yaml filename.
     :param default_value: A bool (True/False), indicating whether to default
         the new loggable properties to True (they are logged) or False (they are
-        not logged).
-    :returns: The loggable list, like returned by
-        :func:`get_loggable_properties`.
+        not logged). The individual properties can subsequently be set either
+        way manually in the file.
+    :returns: The loggable list returned by :func:`get_loggable_properties`.
 
     E.x.:
 
@@ -512,18 +625,65 @@ def load_save_get_loggable_properties(
 
 
 class NixLogWriter:
+    """Writer that supports logging properties to a Nix HDF5 file.
+
+    It supports logging arbitrary torch tensors, numpy arrays, and numerical
+    scalars. The logged data can then be retrieved with :class:`NixLogReader`.
+
+    A typical example is:
+
+    . code-block:: python
+
+        log_props = read_loggable_from_object(Model(), True)
+        writer = NixLogWriter(h5_filename)
+        # create the file
+        writer.create_file()
+        # create a section for this session
+        writer.create_block('example')
+        # create the objects required for logging using the loggable properties
+        property_arrays = writer.get_property_arrays('example', log_props)
+        do_work...
+        # all the enabled loggable props will be logged
+        writer.log(property_arrays, 0)
+        do_more_work...
+        writer.log(property_arrays, 1)
+        # now close
+        writer.close_file()
+    """
 
     nix_file: Optional[nix.File] = None
+    """The internal nix file object."""
 
     filename: Union[str, Path] = ''
+    """The filename of the nix file that will be created when
+    :meth:`create_file` is called.
+    """
 
     git_hash = ''
+    """An optional git hash that can be included in the file. It can be used
+    to label the model version for example.
+    """
 
     compression = nix.Compression.Auto
+    """The compression to use in the file.
+
+    It is one of ``nix.Compression``.
+    """
 
     metadata: Optional[dict] = None
+    """A dict of arbitrary metadata that can be included in the file.
+
+    It is saved to the file after being encoded using
+    :meth:`~tree_config.yaml.yaml_dumps`.
+    """
 
     config_data: Optional[dict] = None
+    """A dict of :mod:`tree_config` config data used to config the model that
+    can be included in the file.
+
+    It is saved to the file after being encoded using
+    :meth:`~tree_config.yaml.yaml_dumps`.
+    """
 
     def __init__(
             self, filename: Union[str, Path], git_hash='',
@@ -542,7 +702,12 @@ class NixLogWriter:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close_file()
 
-    def create_file(self):
+    def create_file(self) -> None:
+        """Creates the file named in :attr:`filename`. If it exists, an error
+        is raised.
+
+        :meth:`close_file` must be called after this to close the file.
+        """
         if os.path.exists(self.filename):
             raise ValueError(f'{self.filename} already exists')
 
@@ -560,12 +725,19 @@ class NixLogWriter:
         for key, value in (self.metadata or {}).items():
             metadata_sec[key] = yaml_dumps(value)
 
-    def close_file(self):
+    def close_file(self) -> None:
+        """Closes the nix file.
+        """
         if self.nix_file is not None:
             self.nix_file.close()
             self.nix_file = None
 
     def create_block(self, name: str) -> None:
+        """Creates a new block using the given that could subsequently be used
+        with :meth:`get_property_arrays` to log to this block.
+
+        It is used to organize the data into sessions.
+        """
         self.nix_file.create_block(f'{name}_data_shape_len', 'shape')
         self.nix_file.create_block(f'{name}_data_shape', 'shape')
         self.nix_file.create_block(f'{name}_data_log', 'data')
@@ -574,6 +746,19 @@ class NixLogWriter:
     def get_property_arrays(
             self, name: str, loggable_properties: FlatLoggableProps
     ) -> List[LogDataItem]:
+        """Takes the list of properties to be logged and it creates a list of
+        objects that can be used with :attr:`log` to log all these properties.
+
+        See the class for an example.
+
+        :param name: The name of the block to which the properties will be
+            logged. The block must have been created previously with
+            :meth:`create_block`.
+        :param loggable_properties: The list of properties (in the format of
+            :func:`get_loggable_properties`) to read and log.
+        :return: A list of objects that can be passed to :meth:`log` to log
+            the properties.
+        """
         shape_len_block: nix.Block = self.nix_file.blocks[
             f'{name}_data_shape_len']
         shape_block = self.nix_file.blocks[f'{name}_data_shape']
@@ -619,6 +804,16 @@ class NixLogWriter:
 
     @staticmethod
     def log(property_arrays: List[LogDataItem], counter: int) -> None:
+        """Logs all the properties passed to :meth:`get_property_arrays`.
+
+        See the class for an example.
+
+        :param property_arrays: The list of objects returned by
+            :meth:`get_property_arrays`
+        :param counter: An arbitrary integer that gets logged with the
+            properties that could be later used to identify the data,
+            e.g. the epoch when it was logged.
+        """
         for obj, prop, counter_array, data, shape_len, shape in property_arrays:
             counter_array.append(counter)
 
@@ -635,10 +830,31 @@ class NixLogWriter:
 
 
 class NixLogReader:
+    """A reader that can read and return the data written to a nix file using
+    :class:`NixLogWriter`.
+
+    E.g.:
+
+    . code-block:: python
+
+        with NixLogReader('log.h5') as reader:
+            print('Logged experiments: ', reader.get_experiment_names())
+            # prints e.g. `Logged experiments:  ['example']`
+            print('Logged properties: ',
+                reader.get_experiment_property_paths('example'))
+            # prints e.g. `Logged properties:  [('neuron_1', 'activation'), ...`
+            print('Activation: ', reader.get_experiment_property_data(
+                'example', ('neuron_1', 'activation')))
+            # prints `Activation:  (array([0, 1, 2], dtype=int64), [array([0...`
+    """
 
     nix_file: Optional[nix.File] = None
+    """The internal nix file object."""
 
     filename: Union[str, Path] = ''
+    """The filename of the nix file that will be opened when
+    :meth:`open_file` is called.
+    """
 
     def __init__(self, filename: Union[str, Path]):
         self.filename = filename
@@ -651,21 +867,70 @@ class NixLogReader:
         self.close_file()
 
     def open_file(self):
+        """Opens the file named in :attr:`filename` that was created with
+        :meth:`NixLogWriter.create_file`.
+
+        :meth:`close_file` must be called after this to close the file.
+
+        An alternative syntax is to use it as a context manager, which is a
+        little safer:
+
+        . code-block:: python
+
+            with NixLogReader('log.h5') as reader:
+                ...
+
+        This internally calls :meth:`open_file` and :meth:`close_file` as
+        needed.
+        """
         self.nix_file = nix.File.open(
             str(self.filename), mode=nix.FileMode.ReadOnly)
 
     def close_file(self):
+        """Closes the nix file.
+        """
         if self.nix_file is not None:
             self.nix_file.close()
             self.nix_file = None
 
     def get_experiment_names(self) -> List[str]:
+        """Returns the list of block names found in the file that was created
+        with :meth:`NixLogWriter.create_block`.
+
+        E.g.:
+
+        . code-block:: python
+
+            >>> with NixLogReader('log.h5') as reader:
+            >>>     print(reader.get_experiment_names())
+            ['example']
+        """
         f = self.nix_file
         return [
             block.name[:-9]
             for block in f.blocks if block.name.endswith('_data_log')]
 
     def get_experiment_property_paths(self, name: str) -> List[Tuple[str]]:
+        """Returns the list of properties found in the file that was created
+        with :meth:`NixLogWriter.get_property_arrays`.
+
+        Each item in the list is itself a tuple of strings. This tuple
+        represents the path to the property starting from the root object (e.g.
+        the model) as attributes. E.g. ``model.child.prop`` will be represented
+        as ``('model', 'child', 'prop')``.
+
+        :param name: The name of the block to scan for properties.
+
+        E.g.:
+
+        . code-block:: python
+
+            >>> with NixLogReader('log.h5') as reader:
+            >>>     print(reader.get_experiment_property_paths('example'))
+            [('neuron_1', 'activation'), ('neuron_1', 'intensity'),
+            ('synapse', 'activation'), ('neuron_2', 'activation'),
+            ('neuron_2', 'intensity'), ('activation_sum',)]
+        """
         data_block: nix.Block = self.nix_file.blocks[f'{name}_data_log']
         properties = []
         for arr in data_block.data_arrays:
@@ -676,6 +941,34 @@ class NixLogReader:
     def get_experiment_property_data(
             self, name: str, property_path: Tuple[str, ...]
     ) -> Tuple[np.ndarray, List[Union[np.ndarray, float, int]]]:
+        """Returns all the data of a property previously logged with
+        :meth:`NixLogWriter.log`.
+
+        :param name: The name of the block that contains the data.
+        :param property_path: The full attribute path to the property, so we
+            can locate it in the data. It is an item from the list returned by
+            :meth:`get_experiment_property_paths`.
+        :return: A 2-tuple of ``(counter, data)``. ``counter`` and ``data``,
+            have the same length. ``counter`` is an array containing the count
+            value that corresponds the each data item as passed to
+            the ``counter`` parameter in :meth:`NixLogWriter.log`.
+            ``data`` is a list of the values logged for this property, one item
+            for each call to :meth:`NixLogWriter.log`. It can be scalars or
+            numpy arrays.
+
+        E.g.:
+
+        . code-block:: python
+
+            >>> with NixLogReader('log.h5') as reader:
+            >>>     print(reader.get_experiment_property_data(
+            ...           'example', ('neuron_1', 'activation')))
+            (array([0, 1, 2], dtype=int64), [
+                array([0.56843126, 1.0845224 , 1.3985955 ], dtype=float32),
+                array([0.40334684, 0.83802634, 0.7192576 ], dtype=float32),
+                array([0.40334353, 0.59663534, 0.18203649], dtype=float32)
+            ])
+        """
         shape_len_block: nix.Block = self.nix_file.blocks[
             f'{name}_data_shape_len']
         shape_block = self.nix_file.blocks[f'{name}_data_shape']
