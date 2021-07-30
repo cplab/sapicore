@@ -21,7 +21,7 @@ PyTorch
 
 Sapicore is written on top of PyTorch. This means that Sapicore classes that
 perform computation and may need to interact with the CPU/GPU inherit from
-``torch.nn.modules.module.Module``.
+:py:class:`torch.nn.Module`.
 
 These class instances are added (whether directly or through a parent) to the
 overall model so that pytorch can track them and manage their :ref:`state-guide`.
@@ -56,7 +56,7 @@ concrete details, including whether a synapse or neuron object actually represen
 a cluster of synapses/neurons.
 
 Neurons, synapses, and networks have an ``initialize_state`` method that would be called
-indirectly through the :py:`class:~sapicore.model.SapicoreModel` to ready the
+indirectly through the :py:class:`~sapicore.model.SapicoreModel` to ready the
 state. This would happen after :ref:`config-guide`. Then, their ``forward`` method
 would be called to process the data through the neuron/synapse. The network has to
 implement its ``forward`` method to call the appropriate neurons/synapses in the correct
@@ -130,7 +130,7 @@ file. E.g.:
 To be able to do this:
 
 #. Sapicore inherits every learning rule, network, synapse, neuron, and other
-   relevant objects from ``torch.nn.modules.module.Module``.
+   relevant objects from :py:class:`torch.nn.Module`.
 #. As part of the Sapicore API, objects are added directly or indirectly through a parent to
    the root model. E.g. :py:meth:`~sapicore.model.SapicoreModel.add_learning_rule`
    registers the rule object with PyTorch as a "child" of the model. This is how PyTorch
