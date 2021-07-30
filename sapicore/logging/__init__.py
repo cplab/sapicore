@@ -39,7 +39,7 @@ property should be logged.
 
 E.g. a model such as:
 
-. code-block:: python
+.. code-block:: python
 
     class Model(Loggable):
 

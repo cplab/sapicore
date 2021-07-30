@@ -252,12 +252,12 @@ class SimplePipeline(PipelineBase):
     def init_torch(self):
         """Init torch library.
         """
-        use_cuda = torch.cuda.is_available()
-        self.cuda_device = torch.device("cuda:0" if use_cuda else "cpu")
-        # Sets up Gpu use
-        if use_cuda:
+        # Sets up CPU/GPU use
+        if torch.cuda.is_available():
+            self.cuda_device = torch.device("cuda:0")
             torch.cuda.manual_seed_all(self.seed)
         else:
+            self.cuda_device = torch.device("cpu")
             torch.manual_seed(self.seed)
 
     def init_model(self):
@@ -306,7 +306,7 @@ class SimplePipeline(PipelineBase):
             # fake data
             data = torch.normal(0, 1, size=(model.model_size, ))
             # pass it through the model
-            model.forward(data)
+            model(data)
             # apply model learning
             model.apply_learning()
 
@@ -342,7 +342,7 @@ class SimplePipeline(PipelineBase):
 if __name__ == '__main__':
     # create and run the model
     pipeline = SimplePipeline()
-    pipeline.run()
+    # pipeline.run()
 
     # print logged data
     with NixLogReader(join(pipeline.root_path, 'debug_logging.h5')) as reader:
