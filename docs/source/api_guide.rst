@@ -45,9 +45,9 @@ Network abstraction
 
 Sapicore defines the basic abstract classes used to build neuromorphic models.
 
-At the lowest level, we have a :py:class:~sapicore.neuron.SapicoreNeuron` and
-a :py:class:~sapicore.synapse.SapicoreSynapse` that are composed in various ways to
-build a :py:class:~sapicore.network.SapicoreNetwork`. If a network is a graph
+At the lowest level, we have a :py:class:`~sapicore.neuron.SapicoreNeuron` and
+a :py:class:`~sapicore.synapse.SapicoreSynapse` that are composed in various ways to
+build a :py:class:`~sapicore.network.SapicoreNetwork`. If a network is a graph
 composed of vertices and nodes, then a neuron is a node and a synapse is a vertex.
 
 Sapicore does not define what it means for neurons to be connected to each other
@@ -56,7 +56,7 @@ concrete details, including whether a synapse or neuron object actually represen
 a cluster of synapses/neurons.
 
 Neurons, synapses, and networks have an ``initialize_state`` method that would be called
-indirectly through the :py:class:~sapicore.model.SapicoreModel` to ready the
+indirectly through the :py:`class:~sapicore.model.SapicoreModel` to ready the
 state. This would happen after :ref:`config-guide`. Then, their ``forward`` method
 would be called to process the data through the neuron/synapse. The network has to
 implement its ``forward`` method to call the appropriate neurons/synapses in the correct
@@ -66,7 +66,7 @@ Model abstraction
 *****************
 
 So far, a network only defined the connectivity between neurons and synapses.
-A :py:class:~sapicore.model.SapicoreModel`, although a network itself, allows
+A :py:class:`~sapicore.model.SapicoreModel`, although a network itself, allows
 sub-networks to be added as nodes to its connectivity graph. So, we can define
 concrete networks and then re-use them in models without having to think
 about their internal details, but we just pass data through their ``forward``
@@ -75,22 +75,22 @@ method as if it's a neuron.
 Learning
 ^^^^^^^^
 
-A :py:class:~sapicore.model.SapicoreModel` also adds the concept of a
-:py:class:~sapicore.learning.SapicoreLearning` rule that can be added
+A :py:class:`~sapicore.model.SapicoreModel` also adds the concept of a
+:py:class:`~sapicore.learning.SapicoreLearning` rule that can be added
 to the model. Its behavior is similarly left undefined and must be
 concretely implemented.
 
-A :py:class:~sapicore.learning.SapicoreLearning` rule also has an
-:py:meth:~sapicore.learning.SapicoreLearning.initialize_state` method
-as well as an :py:meth:~sapicore.learning.SapicoreLearning.apply_learning` method
+A :py:class:`~sapicore.learning.SapicoreLearning` rule also has an
+:py:meth:`~sapicore.learning.SapicoreLearning.initialize_state` method
+as well as an :py:meth:`~sapicore.learning.SapicoreLearning.apply_learning` method
 that can be called with objects as arguments on which it applies the
 learning. The model, in addition to a
-:py:meth:~sapicore.model.SapicoreModel.initialize_learning_state`
+:py:meth:`~sapicore.model.SapicoreModel.initialize_learning_state`
 (that must be overwritten to call
-:py:meth:~sapicore.learning.SapicoreLearning.initialize_state` on the relevant
-learning rules), also has an :py:meth:~sapicore.model.SapicoreModel.apply_learning`
+:py:meth:`~sapicore.learning.SapicoreLearning.initialize_state` on the relevant
+learning rules), also has an :py:meth:`~sapicore.model.SapicoreModel.apply_learning`
 method that also needs to be implemented by the user (to call
-:py:meth:~sapicore.learning.SapicoreLearning.apply_learning`). Notice that the
+:py:meth:`~sapicore.learning.SapicoreLearning.apply_learning`). Notice that the
 model won't automatically call these methods on learning rules.
 
 .. _state-guide:
@@ -132,7 +132,7 @@ To be able to do this:
 #. Sapicore inherits every learning rule, network, synapse, neuron, and other
    relevant objects from ``torch.nn.modules.module.Module``.
 #. As part of the Sapicore API, objects are added directly or indirectly through a parent to
-   the root model. E.g. :py:meth:~sapicore.model.SapicoreModel.add_learning_rule`
+   the root model. E.g. :py:meth:`~sapicore.model.SapicoreModel.add_learning_rule`
    registers the rule object with PyTorch as a "child" of the model. This is how PyTorch
    can track all relevant objects and send them and their memory to the device.
 #. For each object, if it uses any memory buffers or parameters (i.e. tensors), it must be
@@ -178,7 +178,7 @@ Pipeline
 Running an experiment on a model is very similar to how deep learning PyTorch models
 are trained, except that we don't use back-propagation or the deep learning optimizers.
 
-:py:class:~sapicore.pipeline.PipelineBase` is a very simple base class to be used to run
+:py:class:`~sapicore.pipeline.PipelineBase` is a very simple base class to be used to run
 training or testing. The typical overall steps to run an experiment as demoed in the
 example is to:
 
@@ -187,10 +187,10 @@ example is to:
 #. Load any datasets to be used. :py:class:`torch.utils.data.Dataset` is used
    to load the data in a format usable with PyTorch. The ``torchvision`` project
    has good examples on how to load datasets.
-#. Create the :py:class:~sapicore.model.SapicoreModel` to be trained/tested.
-#. Configure the model as described in the :ref:`<config-guide>` section.
+#. Create the :py:class:`~sapicore.model.SapicoreModel` to be trained/tested.
+#. Configure the model as described in the :ref:`config-guide` section.
 #. Set up and configure which properties to log during training/testing as described
-   in the :ref:`<log-guide>` section.
+   in the :ref:`log-guide` section.
 #. Initialize the model and learning state and "send" the model to the CPU/GPU device used.
 #. Run the training/testing iterations. For each iteration, use ``with torch.no_grad(): ...``
    to disable gradient tracking, pass the data through the model, and apply learning as needed.
