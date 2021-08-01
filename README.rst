@@ -6,26 +6,26 @@ for complete documentation.
 
 -----------------
 
-A PyTorch-based modeling framework for neuromorphic olfaction.
+A PyTorch-based framework for neuromorphic modeling.
 
-Sapicore is a framework which provides a high level abstractions for writing
-neuromorphic models using pytorch. Sapicore does not contain any concrete models,
-instead each model should have its own repo that implements the Sapicore
+Sapicore is a framework that provides high level abstractions to help write
+neuromorphic models using pytorch. Sapicore itself does not contain any concrete
+models, instead each model may have its own repo that implements the Sapicore
 components used by the model.
 
-For example, the EPL-feed-forward model implemented using Sapicore can be found
-`here <https://github.com/cplab/sapinet_eplff>`_. Following this methodology
-will allow Sapicore to be used by multiple models independently without
-each polluting the other with different implementation details or
-requirements.
+Following this methodology will allow Sapicore to be used by multiple models
+independently, without each polluting the other with different implementation
+details or requirements.
 
-Models Sapicore common to a lab can be placed in a package outside the
+Sapicore models common to a lab can be placed in a package outside the
 framework and re-used by other projects that want to use these common models.
 
-Sapicore supports user model configuration using the ``tree-config`` package.
-Similarly, Sapicore supports annotating variables and buffers for logging
-to e.g. ``tensorboardx`` for live display or using ``nixio`` HDF5 based
-files for later analysis or debugging.
+Sapicore supports model user-configuration using the
+`tree-config <https://github.com/matham/tree-config/>`_ package.
+Similarly, Sapicore supports annotating properties and buffers for logging
+to e.g. ``tensorboardx`` for live display or using
+`nixio <https://github.com/G-Node/nixpy>`_ HDF5 based files for later analysis or
+debugging.
 
 Installation
 ------------
@@ -34,13 +34,14 @@ Sapicore has minimal requirements. It requires
 
 * Python 3.7+
 * Pytorch 1.5+ (see `PyTorch installation <https://pytorch.org/get-started/locally/>`_).
-* Scientific stack (see ``setup.py``) and tensorboard and tensorboardx (optional).
+* Scientific stack (see the list in ``setup.py``).
+* Tensorboard and tensorboardx (optional).
 
   The easiest way is to install them with conda as follows::
 
       conda install -c conda-forge numpy tqdm pandas ruamel.yaml tensorboard tensorboardx
 
-  or using pip, simply::
+  or using pip, simply (pip automatically installs the remaining dependencies)::
 
       python -m pip install tensorboard tensorboardx
 
@@ -122,8 +123,8 @@ can be found under sapicore/examples.
         def apply_learning(
                 self, pre_neuron: SimpleNeuron, synapse: SimpleSynapse,
                 post_neuron: SimpleNeuron, **kwargs):
-            synapse.weight *= torch.abs_(pre_neuron.activation) * \
-                torch.abs_(post_neuron.activation)
+            synapse.weight *= torch.abs(pre_neuron.activation) * \
+                torch.abs(post_neuron.activation)
 
 
     class MyModel(SapicoreModel):

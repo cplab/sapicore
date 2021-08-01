@@ -118,8 +118,8 @@ class SimpleLearning(SapicoreLearning):
             self, pre_neuron: SimpleNeuron, synapse: SimpleSynapse,
             post_neuron: SimpleNeuron, **kwargs):
         """Called to apply learning to the given neurons."""
-        synapse.weight *= torch.abs_(pre_neuron.activation) * \
-            torch.abs_(post_neuron.activation) * self.attenuation
+        synapse.weight *= torch.abs(pre_neuron.activation) * \
+            torch.abs(post_neuron.activation) * self.attenuation
 
 
 class MyModel(SapicoreModel):
@@ -342,7 +342,7 @@ class SimplePipeline(PipelineBase):
 if __name__ == '__main__':
     # create and run the model
     pipeline = SimplePipeline()
-    # pipeline.run()
+    pipeline.run()
 
     # print logged data
     with NixLogReader(join(pipeline.root_path, 'debug_logging.h5')) as reader:

@@ -7,7 +7,7 @@ with open("README.rst") as f:
 setup(
     name="sapicore",
     version=__version__,
-    description="A PyTorch-based modeling framework for neuromorphic olfaction",
+    description="A PyTorch-based framework for neuromorphic modeling",
     long_description=long_description,
     url="https://github.com/cplab/sapicore",
     author="Neuromorphic algorithms by Ayon Borthakur, Chen Yang, "
