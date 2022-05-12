@@ -10,8 +10,9 @@ setup(
     description="A PyTorch-based framework for neuromorphic modeling",
     long_description=long_description,
     url="https://github.com/cplab/sapicore",
-    author="Neuromorphic algorithms by Ayon Borthakur, Chen Yang, "
-           "Framework architecture by Matthew Einhorn",
+    author="Neuromorphic algorithms by Ayon Borthakur and Thomas Cleland, "
+           "Framework architecture by Matthew Einhorn. Project of the "
+           "Computational Physiology Laboratory at Cornell University",
     author_email="ab2535@cornell.edu",
     classifiers=[
         'Development Status :: 4 - Beta',

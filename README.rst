@@ -1,6 +1,8 @@
 Sapicore
 ========
 
+A project of the Computational Physiology Laboratory at Cornell University.
+
 Please see the online `docs <https://cplab.github.io/sapicore/index.html>`_
 for complete documentation.
 
@@ -205,6 +207,7 @@ When run, this print::
 Authors
 -------
 
-- Neuromorphic algorithms by Ayon Borthakur.
-- Chen Yang.
+A project of the Computational Physiology Laboratory at Cornell University.
+
+- Neuromorphic algorithms by Ayon Borthakur and Thomas Cleland.
 - Framework architecture by Matthew Einhorn.
