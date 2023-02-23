@@ -60,7 +60,7 @@ class Neuron(Component):
     input: Tensor  # tensor storing input to the ensemble.
     voltage: Tensor  # tensor storing ensemble membrane voltages.
 
-    def __init__(self, equation: Callable = None, integrator: Integrator = RungeKutta(order=1), **kwargs):
+    def __init__(self, equation: Callable = None, integrator: Integrator = RungeKutta(order=4), **kwargs):
         """Initializes generic instance attributes shared by all analog and spiking neuron derived classes."""
         # register universal attributes and tracking variables shared across components.
         super().__init__(**kwargs)
@@ -106,3 +106,14 @@ class Neuron(Component):
 
         """
         return self.integrator(x=self.voltage, equation=self.equation, **kwargs)
+
+    def inject(self, current: Tensor):
+        """Injects a current into this neuron.
+
+        Parameters
+        ----------
+        current: Tensor
+            Float tensor containing value(s) to be added to this neuron's `voltage` tensor.
+
+        """
+        self.voltage = self.voltage + current

@@ -13,8 +13,6 @@ from torch.nn.init import xavier_uniform_
 from sapicore.engine.component import Component
 from sapicore.engine.neuron import Neuron
 
-from sapicore.utils.constants import DT
-
 __all__ = ("Synapse",)
 
 
@@ -43,6 +41,11 @@ class Synapse(Component):
 
     delay_ms: float or Tensor
         Generic transmission delay, managed by the synapse object using queues.
+        Transmission delays are useful for some temporal coding schemes.
+
+    simple_delays: bool
+        Whether transmission delay values from one presynaptic element are the same for all postsynaptic targets.
+        Provides a speed-control tradeoff (one matrix multiplication vs. N vector multiplications).
 
     weight_init_method: Callable
         Weight initialization method from `torch.nn.init`.
@@ -61,7 +64,7 @@ class Synapse(Component):
 
     """
 
-    _config_props_: tuple[str] = ("weight_max", "weight_min", "delay_ms")
+    _config_props_: tuple[str] = ("weight_max", "weight_min", "delay_ms", "simple_delays")
     _loggable_props_: tuple[str] = ("weights", "connections", "output")
 
     # declare loggable instance attributes registered as torch buffers.
@@ -76,6 +79,7 @@ class Synapse(Component):
         weight_max: float = 1.0,
         weight_min: float = -1.0,
         delay_ms: float = 2.0,
+        simple_delays: bool = True,
         weight_init_method: Callable = xavier_uniform_,
         **kwargs
     ):
@@ -98,24 +102,31 @@ class Synapse(Component):
         self.weight_min = torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device) + weight_min
         self.weight_init_method = weight_init_method  # xavier_uniform by default.
 
-        # simulation-related common instance attributes.
-        # transmission delays are necessary for realism and for some temporal coding schemes.
-        self.delay_ms = torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device) + delay_ms
+        # whether transmission delays from one presynaptic element are shared among postsynaptic targets.
+        self.simple_delays = simple_delays
 
-        # container for data pulled from the queue in this simulation step.
-        self.delayed_data = torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device)
+        if self.simple_delays:
+            # initialize default transmission delay values as a tensor of size `src_ensemble.num_units`.
+            self.delay_ms = torch.zeros(self.matrix_shape[1], dtype=torch.float, device=self.device) + delay_ms
 
-        # maintains delayed data queue with spikes or analog output.
-        self.delay_queue = [
-            deque(torch.zeros(delay.int(), device=self.device)) for delay in (self.delay_ms / DT).flatten().int()
-        ]
+            # container for data pulled from the queue in this simulation step (input as seen by `dst_ensemble`).
+            self.delayed_data = torch.zeros(self.matrix_shape[1], dtype=torch.float, device=self.device)
+
+            # maintains delayed data queues
+            self.delay_queue = [
+                deque(torch.zeros(delay.int(), device=self.device)) for delay in self.delay_ms.int() / self.dt
+            ]
+        else:
+            # the extensive delay setting, where delayed input views may vary across postsynaptic elements.
+            self.delay_ms = torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device) + delay_ms
+            self.delayed_data = torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device)
+            self.delay_queue = [
+                deque(torch.zeros(delay.int(), device=self.device))
+                for delay in (self.delay_ms / self.dt).flatten().int()
+            ]
 
         # binary connectivity matrix marking enabled/disabled connections (integer mask, all-to-all by default).
         self.register_buffer("connections", torch.ones(self.matrix_shape, dtype=torch.uint8, device=self.device))
-
-        # if synapse represents a connection from an ensemble to itself, zero out diagonal of mask matrix.
-        if self.src_ensemble is self.dst_ensemble:
-            self.connections.fill_diagonal_(0)
 
         # float matrix containing synaptic weights.
         self.register_buffer("weights", torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device))
@@ -134,36 +145,68 @@ class Synapse(Component):
         if hasattr(self, "autograd"):
             self.weights.requires_grad_(self.autograd)
 
+    def connect(self, mode: str = "all", prop: float = 1.0):
+        """Applies a predefined connectivity mask strategy.
+
+        Parameters
+        ----------
+        mode: str
+            Sapicore provides three built-in connectivity mask initialization options: "all", "one", and "prob".
+            "all" will enable all connections (1s matrix) except self-connections if the source and destination
+            ensemble are the same objects. "one" connects the i-th source neuron to the i-th destination neuron,
+            zeroing out all mask matrix elements except the diagonal. "prop" will create random connections
+            from source to destination neurons with a proportion `prop` (float between 0 and 1) being connected.
+
+        prop:
+            Desired proportion a neurons in destination receiving a connection from a particular neuron
+            in the source ensemble. Rounded to an integer using np.round.
+
+            E.g., if prop = 0.2 and matrix_shape is (100, 5), 20 random row elements (destination neurons)
+            in the connectivity mask will be set to 1.
+
+        Warning
+        -------
+        Attempting to initialize one-to-one connectivity between ensembles of different sizes will necessarily
+        result in some unconnected neurons. The faux-diagonal will be set to 1s but there will be all 0s rows/cols,
+        depending on whether the source or destination ensemble is bigger.
+
+        """
+        match mode:
+            case "all":
+                self.connections = torch.ones_like(self.connections)
+
+            case "one":
+                self.connections = torch.eye(*self.connections.size(), device=self.device)
+
+            case "prop":
+                selection_size = int(np.round(prop * self.matrix_shape[0]))
+                torch.randperm(self.matrix_shape[0])
+
+                self.connections = torch.zeros_like(self.connections)
+
+                for i in range(self.matrix_shape[1]):
+                    self.connections[torch.randperm(self.matrix_shape[0])[:selection_size], i] = 1
+
+        # if synapse represents a connection from an ensemble to itself, zero out diagonal of mask matrix.
+        if self.src_ensemble is self.dst_ensemble:
+            self.connections.fill_diagonal_(0)
+
     def heterogenize(self, unravel: bool = True):
         """Diversifies parameters in accordance with this synapse configuration dictionary and recomputes
         the spike delay queue in case values were altered."""
         super().heterogenize(unravel=unravel)
 
         # recompute delay steps and reinitialize queue.
-        self.delay_queue = [
-            deque(torch.zeros(delay.int(), device=self.device)) for delay in (self.delay_ms / DT).flatten().int()
-        ]
+        if self.simple_delays:
+            self.delay_queue = [
+                deque(torch.zeros(delay.int(), device=self.device)) for delay in self.delay_ms.int() / self.dt
+            ]
 
-    def initialize(self) -> None:
-        """Static synapse state initialization, callable with or without a configuration dictionary.
-
-        Applies all extra keyword arguments to object. Default behavior: initializes delays ~U(1ms, 20ms) and a
-        2D weight matrix using :func:`torch.nn.init.xavier_uniform_(gain=1.0)`. Retains default all-to-all (1s)
-        2D connectivity mask unless lateral synapse, in which case zeros out diagonal to disable unit self-connections.
-
-        """
-        # if synapse represents a connection from an ensemble to itself, zero out diagonal of mask matrix.
-        if self.src_ensemble is self.dst_ensemble:
-            self.connections.fill_diagonal_(0)
-
-        # if autograd parameter provided to constructor at build time, turn autograd on or off for the weights.
-        if hasattr(self, "autograd"):
-            self.weights.requires_grad_(self.autograd)
-
-        # recompute delay steps and reinitialize queue in case user overwrote the `delay_ms` setting.
-        self.delay_queue = [
-            deque(torch.zeros(delay.int(), device=self.device)) for delay in (self.delay_ms / DT).flatten().int()
-        ]
+        else:
+            self.delay_queue = [
+                deque(torch.zeros(delay.int(), device=self.device))
+                for delay in (self.delay_ms / self.dt).flatten().int()
+            ]
 
     def set_weights(self, weight_initializer: Callable, *args, **kwargs) -> None:
         """Initializes 2D weight matrix for this synapse instance.
@@ -189,11 +232,15 @@ class Synapse(Component):
             1D tensor of input that occurred an appropriate number of steps ago for each unit.
 
         """
-        # FIX since this comprehensive delay method is x3 slower, need to reintroduce old one and allow user to pick.
-        # add updated presynaptic data to the delayed view of each postsynaptic element.
-        for i in range(len(self.delay_queue)):
-            multi_index = np.unravel_index(i, self.matrix_shape)
-            self.delay_queue[i].append(current_data[multi_index[1]])
+        if self.simple_delays:
+            # append updated presynaptic data to the queues, each corresponding to one presynaptic element.
+            [self.delay_queue[i].append(value) for i, value in enumerate(current_data)]
+
+        else:
+            # append updated presynaptic data to the delayed view of each postsynaptic element (src X dst queues).
+            for i in range(len(self.delay_queue)):
+                multi_index = np.unravel_index(i, self.matrix_shape)
+                self.delay_queue[i].append(current_data[multi_index[1]])
 
         # return appropriate data tensor while popping the head of the line.
         valid_data = [item.popleft() for item in self.delay_queue]
@@ -236,14 +283,20 @@ class Synapse(Component):
 
         """
         # use a list of queues to track transmission delays and "release" input after the fact.
-        self.delayed_data = self.queue_input(data).reshape(self.matrix_shape)
+        self.delayed_data = self.queue_input(data)
 
         # mask non-connections (repeated on every iteration in case connection mask updated during simulation).
         self.weights = self.weights.multiply(self.connections)
 
-        # this loop is unavoidable, as N vector multiplications with different delayed_data are needed (see docstring).
-        for i in range(self.matrix_shape[0]):
-            self.output[i] = torch.matmul(self.weights[i, :], self.delayed_data[i, :])
+        if self.simple_delays:
+            self.output = torch.matmul(self.weights, self.delayed_data)
+
+        else:
+            self.delayed_data = self.delayed_data.reshape(self.matrix_shape)
+
+            # this loop is unavoidable, as N vector multiplications with different delayed_data are needed.
+            for i in range(self.matrix_shape[0]):
+                self.output[i] = torch.matmul(self.weights[i, :], self.delayed_data[i, :])
 
         # enforce weight limits by adding the difference from threshold for cells exceeded.
         weight_plus = self.weights > self.weight_max

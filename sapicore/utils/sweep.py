@@ -100,15 +100,17 @@ class Sweep:
                 # cast attribute value to tensor on the correct device.
                 value = torch.tensor(value, device=obj.device)
 
-                # assumes attribute to be modified is already a tensor after super().__init__.
-                if unravel:
-                    # compute unraveled index given the shape of the tensor to be heterogenized.
-                    unraveled_index = np.unravel_index(i, getattr(obj, key).shape)
-                    getattr(obj, key)[unraveled_index] = value
+                # some attributes may not exhaust all possible combinations (e.g., if some are 2D and some are 1D).
+                if i < getattr(obj, key).numel():
+                    # assumes attribute to be modified is already a tensor after super().__init__.
+                    if unravel:
+                        # compute unraveled index given the shape of the tensor to be heterogenized.
+                        unraveled_index = np.unravel_index(i, getattr(obj, key).shape)
+                        getattr(obj, key)[unraveled_index] = value
 
-                else:
-                    # handle the case where values should overwrite attribute tensor rows.
-                    getattr(obj, key)[i] = value
+                    else:
+                        # handle the case where values should overwrite attribute tensor rows.
+                        getattr(obj, key)[i] = value
 
     def set_combinations(self) -> list[dict]:
         """Determine the argument combinations defining this sweep and update the `combinations` attribute."""
