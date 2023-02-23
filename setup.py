@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 from sapicore import __version__
 
-with open("README.rst") as f:
+with open("README.md") as f:
     long_description = f.read()
 
 setup(
@@ -10,29 +10,31 @@ setup(
     description="A PyTorch-based framework for neuromorphic modeling",
     long_description=long_description,
     url="https://github.com/cplab/sapicore",
-    author="Neuromorphic algorithms by Ayon Borthakur and Thomas Cleland, "
-           "Framework architecture by Matthew Einhorn. Project of the "
-           "Computational Physiology Laboratory at Cornell University",
-    author_email="ab2535@cornell.edu",
+    author="Neuromorphic algorithms by Roy Moyal, Ayon Borthakur, and Thomas Cleland, "
+    "Framework architecture by Roy Moyal and Matthew Einhorn. Project of the "
+    "Computational Physiology Laboratory at Cornell University",
+    author_email="rm875@cornell.edu, ab2535@cornell.edu",
     classifiers=[
-        'Development Status :: 4 - Beta',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
+        "Development Status :: 4 - Beta",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     packages=find_packages(),
     install_requires=[
+        "h5py",
         "numpy",
-        "tqdm",
+        "scipy",
         "pandas",
-        'ruamel.yaml',
-        'nixio',
-        'tree-config',
+        "ray",
+        "torch",
+        "networkx",
+        "scikit-learn",
+        "nixio",
+        "tree-config",
     ],
     extras_require={
-        'dev': [
-            'pytest>=3.6', 'pytest-cov', 'flake8', 'sphinx-rtd-theme',
-            'coveralls', 'sphinx'],
+        "dev": ["pytest", "coverage", "flake8", "sphinx", "sphinx-rtd-theme"],
     },
 )

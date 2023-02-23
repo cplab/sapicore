@@ -1,3 +1,1 @@
-"""Utilities
-============
-"""
+""" Utility modules. """

@@ -1,0 +1,28 @@
+package: sapicore.engine.ensemble.analog
+class: OscillatorEnsemble
+
+model:
+  identifier: O1
+  num_units: 4
+  num_wave_comps: 1
+
+  sweep:
+    fixed:
+      frequencies: [40.0]
+      amp_freq: [5.0]
+
+    random:
+      # amplitudes randomly drawn from a uniform distribution.
+      amplitudes:
+        method: [uniform]
+        # ~U(1, 10) + I
+        args: [[-15.0, 30.0]]
+
+      # phases randomly drawn from a uniform distribution.
+      phases:
+        method: [uniform]
+        # ~U(0, 2*pi)
+        args: [[0.0, 2.0]]
+
+loggable:
+  - voltage

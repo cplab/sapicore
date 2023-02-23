@@ -1,0 +1,26 @@
+package: sapicore.engine.synapse
+class: Synapse
+
+model:
+  identifier: O1->O2
+
+  source: O1
+  target: O2
+
+  sweep:
+    fixed:
+      weight_max: 5.0
+      weight_min: -5.0
+
+    random:
+      weights:
+        method: uniform
+        args: [-5.0, 10.0]
+
+      delay_ms:
+        method: uniform
+        args: [2.0, 8.0]
+
+loggable:
+  - weights
+  - output

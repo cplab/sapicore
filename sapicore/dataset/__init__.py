@@ -1,5 +1,0 @@
-"""Datasets
-===========
-
-Sapicore dataset loaders.
-"""
