@@ -18,12 +18,12 @@ class Pipeline(Configurable):
 
     Parameters
     ----------
-    configuration: dict or str
+    configuration: dict or str, optional
         Dictionary or path to YAML to use with :meth:`apply_config`.
 
     """
 
-    def __init__(self, configuration: dict | str, **kwargs):
+    def __init__(self, configuration: dict | str = None, **kwargs):
         super().__init__(**kwargs)
 
         # parse configuration from YAML if given and use resulting dictionary to initialize attributes.
@@ -33,8 +33,6 @@ class Pipeline(Configurable):
 
         elif isinstance(configuration, dict):
             apply_config(self, configuration)
-        else:
-            raise FileNotFoundError(f"Could not find the configuration file given ({configuration}).")
 
         # developer may define arbitrary attributes at instantiation.
         for key, value in kwargs.items():

@@ -1,5 +1,7 @@
-"""Components manage basic properties and logic common to neurons, synapses, and their derivative classes."""
+"""Component objects handle universal attributes and logic common to classes that may serve as model components.
+Those include neurons, synapses, and their derivatives."""
 from typing import Any
+import os
 
 import torch
 from torch import Tensor
@@ -18,7 +20,8 @@ __all__ = ("Component",)
 class Component(Module, Configurable, Loggable):
     """Model component base class.
 
-    Defines and initializes instance attributes shared by neurons and synapses.
+    Defines instance attributes and methods shared by all model components.
+    Its primary purpose is to implement generic operations on loggable and configurable attributes.
 
     Parameters
     ----------
@@ -28,17 +31,22 @@ class Component(Module, Configurable, Loggable):
     configuration: dict, optional
         Configuration dictionary used during parameter initialization.
 
-    device: str
+    device: str, optional
         Specifies a hardware device on which to process this object's tensors, e.g. "cuda:0".
         Must be a valid torch.device() string value. Defaults to "cpu".
 
     kwargs:
         Additional instance attributes that the user may set.
 
+    See Also
+    --------
+    :class:`~tree_config.Configurable`
+    :class:`~utils.logging.Loggable`
+    :class:`~utils.sweep.Sweep`
+
     """
 
     def __init__(self, identifier: str = None, configuration: dict = None, device: str = "cpu", **kwargs):
-        """Initializes generic instance attributes shared by all analog and spiking neuron derived classes."""
         super().__init__()
 
         # model-related common instance attributes.
@@ -56,7 +64,7 @@ class Component(Module, Configurable, Loggable):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-        # initialize configurable and loggable attributes with dummy tensors (will vary across component models).
+        # initialize configurable and loggable attributes with dummy tensors.
         for prop in self._config_props_:
             setattr(self, prop, torch.zeros(1, dtype=torch.float, device=self.device))
 
@@ -64,9 +72,10 @@ class Component(Module, Configurable, Loggable):
             self.register_buffer(prop, torch.zeros(1, dtype=torch.float, device=self.device))
 
     def configure(self, configuration: dict[str, Any], log_destination: str = None):
-        """Applies a configuration by adding the keys of `configuration` as instance attributes,
+        """Applies a configuration to this object by adding the keys of `configuration` as instance attributes,
         initializing their values, and updating the `_config_props_` tuple to reflect the new keys.
-        Also updates `_loggable_props_` for this object if the key "loggable" is provided in the dictionary.
+
+        Also updates `_loggable_props_` for this object if the configuration includes the key "loggable".
 
         Parameters
         ----------
@@ -82,32 +91,34 @@ class Component(Module, Configurable, Loggable):
         This method is generic and can be used without alterations by all derivative classes.
 
         The sub-dictionary `model` may include the special `sweep` key, which specifies settings for the
-        heterogeneous initialization of certain parameters (see :class:`~utils.sweep.Sweep` for details).
+        heterogeneous initialization of certain parameters in the form of a dictionary.
 
         """
-        # apply initial configuration if given.
+        # apply this object's configuration by adding or updating instance variables.
         apply_config(self, configuration)
 
-        # override loggable properties if provided in the configuration dictionary.
+        # override _loggable_properties_ if provided in the configuration dictionary.
         if configuration.get("loggable"):
             self._loggable_props_ = configuration.get("loggable")
 
-        # if file argument provided, back up configuration dictionary to the file `log_destination`.
-        dump_yaml(self.configuration, log_destination)
+        # if `log_destination` was passed, save the configuration dictionary to that location.
+        if os.path.exists(log_destination):
+            dump_yaml(self.configuration, log_destination)
 
     def forward(self, data: Tensor) -> dict:
-        """Passes input through the component.
+        """Processes an input, updates the state of this component, and advances the simulation by one step.
 
         Parameters
         ----------
         data: Tensor
-            Input to be added to this component's numeric state tensor (e.g., `voltage`).
+            Input to be processed (e.g., added to a neuron's numeric state tensor `voltage`).
 
         Returns
         -------
         dict
-            A dictionary with loggable attributes for potential use by a :class:`~pipeline.simulation.Simulator`
-            handling runtime operations.
+            A dictionary whose keys are loggable attributes and whose values are their states as of this time step.
+            For potential use by a :class:`~pipeline.simulation.Simulator` or any other :class:`~pipeline.Pipeline`
+            script handling runtime operations.
 
         Raises
         ------
@@ -118,7 +129,14 @@ class Component(Module, Configurable, Loggable):
         raise NotImplementedError
 
     def heterogenize(self, unravel: bool = True):
-        """Initializes component's attribute tensors heterogeneously based on a given sweep search dictionary.
+        """Edits configurable tensor attributes based on a sweep search dictionary if one was provided by the user
+        within this object's `configuration` dictionary.
+
+        Note
+        ----
+        If a `sweep` key is not present in `configuration`, this method will pass silently, retaining the existing
+        configurable tensor values. It can be invoked safely from generic methods (e.g.,
+        :meth:`~engine.network.Network.build`).
 
         Parameters
         ----------
@@ -127,10 +145,15 @@ class Component(Module, Configurable, Loggable):
             to individual elements (True) or overwrite entire rows (False).
 
             The former behavior is appropriate for synapse attributes. It is achieved using `numpy.unravel_index`,
-            which maps flattened-like indices to their nD equivalents given the shape of the array/tensor.
+            which maps flattened-like indices to their nD equivalents given the shape of the array.
 
-            The latter behavior is required when values are themselves 1D vectors
-            (e.g., oscillator component frequencies).
+            The latter behavior is called for when values are themselves 1D vectors (e.g., oscillator frequencies).
+
+        Warning
+        -------
+        This method mutates the underlying component object. To simply view the combinations, initialize a
+        :class:`utils.sweep.Sweep` object and call it with your desired search space dictionary and number
+        of combinations.
 
         """
         # safe to call if object has no sweep specification or empty configuration; method will return silently.
@@ -139,12 +162,11 @@ class Component(Module, Configurable, Loggable):
             sweep = Sweep(
                 search_space=self.configuration.get("model", {}).get("sweep"), num_combinations=self.num_units
             )
-
             # modify this instance in-place.
             sweep.heterogenize(obj=self, unravel=unravel)
 
     def state(self) -> dict:
-        """Returns loggable properties and their states.
+        """Returns a dictionary of this object's loggable properties and their states as of this simulation step.
 
         Returns
         -------
@@ -152,9 +174,4 @@ class Component(Module, Configurable, Loggable):
             Dictionary containing loggable property names and their values.
 
         """
-        state = {}
-        for prop in self._loggable_props_:
-            state[prop] = getattr(self, prop)
-
-        # return current state(s) of loggable attributes as a dictionary.
-        return state
+        return {prop: getattr(self, prop) for prop in self._loggable_props_}

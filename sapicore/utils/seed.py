@@ -22,8 +22,8 @@ def set_seed(seed: Optional[int] = None) -> int:
     seed: int
         Returns the value of the seed in case a random value was picked and needs to be recorded.
 
-    Notes
-    -----
+    Note
+    ----
     In future versions, verify that the seed is recorded in the results directory and/or always set via the YAML.
 
     Examples

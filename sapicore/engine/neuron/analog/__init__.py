@@ -1,7 +1,7 @@
 """ Analog neurons emit real numbers, usually onto static synapses.
 
-Analog neurons inherit all properties of their parent class :class:`~neuron.Neuron`, extending it by implementing a
-generic forward method that simply adds incoming input to their numeric state tensor `voltage`.
+Analog neurons inherit all properties of their parent class :class:`~engine.neuron.Neuron`, extending it by
+implementing a generic forward method that simply adds incoming input to their numeric state tensor `voltage`.
 
 Analog neurons may perform normalization or provide otherwise transformed input to downstream layers.
 
@@ -27,7 +27,7 @@ class AnalogNeuron(Neuron):
     _loggable_props_: tuple[str] = ("input", "voltage")
 
     def __init__(self, **kwargs):
-        """Invokes the parent :class:`~neuron.Neuron` constructor to initialize common instance attributes."""
+        """Invokes the parent :class:`~engine.neuron.Neuron` constructor to initialize common instance attributes."""
         super().__init__(**kwargs)
 
     def forward(self, data: Tensor) -> dict:

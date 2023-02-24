@@ -29,6 +29,7 @@ extensions = [
 intersphinx_mapping = {
     "torch": ("https://pytorch.org/docs/stable/", None),
     "tree_config": ("https://matham.github.io/tree-config/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
 }
 
 # Turn on sphinx.ext.autosummary

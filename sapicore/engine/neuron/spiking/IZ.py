@@ -1,4 +1,4 @@
-""" Izhikevich neuron model.
+""" Izhikevich neuron model (IZ).
 
 These neurons, while computationally efficient, also exhibit nontrivial dynamics resembling recorded
 electrophysiological data (e.g., subthreshold oscillations).
@@ -23,13 +23,13 @@ from sapicore.engine.neuron.spiking import SpikingNeuron
 class IZNeuron(SpikingNeuron):
     """Base class for the Izhikevich neuron model.
 
-    Extends :class:`~neuron.spiking.SpikingNeuron` by adding necessary parameters and implementing
+    Extends :class:`~engine.neuron.spiking.SpikingNeuron` by adding necessary parameters and implementing
     the IZ forward method efficiently for 1D tensors of arbitrary size.
 
     User may implement subclasses to differentiate IZ model variants along additional dimensions
     (e.g., parameterizing ODE scalars as well).
 
-    IZ units own the following attributes on top of those inherited from :class:`~neuron.spiking.SpikingNeuron`:
+    IZ units own the following attributes on top of those inherited from :class:`~engine.neuron.spiking.SpikingNeuron`:
 
     Parameters
     ----------

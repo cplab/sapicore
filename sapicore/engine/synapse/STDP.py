@@ -62,7 +62,7 @@ class STDPSynapse(Synapse):
     ):
         """Constructs an STDP synapse object connecting two ensembles to each other or an ensemble to itself.
 
-        :class:`~synapse.Synapse` attributes should be given as keyword arguments by the calling method
+        :class:`~engine.synapse.Synapse` attributes should be given as keyword arguments by the calling method
         unless default values are acceptable.
         """
         super().__init__(**kwargs)
@@ -136,7 +136,7 @@ class STDPSynapse(Synapse):
         self.learning_switch = state
 
     def forward(self, data: torch.tensor) -> dict:
-        """Updates weights if need be, then calls the parent :class:`~synapse.Synapse` :meth:`forward` method.
+        """Updates weights if need be, then calls the parent :class:`~engine.synapse.Synapse` :meth:`forward` method.
 
         Parameters
         ----------

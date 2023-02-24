@@ -4,8 +4,8 @@ Sapicore provides leaky integrate-and-fire (LIF) and Izhikevich neuron implement
 
 See Also
 --------
-:class:`~neuron.spiking.LIF.LIFNeuron`
-:class:`~neuron.spiking.IZ.IZNeuron`
+:class:`~engine.neuron.spiking.LIF.LIFNeuron`
+:class:`~engine.neuron.spiking.IZ.IZNeuron`
 
 """
 from sapicore.engine.ensemble import Ensemble
@@ -17,10 +17,10 @@ __all__ = ("LIFEnsemble", "IZEnsemble")
 
 
 class LIFEnsemble(Ensemble, LIFNeuron):
-    """Ensemble of LIF neurons, inheriting its attributes from :class:`~neuron.spiking.LIF.LIFNeuron`."""
+    """Ensemble of LIF neurons, inheriting its attributes from :class:`~engine.neuron.spiking.LIF.LIFNeuron`."""
 
     def __init__(self, **kwargs):
-        """Constructs a LIF ensemble, inheriting its attributes from :class:`~neuron.spiking.LIF.LIFNeuron`."""
+        """Constructs a LIF ensemble, inheriting its attributes from :class:`~engine.neuron.spiking.LIF.LIFNeuron`."""
         super().__init__(**kwargs)
 
     def heterogenize(self, unravel: bool = True):
@@ -32,10 +32,10 @@ class LIFEnsemble(Ensemble, LIFNeuron):
 
 
 class IZEnsemble(Ensemble, IZNeuron):
-    """Ensemble of IZ neurons, inheriting its attributes from :class:`~neuron.spiking.IZ.IZNeuron`."""
+    """Ensemble of IZ neurons, inheriting its attributes from :class:`~engine.neuron.spiking.IZ.IZNeuron`."""
 
     def __init__(self, **kwargs):
-        """Constructs a LIF ensemble, inheriting its attributes from :class:`~neuron.spiking.LIF.LIFNeuron`."""
+        """Constructs a LIF ensemble, inheriting its attributes from :class:`~engine.neuron.spiking.LIF.LIFNeuron`."""
         super().__init__(**kwargs)
 
     def heterogenize(self, unravel: bool = True):

@@ -5,7 +5,7 @@ A Spiking Neural Network Simulator
 ----------------------------------
 
 A project of the Computational Physiology Laboratory at Cornell University.
-Complete documentation is available [here](https://cplab.github.io/sapicore/index.html>).
+Complete documentation is available [here](https://cplab.github.io/sapicore/index.html).
 
 -----------------
 
@@ -24,7 +24,7 @@ interfacing with existing libraries (e.g.,
 [ray](https://docs.ray.io/en/latest/ray-core/walkthrough.html),
 [scikit-learn](https://scikit-learn.org/stable/), [networkX](https://networkx.org/), and
 [tensorboard](https://pytorch.org/docs/stable/tensorboard.html)).
-We also support object configuration using [tree-config](https://github.com/matham/tree-config/>).
+We also support object configuration using [tree-config](https://github.com/matham/tree-config/).
 
 ***
 
@@ -35,8 +35,9 @@ Sapicore 0.3.0.dev0 is currently in beta. The current version includes the follo
 * Spiking neurons (LIF and IZ).
 * Analog neurons and oscillators.
 * Static and STDP synapses.
-* A Network module for combining these components.
-* Pipelines and a default end-to-end simulator.
+* Network construction and simulation tools.
+* Configurable pipelines.
+* Visualization tools.
 
 To simulate a network from a YAML configuration, simply run:
 
@@ -54,7 +55,7 @@ Installation
 ------------
 General requirements (see ``setup.py`` and ``requirements.txt`` for more information):
 
-* Python 3.10+
+* Python 3.10+.
 * Scientific Stack (numpy, scipy, pandas, matplotlib).
 * PyTorch 1.12.0+ (for efficient tensor operations on GPU).
 * NetworkX 2.8.8+ (for network representation and analysis).
@@ -133,7 +134,7 @@ Authors
 -------
 A project of the Computational Physiology Laboratory at Cornell University.
 
-- Neuromorphic algorithms by Ayon Borthakur, Thomas Cleland, and Roy Moyal.
+- Neuromorphic algorithms by Ayon Borthakur, Roy Moyal, and Thomas Cleland.
 - Framework architecture by Matthew Einhorn and Roy Moyal.
 - Engine infrastructure and algorithms by Roy Moyal.
 - Simulation and visualization tools by Roy Moyal.

@@ -20,45 +20,36 @@ class Sweep:
         Argument values, distributions, and sweep strategies. Stored in the `parameters` portion of the
         specification dictionary or YAML.
 
+
     Configuration dictionary parameters are expected to be found under one of four keys:
 
-    1. Fixed:
+    1. **Fixed**: The argument takes the same value across all execution branches. E.g., if
+    settings["fixed"]["resample"]=100, `self.method` will always be called with resample=100.
 
-        The argument takes the same value across all execution branches. E.g., if
-        settings["fixed"]["resample"]=100, `self.method` will always be called with resample=100.
+    2. **Zipped**: The values of the arguments listed are iterated over such that the Nth value of any argument is
+    matched with the Nth value of other arguments. Combinations are repeated as many times as it takes
+    to reach the number of units dictated by construction, considering all other argument specs.
+    E.g., if settings["zipped"]["freq_band"] = [[5, 10], [30, 50]] and ... ["resample"] = [50, 100],
+    then the procedure referenced by `self.method` will pass freq_band = [5, 10] with resample = 50
+    in half of the branches, and freq_band = [30, 50] with resample = 100 in the other half.
 
-    2. Zipped:
+    3. **Grid**: The values of the arguments keys listed are iterated over such that any argument value combination is
+    equally represented in the execution tree. Combinations are repeated as many times as it takes to reach
+    the number of units dictated by the specification dictionary, considering all other argument specs.
+    E.g., if settings["zipped"]["freq_band"] = [[5, 10], [30, 50]] and ...["resample"] = [50, 100],
+    then the procedure referenced by `self.method` will be called in four qualitatively distinct branches,
+    where (freq_band, resample) take the values ([5, 10], 50), ([5, 10], 100), ([30, 50], 50), ([30, 50], 100).
 
-        The values of the arguments listed are iterated over such that the Nth value of any argument is
-        matched with the Nth value of other arguments. Combinations are repeated as many times as it takes
-        to reach the number of units dictated by construction, considering all other argument specs.
-
-        E.g., if settings["zipped"]["freq_band"] = [[5, 10], [30, 50]] and ...["resample"] = [50, 100],
-        then the procedure referenced by `self.method` will pass freq_band = [5, 10] with resample = 50
-        in half of the branches, and freq_band = [30, 50] with resample = 100 in the other half.
-
-    3. Grid:
-
-        The values of the arguments keys listed are iterated over such that any argument value combination is
-        equally represented in the execution tree. Combinations are repeated as many times as it takes to reach
-        the number of units dictated by the specification dictionary, considering all other argument specs.
-
-        E.g., if settings["zipped"]["freq_band"] = [[5, 10], [30, 50]] and ...["resample"] = [50, 100],
-        then the procedure referenced by `self.method` will be called in four qualitatively distinct branches,
-        where (freq_band, resample) take the values ([5, 10], 50), ([5, 10], 100), ([30, 50], 50), ([30, 50], 100).
-
-    4. Random:
-
-        The values of the parameter keys listed are drawn from a :mod:`scipy.stats` distribution given under the
-        key "method", with the arguments "args". E.g., if settings["random"]["resample"]["method"]="uniform"
-        and ...["args"] = [x, y], then `resample` values will be drawn from `U(x, x+y)`.
+    4. **Random**: The values of the parameter keys listed are drawn from a :mod:`scipy.stats` distribution given
+    under the key "method", with the arguments "args". E.g., if settings["random"]["resample"]["method"]="uniform"
+    and ...["args"] = [x, y], then `resample` values will be drawn from `U(x, x+y)`.
 
     Example
     -------
     Define a search space and generate a list of parameter combination dictionaries:
 
         >>> s = Sweep(search_space={"fixed": {"a": 4}, "grid": {"b": [6, 7], "c": [8, 9]}}, num_combinations=4)
-        >>> print(s.combinations)
+        >>> print(s())
         [{'a': 4, 'b': 6, 'c': 8}, {'a': 4, 'b': 6, 'c': 9}, {'a': 4, 'b': 7, 'c': 8}, {'a': 4, 'b': 7, 'c': 9}]
 
     See Also
@@ -215,7 +206,7 @@ class Sweep:
 
         See Also
         --------
-        :class:`~sweep.Sweep`:
+        :class:`~utils.sweep.Sweep`:
             For a full documentation of parameter sweep strategies.
 
         """

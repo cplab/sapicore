@@ -13,13 +13,13 @@ class Integrator:
     Parameters
     ----------
     identifier: str, optional
-        Name of the integrator, e.g. "RK" for Runge-Kutta.
+        Name of the integrator.
 
     order: int, optional
         Order of the integrator if applicable.
 
     step: float, optional
-        Step size. Defaults to the simulation step :attr:`utils.constants.DT`.
+        Step size. Defaults to :attr:`~utils.constants.DT`.
 
     """
 
@@ -47,7 +47,7 @@ class Integrator:
 
         Warning
         -------
-        Users are encouraged to use forward Euler (Runge-Kutta order 1) in their :meth:`~neuron.Neuron.forward`
+        Users are encouraged to use forward Euler (Runge-Kutta order 1) in their :meth:`~engine.neuron.Neuron.forward`
         implementations, regardless of whether they anticipate using more advanced approximation methods.
 
         """
@@ -60,15 +60,19 @@ class RungeKutta(Integrator):
     Parameters
     ----------
     identifier: str, optional
-        Name of the integrator, e.g. "RK" for Runge-Kutta.
+        Name of the integrator.
 
     order: int, optional
-        Order of the integrator. Forward Euler (order 1) and RK4 are currently supported.
+        Order of the integrator. RK1 and RK4 are currently supported.
+
+    Note
+    ----
+    The forward Euler method is Runge-Kutta of order 1.
 
     References
     ----------
-    `<https://perso.crans.org/besson/publis/notebooks/Runge-Kutta_methods_for_ODE_integration_in_Python.html>`_
-        :class:`~utils.integration.RungeKutta` implements the algorithm variants described in this tutorial.
+    `Tutorial <https://perso.crans.org/besson/publis/notebooks/Runge-Kutta_methods_for_ODE_integration_in_Python.html>`_
+        :class:`~utils.integration.RungeKutta` implements the algorithm variants described above.
 
     """
 

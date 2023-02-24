@@ -11,7 +11,6 @@ on:
 
 jobs:
   lint:
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -28,7 +27,6 @@ jobs:
         python3 -m flake8 . --count --ignore=E125,E126,E127,E128,E402,E741,E731,W503,F401,W504,F841 --show-source --statistics --max-line-length=120 --exclude=__pycache__,.tox,.git/,doc/
 
   linux:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -64,7 +62,6 @@ jobs:
         python3 -m pytest --cov=sapicore --cov-report term --cov-branch sapicore/test
 
   docs:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

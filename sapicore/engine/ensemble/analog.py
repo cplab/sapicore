@@ -1,8 +1,8 @@
 """ Analog ensemble variants.
 
-Currently, :class:`~neuron.analog.AnalogNeuron` or :class:`~neuron.analog.oscillator.OscillatorNeuron` can be used
-as base classes. Analog neurons simply add the input to the state stored in `voltage`, while oscillators are
-capable of generating an arbitrary combination of sine waves, with basic support for phase-amplitude coupling
+Currently, :class:`~engine.neuron.analog.AnalogNeuron` or :class:`~engine.neuron.analog.oscillator.OscillatorNeuron`
+can be used as base classes. Analog neurons simply add the input to the state stored in `voltage`, while oscillators
+are capable of generating an arbitrary combination of sine waves, with basic support for phase-amplitude coupling
 via component amplitude oscillations.
 
 Ensembles can be initialized programmatically or from a configuration YAML containing neuron parameters and their
@@ -10,8 +10,8 @@ generation method (fixed, zipped, grid, or from distribution). Forward calls inv
 
 See Also
 --------
-:class:`~neuron.analog.AnalogNeuron`
-:class:`~neuron.analog.oscillator.OscillatorNeuron`
+:class:`~engine.neuron.analog.AnalogNeuron`
+:class:`~engine.neuron.analog.oscillator.OscillatorNeuron`
 
 """
 import torch
@@ -27,7 +27,10 @@ class AnalogEnsemble(Ensemble, AnalogNeuron):
     """Ensemble of generic analog neurons."""
 
     def __init__(self, **kwargs):
-        """Constructs an analog ensemble instance, inheriting attributes from :class:`~neuron.analog.AnalogNeuron`."""
+        """Constructs an analog ensemble instance, inheriting attributes from
+        :class:`~engine.neuron.analog.AnalogNeuron`.
+
+        """
         # invoke parent constructor and initialization method(s).
         super().__init__(**kwargs)
 
@@ -55,7 +58,7 @@ class OscillatorEnsemble(Ensemble, OscillatorNeuron):
 
     def __init__(self, num_wave_comps: int = 1, **kwargs):
         """Constructs an oscillator ensemble instance, inheriting attributes from
-        :class:`~ensemble.Ensemble` and :class:`~neuron.analog.oscillator.OscillatorNeuron`."""
+        :class:`~engine.ensemble.Ensemble` and :class:`~engine.neuron.analog.oscillator.OscillatorNeuron`."""
         # generic ensemble initialization with configurable and loggable tensors.
         super().__init__(**kwargs)
 

@@ -13,9 +13,12 @@ from sapicore.engine.synapse import Synapse
 
 from sapicore.utils.io import parse_yaml
 from sapicore.utils.signals import flatten
-from sapicore.utils.constants import ROOT
 
 __all__ = ("Network",)
+
+
+# project root source directory (.../sapicore).
+ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 
 class Network(Module):
@@ -23,7 +26,7 @@ class Network(Module):
     ensembles connected by synapses.
 
     Networks may be constructed from a configuration dictionary (read from a YAML or defined programmatically)
-    by applying :meth:`build_network`. User may also initialize an empty network and apply :meth:`add_ensembles`
+    by applying :meth:`build`. User may also initialize an empty network and apply :meth:`add_ensembles`
     and :meth:`add_synapses` to build the network `graph` directly. One or more `root` nodes may be specified
     in the YAML/dictionary or passed to the Network constructor.
 
@@ -44,8 +47,8 @@ class Network(Module):
         Initialize a network object with a ready-made graph representation containing ensemble and synapse objects,
         which are themselves :mod:`torch.nn.Module` and support operations such as autograd.
 
-    Notes
-    -----
+    Note
+    ----
     Synapse objects know their source and destination ensemble references; they are 2D objects
     capable of connecting two ensembles in a unidirectional fashion with heterogeneous parameters.
     Lateral connections from an ensemble to itself are supported by design and warrant no special treatment.
@@ -85,9 +88,9 @@ class Network(Module):
         self._find_roots()
 
     def add_ensembles(self, *args: Neuron | dict | str):
-        """Adds ensemble nodes to the network graph from a list of string `path`s to YAML dictionaries,
-        from pre-initialized :class:`neuron.Neuron` objects or children thereof (e.g., any `Ensemble`),
-        or from configuration dictionaries. User may mix and match if necessary.
+        """Adds ensemble nodes to the network graph from paths to YAML, from pre-initialized
+        :class:`engine.neuron.Neuron` objects or children thereof (e.g., any `Ensemble`), or from
+        configuration dictionaries. User may mix and match if necessary.
 
         Raises
         ------
@@ -104,11 +107,11 @@ class Network(Module):
         for ensemble in args:
             if isinstance(ensemble, Neuron):
                 # handle the object arguments.
-                self.graph.add_node(ensemble.identifier, reference=ensemble, device=self.device)
+                self.graph.add_node(ensemble.identifier, reference=ensemble)
 
             elif isinstance(ensemble, dict):
                 ensemble, comp_cfg = self._object_from_configuration(cfg=ensemble, comp_type="ensemble")
-                self.graph.add_node(ensemble.identifier, reference=ensemble, device=self.device)
+                self.graph.add_node(ensemble.identifier, reference=ensemble)
 
             elif isinstance(ensemble, str):
                 if os.path.exists(os.path.join(ROOT, ensemble)):
@@ -116,7 +119,7 @@ class Network(Module):
                     ensemble, comp_cfg = self._object_from_configuration(
                         path=os.path.join(ROOT, ensemble), comp_type="ensemble"
                     )
-                    self.graph.add_node(ensemble.identifier, reference=ensemble, device=self.device)
+                    self.graph.add_node(ensemble.identifier, reference=ensemble)
                 else:
                     logging.info(f"Could not add ensemble, invalid path given: {ensemble}")
                     continue
@@ -130,9 +133,9 @@ class Network(Module):
         self._find_roots()
 
     def add_synapses(self, *args: Synapse | dict | str):
-        """Adds synapse edges to the network graph from a list of string `path`s to YAML dictionaries,
-        from pre-initialized :class:`synapse.Synapse` objects or children thereof (e.g., `STDPSynapse`),
-        or from configuration dictionaries. User may mix and match if necessary.
+        """Adds synapse edges to the network graph from paths to YAML, from pre-initialized
+        :class:`engine.synapse.Synapse` objects or children thereof (e.g.,`STDPSynapse`), or from
+        configuration dictionaries. User may mix and match if necessary.
 
         Raises
         ------
@@ -232,7 +235,7 @@ class Network(Module):
         """
         pass
 
-    def forward(self, data: torch.tensor) -> None:
+    def forward(self, data: torch.tensor) -> dict:
         """Processes current simulation step for this network object.
 
         In this generic implementation, forward call order is determined by a BFS traversal starting from
@@ -243,6 +246,12 @@ class Network(Module):
         ----------
         data: torch.tensor
             External input to be processed by this generic network.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the loggable properties of this network's ensembles and synapses in this
+            simulation step.
 
         Warning
         -------
@@ -285,6 +294,16 @@ class Network(Module):
 
         self.simulation_step += 1
 
+        # build and pass a state dictionary for use by calling module.
+        state = {"ensembles": {}, "synapses": {}}
+        for comp in self.get_ensembles():
+            state["ensembles"][comp.identifier] = comp.state()
+
+        for comp in self.get_synapses():
+            state["synapses"][comp.identifier] = comp.state()
+
+        return state
+
     def _in_edges(self, node: str) -> list[Synapse]:
         """Returns list of synapse objects going into the ensemble `node`."""
         return [ref.get("reference") for _, _, ref in list(self.graph.in_edges(node, data=True))]
@@ -294,7 +313,7 @@ class Network(Module):
         return [ref.get("reference") for _, _, ref in list(self.graph.out_edges(node, data=True))]
 
     def _find_roots(self):
-        """Locates one or more node identifiers, corresponding to :class:`~neuron.Neuron` or a child class thereof
+        """Locates one or more node identifiers, corresponding to :class:`~engine.neuron.Neuron` or a child thereof
         (including ensembles), that are exposed to external input. Those are used as starting points for the multi-BFS
         forward sweep, whose order also gets updated every time this method is called.
         """

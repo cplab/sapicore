@@ -1,15 +1,15 @@
 """ Oscillators are waveform generators.
 
-Oscillators, inheriting from :class:`~neuron.analog.AnalogNeuron`, generate a wave consisting of pure sines.
+Oscillators, inheriting from :class:`~engine.neuron.analog.AnalogNeuron`, generate a wave consisting of pure sines.
 Components can be phase-shifted relative to each other or have their amplitude coupled to a certain frequency.
 
-Potential uses include the imposition of modulation or forced oscillations. Like other :class:`~neuron.Neuron`
+Potential uses include the imposition of modulation or forced oscillations. Like other :class:`~engine.neuron.Neuron`
 instances, oscillators maintain their numeric state in the tensor `voltage`.
 
 Warning
 -------
-Oscillators should only emit to non-spiking-dependent synapses (e.g, :class:`~synapse.Synapse`). If paired with
-synapses whose behavior requires reading out a `spiked` attribute (e.g., :class:`~synapse.STDP.STDPSynapse`),
+Oscillators should only emit to non-spiking-dependent synapses (e.g, :class:`~engine.synapse.Synapse`). If paired with
+synapses whose behavior requires reading out a `spiked` attribute (e.g., :class:`~engine.synapse.STDP.STDPSynapse`),
 the simulation will raise an exception.
 
 See Also
@@ -53,7 +53,7 @@ class OscillatorNeuron(AnalogNeuron):
         and amp_freq[0] = 5.0, the amplitude of the 40 Hz component will oscillate at 5 Hz.
 
     **kwargs:
-        Accepts and applies any keyword argument by invoking the parent class :class:`~neuron.Neuron`
+        Accepts and applies any keyword argument by invoking the parent class :class:`~engine.neuron.Neuron`
         constructor.
 
     """

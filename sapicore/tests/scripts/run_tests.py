@@ -45,7 +45,7 @@ if __name__ == "__main__":
     os.chdir(ROOT)
 
     # initialize coverage.py object.
-    cov = Coverage(omit=[os.path.join(ROOT, folder, "*") for folder in ["dataset", "utils", "scripts"]])
+    cov = Coverage(omit=[os.path.join(ROOT, folder, "*") for folder in ["scripts"]])
     cov.start()
 
     # run configurable tests.

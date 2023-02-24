@@ -1,4 +1,4 @@
-""" Leaky integrate-and-fire neuron model. """
+""" Leaky Integrate-and-Fire neuron model (LIF). """
 import torch
 
 from torch import tensor, Tensor
@@ -8,13 +8,14 @@ from sapicore.engine.neuron.spiking import SpikingNeuron
 
 
 class LIFNeuron(SpikingNeuron):
-    """Base class for the leaky integrate-and-fire (LIF) neuron model.
+    """Base class for the leaky integrate-and-fire neuron model (LIF).
 
-    Extends :class:`~neuron.spiking.SpikingNeuron` by adding necessary parameters and implementing
-    the LIF :meth:`~LIFNeuron.forward` method efficiently for 1D tensors of arbitrary size.
+    Extends :class:`~engine.neuron.spiking.SpikingNeuron` by adding necessary parameters and implementing
+    the LIF :meth:`~forward` method efficiently for 1D tensors of arbitrary size.
     User may implement subclasses to differentiate variants along additional dimensions.
 
-    LIF units own the following attributes in addition to those inherited from :class:`~neuron.spiking.SpikingNeuron`:
+    LIF units own the following attributes in addition to those inherited from
+    :class:`~engine.neuron.spiking.SpikingNeuron`:
 
     Parameters
     ----------
@@ -36,7 +37,7 @@ class LIFNeuron(SpikingNeuron):
     References
     ----------
     `LIF Tutorial <https://compneuro.neuromatch.io/tutorials/W2D3_BiologicalNeuronModels/student/W2D3_Tutorial1.html>`_
-        :meth:`~neuron.spiking.LIF.LIFNeuron.forward` implements the algorithm described in this tutorial.
+        :meth:`~engine.neuron.spiking.LIF.LIFNeuron.forward` implements the algorithm described in this tutorial.
 
     """
 

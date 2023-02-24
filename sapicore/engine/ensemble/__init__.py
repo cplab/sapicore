@@ -2,11 +2,11 @@
 and handling layer-aware operations such as heterogeneous parameter initialization
 and normalization.
 
-Notes
------
+Note
+----
 Ensemble instance attributes are 1D tensors corresponding to potentially heterogeneous parameters
 and states of neurons (tensor elements) whose behavior is prescribed by their parent class
-(e.g., :class:`~neuron.spiking.LIF.LIFNeuron`).
+(e.g., :class:`~engine.neuron.spiking.LIF.LIFNeuron`).
 
 Ensembles can be initialized programmatically or from a configuration YAML containing neuron parameters and their
 generation method (fixed, zipped, grid, or drawn from a distribution). Forward calls invoke the parent neuron class
@@ -15,7 +15,7 @@ method.
 Example
 -------
 Initialize an ensemble of basic analog neurons, inheriting default parameters and behavior from
-:class:`~neuron.analog.AnalogNeuron`:
+:class:`~engine.neuron.analog.AnalogNeuron`:
 
     >>> from sapicore.engine.ensemble.spiking import LIFEnsemble
     >>> layer = LIFEnsemble(num_units = 10)
@@ -31,7 +31,7 @@ class Ensemble(Neuron):
     """Ensemble base class. Provides generic implementations of tensor expansion and parameter diversification."""
 
     def __init__(self, num_units: int = 1, **kwargs):
-        """Constructs a generic ensemble instance, inheriting attributes from :class:`~neuron.Neuron`."""
+        """Constructs a generic ensemble instance, inheriting attributes from :class:`~engine.neuron.Neuron`."""
         super().__init__(**kwargs)
         self.num_units = num_units
 

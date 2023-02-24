@@ -14,9 +14,10 @@ import h5py as hdf
 import torch
 from torch.nn import Module
 
-from sapicore.utils.constants import CHUNK_SIZE
-
 __all__ = ("DataAccumulatorHook", "ensure_dir", "parse_yaml", "dump_yaml", "log_settings")
+
+# data chunks will be dumped to disk after reaching this size in MB.
+CHUNK_SIZE = 10.0
 
 
 class DataAccumulatorHook(Module):
@@ -36,7 +37,7 @@ class DataAccumulatorHook(Module):
 
     entries: int
         Number of log entries, equal to the number of simulation steps. Used to ensure the last batch in the run
-        is written to disk despite its size being smaller than :attr:`~utils.constants.CHUNK_SIZE`.
+        is written to disk despite its size being smaller than :attr:`~CHUNK_SIZE`.
 
     """
 

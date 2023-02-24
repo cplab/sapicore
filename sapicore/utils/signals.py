@@ -152,8 +152,8 @@ def design_input_current(current: Tensor, num_steps: int, num_units: int, device
     Tensor
         The generated current, given as a float32 tensor whose elements are its values at each time point.
 
-    Notes
-    -----
+    Note
+    ----
     The present implementation supports duplication of the current time series to accommodate multiple units.
     Mechanisms for sending varying currents to different ensemble elements are better suited for the data synthesis
     module, and should be implemented there in a principled manner.

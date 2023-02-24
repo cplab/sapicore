@@ -1,7 +1,7 @@
-""" Spiking neurons emit binary spikes once their numeric state surpasses a threshold.
+""" Spiking neurons emit all-or-none events once their numeric state surpasses a critical threshold.
 
-Spiking neurons inherit all properties of their parent class :class:`~neuron.Neuron`. In addition to `voltage`,
-they also own the registered buffer `spiked`.
+Spiking neurons inherit all properties of their parent class :class:`~engine.neuron.Neuron`. In addition to `voltage`,
+they also own the binary integer tensor `spiked`, which maintains their emitted action potentials.
 
 """
 import torch
@@ -30,7 +30,6 @@ class SpikingNeuron(Neuron):
     spiked: Tensor
 
     def __init__(self, **kwargs):
-        """Invokes the parent constructor to initialize common instance attributes."""
         # register universal loggables and configurables using the parent method(s).
         super().__init__(**kwargs)
 
@@ -38,17 +37,24 @@ class SpikingNeuron(Neuron):
         self.register_buffer("spiked", torch.zeros(1, dtype=torch.int8, device=self.device))
 
     def forward(self, data: Tensor) -> dict:
-        """Passes external input through the neuron unit.
+        """Processes an input, updates the state of this component, and advances the simulation by one step.
+
+        Parameters
+        ----------
+        data: Tensor
+            Input to be processed (e.g., added to a neuron's numeric state tensor `voltage`).
 
         Returns
         -------
         dict
-            A dictionary with loggable attributes for potential use by the :class:`~simulation.Simulator` object
-            handling runtime operations (e.g., selectively updating structural connectivity during neurogenesis).
+            A dictionary whose keys are loggable attributes and whose values are their states as of this time step.
+            For potential use by a :class:`~pipeline.simulation.Simulator` or any other :class:`~pipeline.Pipeline`
+            script handling runtime operations.
 
         Raises
         ------
         NotImplementedError
             The forward method must be implemented by each derived class.
+
         """
         raise NotImplementedError
