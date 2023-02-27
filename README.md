@@ -43,11 +43,7 @@ To simulate a network from a YAML configuration, simply run:
 
     python simulation.py -config /path/to/your/filename.yaml
 
-Extensive documentation is also provided and can be compiled by installing Sphinx and RTD,
-then running `docs/refresh.sh`.
-
-Future updates will provide a `tutorials` directory with detailed examples. For now, please refer to `example.yaml`
-and other supporting specification files under `tests/engine/network/test_network`.
+See the `tutorials` directory and configuration files `tests/engine/network/test_network` for instructive examples.
 
 ***
 
@@ -106,6 +102,8 @@ To configure your local environment, install these development dependencies and 
 	pip install black flake8 pre-commit
 	pre-commit install
 
+Documentation can be compiled by installing Sphinx and RTD, then running `docs/refresh.sh`.
+
 Citation
 --------
 Sapinet, the primary focus of this effort, is a multilayer spiking model designed for few-shot online learning of
@@ -134,7 +132,7 @@ Authors
 -------
 A project of the Computational Physiology Laboratory at Cornell University.
 
-- Neuromorphic algorithms by Ayon Borthakur, Roy Moyal, and Thomas Cleland.
 - Framework architecture by Matthew Einhorn and Roy Moyal.
-- Engine infrastructure and algorithms by Roy Moyal.
-- Simulation and visualization tools by Roy Moyal.
+- Neuromorphic algorithms by Roy Moyal, Ayon Borthakur, and Thomas Cleland.
+- Engine infrastructure, simulator, and visualization tools by Roy Moyal.
+- Tutorials and examples by Roy Moyal and Jeremy Forest.

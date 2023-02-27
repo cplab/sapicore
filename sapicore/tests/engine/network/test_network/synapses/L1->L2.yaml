@@ -17,7 +17,7 @@ model:
     random:
       weights:
         method: uniform
-        args: [50.0, 20.0]
+        args: [50.0, 50.0]
 
       delay_ms:
         method: uniform

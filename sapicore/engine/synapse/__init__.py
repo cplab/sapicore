@@ -76,8 +76,8 @@ class Synapse(Component):
         self,
         src_ensemble: [Neuron] = None,
         dst_ensemble: [Neuron] = None,
-        weight_max: float = 1.0,
-        weight_min: float = -1.0,
+        weight_max: float = 1000.0,
+        weight_min: float = -1000.0,
         delay_ms: float = 2.0,
         simple_delays: bool = True,
         weight_init_method: Callable = xavier_uniform_,
@@ -131,15 +131,15 @@ class Synapse(Component):
         # float matrix containing synaptic weights.
         self.register_buffer("weights", torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device))
 
-        # default initialization method for weights (can be overriden).
-        self.weights = self.weight_init_method(tensor=self.weights)
-
         # output 1D tensor containing data for the destination ensemble.
         self.register_buffer("output", torch.zeros(self.matrix_shape[0], dtype=torch.float, device=self.device))
 
         # developer may override or define arbitrary attributes at instantiation.
         for key, value in kwargs.items():
             setattr(self, key, value)
+
+        # default initialization method for weights (can be overriden).
+        self.weights = self.weight_init_method(tensor=self.weights)
 
         # if autograd parameter provided to constructor at build time, turn autograd on or off for the weights.
         if hasattr(self, "autograd"):
@@ -151,11 +151,12 @@ class Synapse(Component):
         Parameters
         ----------
         mode: str
-            Sapicore provides three built-in connectivity mask initialization options: "all", "one", and "prob".
-            "all" will enable all connections (1s matrix) except self-connections if the source and destination
-            ensemble are the same objects. "one" connects the i-th source neuron to the i-th destination neuron,
-            zeroing out all mask matrix elements except the diagonal. "prop" will create random connections
-            from source to destination neurons with a proportion `prop` (float between 0 and 1) being connected.
+            Sapicore provides four built-in connectivity mask initialization options: "all", "one", "prop", "rand".
+            "all" enables all connections (matrix of 1s) except self-connections (diagonal) if the destination and
+            source ensemble are the same object. "one" connects the i-th source neuron to the i-th destination neuron,
+            zeroing out all matrix elements **except** the diagonal. "prop" connects each source neuron to
+            `prop`*`dst_ensemble.num_units` randomly selected destination neurons. "rand" sets a proportion `prop`
+            of the matrix elements to 1 with no balance constraints (unlike "prop").
 
         prop:
             Desired proportion a neurons in destination receiving a connection from a particular neuron
@@ -186,6 +187,16 @@ class Synapse(Component):
 
                 for i in range(self.matrix_shape[1]):
                     self.connections[torch.randperm(self.matrix_shape[0])[:selection_size], i] = 1
+
+            case "rand":
+                num_enabled = int(np.round(prop * self.weights.numel()))
+                ids_enabled = np.random.choice(np.arange(self.weights.numel()), size=num_enabled, replace=False)
+
+                self.connections = torch.zeros_like(self.connections)
+                self.connections[np.unravel_index(ids_enabled, shape=self.matrix_shape)] = 1.0
+
+            case _:
+                return
 
         # if synapse represents a connection from an ensemble to itself, zero out diagonal of mask matrix.
         if self.src_ensemble is self.dst_ensemble:

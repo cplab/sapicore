@@ -24,7 +24,7 @@ jobs:
     - name: Lint with pycodestyle
       run: |
         python3 -m pip install flake8
-        python3 -m flake8 . --count --ignore=E125,E126,E127,E128,E402,E741,E731,W503,F401,W504,F841 --show-source --statistics --max-line-length=120 --exclude=__pycache__,.tox,.git/,doc/
+        python3 -m flake8 . --count --ignore=E125,E126,E127,E128,E203,E402,E741,E731,W503,F401,W504,F841 --show-source --statistics --max-line-length=120 --exclude=__pycache__,.tox,.git/,doc/
 
   linux:
     runs-on: ubuntu-latest
@@ -39,7 +39,7 @@ jobs:
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip virtualenv wheel setuptools
-        python3 -m pip install torch torchvision torchaudio -f https://download.pytorch.org/whl/cpu/torch_stable.html
+        python3 -m pip install torch torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html
     - name: Install project
       run: python3 -m pip install -e .[dev]
     - name: Make wheel
@@ -72,7 +72,7 @@ jobs:
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip virtualenv wheel setuptools
-        python3 -m pip install torch torchvision torchaudio -f https://download.pytorch.org/whl/cpu/torch_stable.html
+        python3 -m pip install torch torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html
         python3 -m pip install -e .[dev]
     - name: Generate docs
       run: |

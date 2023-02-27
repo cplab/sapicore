@@ -39,7 +39,7 @@ class Neuron(Component):
     integrator: Integrator, optional
         Specifies an :class:`utils.integration.Integrator` to be used when approximating the next value(s)
         of this neuron's dynamic variable(s), e.g. voltage. Requires explicitly defining `equation`.
-        Defaults to forward Euler (which is the same as Runge-Kutta with order=1).
+        Defaults to Runge-Kutta of order 4 to increase accuracy at a small performance penalty.
 
     input: Tensor
         PyTorch registered buffer tracking the input current(s) received in this simulation step.
