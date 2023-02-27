@@ -22,23 +22,25 @@ class BasicSimulation(Pipeline):
         self.num_units = num_units
         self.learning = learning
 
-        # fixes RNG seed for consistency across runs.
+        # fixes RNG seed across scientific stack libraries for consistency.
         set_seed(9846)
 
     def run(self):
-        # initialize two default IZ ensembles.
+        # initialize two default IZ ensembles (with RK4 numeric approximation).
         l1 = IZEnsemble(identifier="L1", num_units=self.num_units)
         l2 = IZEnsemble(identifier="L2", num_units=self.num_units, b=0.2632)
 
-        # initialize a default STDP synapse and set connection probability to 0.8.
+        # initialize a default excitatory STDP synapse.
         syn = STDPSynapse(src_ensemble=l1, dst_ensemble=l2, weight_min=0.0)
 
         # connect the layers one-to-one and toggle learning on/off based on given setting.
         syn.connect("one")
         syn.weights = syn.weights * 15.0
+
+        # learning is turned on by default.
         syn.toggle_learning(self.learning)
 
-        # initialize network and add our components.
+        # initialize a network object and add our components.
         network = Network()
 
         network.add_ensembles(l1, l2)

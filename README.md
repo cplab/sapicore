@@ -5,22 +5,20 @@ A Spiking Neural Network Simulator
 ----------------------------------
 
 A project of the Computational Physiology Laboratory at Cornell University.
-Complete documentation is available [here](https://cplab.github.io/sapicore/index.html).
+Complete documentation is [available](https://cplab.github.io/sapicore/index.html).
 
 -----------------
 
 Sapicore is a spiking neural network (SNN) simulator built with PyTorch. It streamlines
-the design and testing of complex, heterogeneous model architectures with nontrivial dynamics.
-Developers may extend our easy-to-use, incremental class hierarchy, which includes default
-implementations of neurons and synapses commonly used in neuroscience and machine learning applications.
+the design and testing of heterogeneous model architectures with nontrivial dynamics.
 
-We provide two integrated APIs for specifying model architectures, running simulations, and
-performing rudimentary output data exploration: programmatic and dictionary-based (YAML).
-Users may write their own specification files, custom derivative classes, and dataloaders in separate
-repositories.
+We provide programmatic and dictionary/YAML-based APIs for specifying model architectures,
+running simulation pipelines, and performing rudimentary output data exploration.
+Sapicore's incremental class hierarchy includes efficient default implementations of neuron
+and synapse models commonly used in neuroscience and machine learning applications.
+Users may write their own dataloaders, derivative classes, and specification files in separate repositories.
 
-We provide a simple text-based API for specifying simulation and data exploration pipelines,
-interfacing with existing libraries (e.g.,
+Sapicore interfaces with industry-standard ML libraries (e.g.,
 [ray](https://docs.ray.io/en/latest/ray-core/walkthrough.html),
 [scikit-learn](https://scikit-learn.org/stable/), [networkX](https://networkx.org/), and
 [tensorboard](https://pytorch.org/docs/stable/tensorboard.html)).
@@ -43,23 +41,25 @@ To simulate a network from a YAML configuration, simply run:
 
     python simulation.py -config /path/to/your/filename.yaml
 
-See the `tutorials` directory and configuration files `tests/engine/network/test_network` for instructive examples.
+See the `tutorials` directory and configuration files under `tests/engine/network/test_network`
+for instructive examples.
 
 ***
 
 Installation
 ------------
-General requirements (see ``setup.py`` and ``requirements.txt`` for more information):
+General requirements (see ``setup.py`` for more information):
 
-* Python 3.10+.
-* Scientific Stack (numpy, scipy, pandas, matplotlib).
-* PyTorch 1.12.0+ (for efficient tensor operations on GPU).
-* NetworkX 2.8.8+ (for network representation and analysis).
-* Tensorboard 2.9.0+ (for interactive data exploration).
+* Python 3.10+
+* Scientific Stack
+* PyTorch 1.12.0+
+* NetworkX 2.8.8+
+* Tensorboard 2.9.0+
 
 For developers:
-* Pytest 7.1.2+ to run unit and integration tests.
-* Sphinx 5.3.0+ to run the automated documentation procedures provided.
+
+* Pytest 7.1.2+
+* Sphinx 5.3.0+
 
 To install the latest stable version of Sapicore:
 

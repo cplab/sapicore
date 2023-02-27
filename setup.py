@@ -30,9 +30,13 @@ setup(
         "scipy",
         "pandas",
         "torch",
+        "tensorboard",
         "networkx",
         "scikit-learn",
+        "matplotlib",
+        "PyYAML",
         "nixio",
+        "alive_progress",
         "tree-config",
     ],
     extras_require={
