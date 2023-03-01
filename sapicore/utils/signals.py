@@ -1,10 +1,12 @@
 """ Utility classes and functions for artificial signal generation. """
+import logging
+
 import torch
 from torch import Tensor
 
 from sapicore.utils.constants import DT
 
-__all__ = ("Wave", "design_input_current", "flatten")
+__all__ = ("Wave", "extend_input_current")
 
 
 class Wave:
@@ -24,19 +26,19 @@ class Wave:
     phase_shifts: Tensor
         Starting phase of each frequency component, to be multiplied by np.pi.
 
-    phase_amplitude_coupling: Tensor
-        Optional, frequency of variations in amplitude for each component, if coupling is desired.
+    phase_amplitude_coupling: Tensor, optional
+        Frequency of variations in amplitude of each component, if such coupling is desired. Defaults to `None`.
 
     sampling_rate: int, optional
-        Sampling rate in Hz, by default 1000.0 / DT (simulation time step).
+        Sampling rate in Hz. Defaults to 1000.0 / :attr:`~utils.constants.DT` (simulation time step).
 
     device: str, optional
-        Specifies a hardware device on which to register PyTorch buffer fields, e.g. "cuda:0". Defaults to "cpu".
+        Specifies a hardware device on which to process tensors, e.g. "cuda:0". Defaults to "cpu".
 
     See Also
     --------
-    neuron.analog.oscillator.OscillatorNeuron:
-        An analog neuron that used a Wave iterator to generate its output.
+    :class:`~engine.neuron.analog.oscillator.OscillatorNeuron`:
+        An analog neuron that uses a Wave iterator to generate its output.
 
     Example
     -------
@@ -48,7 +50,7 @@ class Wave:
         >>> phase_shifts = torch.tensor([torch.pi, 0.0])
         >>> phase_amplitude_coupling = torch.tensor([frequencies[1], 0.0])
 
-    Initialize a signal based on the above parameters:
+    Prepare a signal based on the above parameters:
 
         >>> signal = Wave(amplitudes=amplitudes, frequencies=frequencies, phase_shifts = phase_shifts,
         ... phase_amplitude_coupling=phase_amplitude_coupling, sampling_rate=sampling_rate)
@@ -71,9 +73,6 @@ class Wave:
         sampling_rate: float = 1000.0 / DT,
         device: str = "cpu",
     ):
-        # iteration counter.
-        self.index = 0
-
         # instance attributes defining the waveform.
         self.amplitudes = amplitudes
         self.frequencies = frequencies
@@ -83,6 +82,9 @@ class Wave:
 
         # hardware device on which to store this instance's tensors.
         self.device = device
+
+        # iteration counter.
+        self.index = 0
 
         # validate correctness of waveform configuration provided.
         self.valid = self._validate()
@@ -108,14 +110,17 @@ class Wave:
                     amp_series = amp_series + temp
 
                 # add PAC oscillation to combined wave.
-                value = value + amp_series * torch.sin(2 * torch.pi * self.frequencies[i] * time + self.phase_shifts[i])
+                value = value + amp_series * torch.sin(
+                    2.0 * torch.pi * self.frequencies[i] * time + self.phase_shifts[i]
+                )
 
         self.index += 1
         return value
 
     def _validate(self) -> bool:
-        """Validates wave parameters, setting :attr:``valid`` to False if configuration is faulty."""
-        # check that all component sines have an amplitude, a frequency, and a phase (i.e., that lengths are equal).
+        """Validates wave parameters, setting :attr:`valid` to False if configuration is faulty.
+        Specifically, checks that all sine components have an amplitude, a frequency, and a phase
+        (i.e., that lengths are equal)."""
         lengths = [len(v) for v in [self.amplitudes, self.frequencies, self.phase_shifts]]
         if not all(x == lengths[0] for x in lengths):
             return False
@@ -123,52 +128,98 @@ class Wave:
         return True
 
 
-def flatten(lst: list[list]) -> list:
-    """Flattens a list."""
-    return [item for sublist in lst for item in sublist]
+def extend_input_current(
+    blueprint: Tensor, num_steps: int, num_units: int, device: str = "cpu", mode: str = "smear"
+) -> Tensor:
+    """Accepts a tensor of values `blueprint` and either smears or repeats it, depending on `mode`.
 
+    Convenience function for generating a dummy input current from a `blueprint`. That is to say,
+    the user provides the desired **shape** of the current time series and specifies how to extend it.
 
-def design_input_current(current: Tensor, num_steps: int, num_units: int, device: str = "cpu") -> Tensor:
-    """Convenience function for the quick configuration of a structured ``current``. Accepts a list of float values
-    and smears it; e.g., [0, 1, 0, 2] is extended to [0, 0, 1, 1, 0, 0, 2, 2, ...] to fit the requested duration in
-    simulation step units, ``num_steps``.
+    For instance, if mode is "smear", [0, 1, 0, 2] will be extended to [0, 0, 1, 1, 0, 0, 2, 2, ...]
+    to fit the requested duration in simulation step units, `num_steps`.  If mode is "repeat",
+    [0, 1, 0, 2] will be extended to [0, 1, 0, 2, 0, 1, 0, 2, ...].
 
     Parameters
     ----------
-    current: Tensor
-        Input current values to be smeared (typically given under simulation/current in the configuration YAML).
+    blueprint: Tensor
+        Input current values to be extended (typically given under simulation/current in the configuration YAML).
 
     num_steps: int
         Length of current to be generated, equal to the number of simulation steps.
+        This is also the number of columns in the returned tensor.
 
     num_units: int
         Number of neurons (tensor elements) in the ensemble that will receive the generated current.
+        This is also the number of rows in the returned tensor.
 
     device: str, optional
         Specifies a hardware device on which to register PyTorch buffer fields, e.g. "cuda:0". Defaults to "cpu".
 
+    mode: str, optional
+        Whether to "smear" the given blueprint or "repeat" it (as in np.tile).
+
     Returns
     -------
     Tensor
-        The generated current, given as a float32 tensor whose elements are its values at each time point.
+        The generated current, given as a tensor whose columns are its values at each time point (ensemble elements
+        correspond to rows).
+
+    Examples
+    --------
+
+        >>> extend_input_current(blueprint=torch.tensor([0, 1, 1, 0]), num_steps=8, num_units=2, mode="smear")
+        tensor([[0., 0., 1., 1., 1., 1., 0., 0.],
+                [0., 0., 1., 1., 1., 1., 0., 0.]])
+
+        >>> extend_input_current(blueprint=torch.tensor([0, 1, 1, 0]), num_steps=8, num_units=2, mode="repeat")
+        tensor([[0., 1., 1., 0., 0., 1., 1., 0.],
+                [0., 1., 1., 0., 0., 1., 1., 0.]])
 
     Note
     ----
+    Providing a nonsensical `num_steps` (shorter than or not divisible by the length of the blueprint)
+    will result in truncating or extending the output to the nearest integer multiple of the blueprint length.
+
+    Warning
+    -------
     The present implementation supports duplication of the current time series to accommodate multiple units.
-    Mechanisms for sending varying currents to different ensemble elements are better suited for the data synthesis
-    module, and should be implemented there in a principled manner.
+    :class:`~pipeline.simulation.Simulator` uses this function to support sending varying dummy currents to different
+    ensemble elements.
+
+    Note, however, that these mechanisms are better suited for :mod:`data.synthesis`
+    and will be implemented there in a principled manner. This utility function may be deprecated or moved.
 
     """
-
-    # generate random current data of shape num_steps by num_units.
-    chunk = current.to(device)
+    # generate random current data of shape `num_steps` by `num_units`.
+    chunk = blueprint.to(device)
     num_parts = num_steps // int(chunk.shape[0])
     part_size = int(chunk.shape[0])
+
+    # sanity check the request.
+    if part_size > num_steps:
+        logging.warning(
+            f"[extend_input_current] Your blueprint is shorter ({part_size}) than the number of steps "
+            f"requested ({num_steps}). "
+        )
+
+        # use the given blueprint as is.
+        num_parts = 1
+
+    elif bool(num_steps % part_size):
+        logging.warning(
+            f"[extend_input_current] The number of steps you requested ({num_steps}) is not divisible "
+            f"by the length of your blueprint ({part_size}). "
+        )
+
     current_evolution = torch.zeros(part_size * num_parts, dtype=torch.float, device=device)
 
     for i in range(part_size):
         for j in range(num_parts):
-            current_evolution[j + i * num_parts] = chunk[i]
+            if mode == "smear":
+                current_evolution[j + i * num_parts] = chunk[i]
+            elif mode == "repeat":
+                current_evolution[i + j * part_size] = chunk[i]
 
     current_evolution = current_evolution.repeat((num_units, 1))
     return current_evolution

@@ -23,10 +23,8 @@ from math import pi
 import torch
 from torch import tensor, Tensor
 
-from sapicore.utils.constants import DT
-from sapicore.utils.signals import Wave
-
 from sapicore.engine.neuron.analog import AnalogNeuron
+from sapicore.utils.signals import Wave
 
 __all__ = ("OscillatorNeuron",)
 
@@ -100,7 +98,7 @@ class OscillatorNeuron(AnalogNeuron):
                 "phase_shifts": self.phases[i] * pi,
                 "phase_amplitude_coupling": self.amp_freq[i],
             }
-            self.iter.append(Wave(**specification, sampling_rate=DT * 1000.0, device=self.device))
+            self.iter.append(Wave(**specification, sampling_rate=self.dt * 1000.0, device=self.device))
 
     def forward(self, data: Tensor) -> dict:
         """Oscillator forward method.

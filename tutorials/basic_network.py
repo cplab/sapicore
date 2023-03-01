@@ -5,7 +5,7 @@ from sapicore.engine.synapse.STDP import STDPSynapse
 from sapicore.engine.network import Network
 
 from sapicore.pipeline import Pipeline
-from sapicore.utils.seed import set_seed
+from sapicore.utils.seed import fix_random_seed
 
 import matplotlib.pyplot as plt
 
@@ -23,7 +23,7 @@ class BasicSimulation(Pipeline):
         self.learning = learning
 
         # fixes RNG seed across scientific stack libraries for consistency.
-        set_seed(9846)
+        fix_random_seed(9846)
 
     def run(self):
         # initialize two default IZ ensembles (with RK4 numeric approximation).

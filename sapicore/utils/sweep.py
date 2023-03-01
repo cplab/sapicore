@@ -6,7 +6,7 @@ import scipy
 import numpy as np
 
 from sapicore.utils.constants import SEED
-from sapicore.utils.seed import set_seed
+from sapicore.utils.seed import fix_random_seed
 
 from sklearn.model_selection import ParameterGrid
 
@@ -17,28 +17,30 @@ class Sweep:
     Parameters
     ----------
     search_space: dict
-        Argument values, distributions, and sweep strategies. Stored in the `parameters` portion of the
-        specification dictionary or YAML.
+        Dictionaries of argument keys and their possible values (or scipy distributions and parameters),
+        grouped by top-level keys specifying the sweep strategy to be used with each.
+        Search spaces are typically stored in the `sweep` key  of a :class:`~engine.component.Component`
+        configuration dictionary.
 
 
-    Configuration dictionary parameters are expected to be found under one of four keys:
+    Search space parameters are expected to be found under one of four top-level keys:
 
-    1. **Fixed**: The argument takes the same value across all execution branches. E.g., if
-    settings["fixed"]["resample"]=100, `self.method` will always be called with resample=100.
+    1. **Fixed**: The argument takes the same value across all branches. E.g., if
+    settings["fixed"]["resample"]=100, resample will always take the value 100.
 
     2. **Zipped**: The values of the arguments listed are iterated over such that the Nth value of any argument is
     matched with the Nth value of other arguments. Combinations are repeated as many times as it takes
-    to reach the number of units dictated by construction, considering all other argument specs.
+    to reach the number of combinations dictated by construction or by specification.
     E.g., if settings["zipped"]["freq_band"] = [[5, 10], [30, 50]] and ... ["resample"] = [50, 100],
-    then the procedure referenced by `self.method` will pass freq_band = [5, 10] with resample = 50
-    in half of the branches, and freq_band = [30, 50] with resample = 100 in the other half.
+    then `self.combinations` will have freq_band = [5, 10] with resample = 50 in half the branches,
+    and freq_band = [30, 50] with resample = 100 in the other half.
 
-    3. **Grid**: The values of the arguments keys listed are iterated over such that any argument value combination is
-    equally represented in the execution tree. Combinations are repeated as many times as it takes to reach
-    the number of units dictated by the specification dictionary, considering all other argument specs.
+    3. **Grid**: The values of the keys listed are iterated over such that any value combination is
+    equally represented in the resulting dictionary. Combinations are repeated as many times as it takes to reach
+    the number of combinations dictated by construction or by specification.
     E.g., if settings["zipped"]["freq_band"] = [[5, 10], [30, 50]] and ...["resample"] = [50, 100],
-    then the procedure referenced by `self.method` will be called in four qualitatively distinct branches,
-    where (freq_band, resample) take the values ([5, 10], 50), ([5, 10], 100), ([30, 50], 50), ([30, 50], 100).
+    then `self.combinations` will have four qualitatively distinct groups, with (freq_band, resample) taking
+    one of the following combined values: ([5, 10], 50), ([5, 10], 100), ([30, 50], 50), ([30, 50], 100).
 
     4. **Random**: The values of the parameter keys listed are drawn from a :mod:`scipy.stats` distribution given
     under the key "method", with the arguments "args". E.g., if settings["random"]["resample"]["method"]="uniform"
@@ -54,35 +56,36 @@ class Sweep:
 
     See Also
     --------
-    `Scipy distributions <https://docs.scipy.org/doc/scipy/reference/stats.html#continuous-distributions>`_
+    `Scipy Distributions <https://docs.scipy.org/doc/scipy/reference/stats.html#continuous-distributions>`_
         For a list of supported probability distributions and their arguments.
 
     """
 
     def __init__(self, search_space: dict, num_combinations: int = None):
         # set random seed for consistency across runs.
-        set_seed(SEED)
+        fix_random_seed(SEED)
 
         self.search_space = search_space
         self.num_combinations = num_combinations
 
-        # derive the argument combinations defining the execution branches from `search_space`.
-        self.combinations = self.set_combinations()
+        # generate argument combinations from `search_space`.
+        self.combinations = self.generate_combinations()
 
     def __call__(self, *args, **kwargs):
         return self.combinations
 
     def heterogenize(self, obj: Any, unravel: bool = True):
-        """Initializes `obj`'s attribute tensors heterogeneously based on a given sweep search dictionary.
+        """Initializes attribute tensors heterogeneously based on a given sweep search dictionary.
 
         Parameters
         ----------
         obj: Component
-            Sapicore engine component whose parameters will be diversified (e.g., neuron, ensemble, synapse).
+            Sapicore engine component whose parameters will be diversified (currently, either
+            :class:`~engine.ensemble.Ensemble` or :class:`~engine.synapse.Synapse`).
 
         unravel: bool
             When the property is a 2D tensor, dictates whether combination values should be assigned
-            to individual elements (True) or overwrite entire rows (False).
+            to individual elements (True, default) or overwrite entire rows (False).
 
         """
         # for every parameter combination, set the appropriate attribute tensor element values.
@@ -103,19 +106,20 @@ class Sweep:
                         # handle the case where values should overwrite attribute tensor rows.
                         getattr(obj, key)[i] = value
 
-    def set_combinations(self) -> list[dict]:
-        """Determine the argument combinations defining this sweep and update the `combinations` attribute."""
-        # allow user to set an arbitrary number of combinations, e.g. in case of random sampling.
+    def generate_combinations(self) -> list[dict]:
+        """Determine the argument combinations defining this sweep, update the `combinations` attribute,
+        and return its value for potential use by the calling function."""
+        # allow user to set an arbitrary number of combinations, e.g. in the case of random sampling.
         # if not specified, `count_combinations` will use the LCM of grid and zipped combinations to set the total.
         self.count_combinations()
 
         # initialize an empty list to contain kwargs-like dictionaries, one for each branch/combination.
         combinations = []
 
-        # combinations to cycle through when setting zipped argument values,
+        # combinations to cycle through when setting zipped argument values.
         zipped_cycle = self.extract_combinations(self.search_space, mode="zipped")
 
-        # combinations to cycle through when setting grid search argument values.
+        # combinations to cycle through when setting grid argument values.
         grid_cycle = self.extract_combinations(self.search_space, mode="grid")
 
         for n in range(self.num_combinations):
@@ -159,7 +163,9 @@ class Sweep:
 
         2. If NoC was provided, the calculated value will be either equal to or greater than the requested number.
         The calculated value will be greater iff the user's value will result in an imbalance (i.e., if not
-        every parameter combination can be represented with that NoC).
+        every parameter combination can be represented with that NoC). In such cases, the user should
+        intentionally sample from the larger combination dictionary in a way they see fit. Generally,
+        users should keep balancing considerations in mind when designing heterogeneous layers.
 
         """
         zipped_combinations = 0

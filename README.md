@@ -1,8 +1,8 @@
 Sapicore
 ========
 
-A Spiking Neural Network Simulator
-----------------------------------
+A Framework for Neuromorphic Modeling
+-------------------------------------
 
 A project of the Computational Physiology Laboratory at Cornell University.
 Complete documentation is [available](https://cplab.github.io/sapicore/index.html).

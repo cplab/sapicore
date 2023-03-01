@@ -28,7 +28,7 @@ def spike_raster(data: torch.Tensor, line_size: float = 0.25) -> plt.eventplot:
         # create series of indices containing positions for raster plot.
         positions = df.apply(lambda x: df.index[x == 1.0])
 
-        # pandas index returns inconsistent output depending on data frame content (e.g., if all rows identical,
+        # pandas index returns inconsistent output depending on data frame content (e.g., if all rows are identical,
         # returns frame instead of list[Series]), and `plt.eventplot()` is very particular about 2D input format.
         if type(positions) is not pd.Series:
             positions = [i for i in positions.items()]
@@ -47,7 +47,9 @@ def spike_raster(data: torch.Tensor, line_size: float = 0.25) -> plt.eventplot:
     else:
         plot = plt.eventplot(data, linelengths=line_size)
 
+    # decorate plot and set axis limits.
     plt.title("Ensemble Spiking Activity")
+
     plt.xlabel("Time")
     plt.ylabel("Neuron")
     plt.xlim(0, data.shape[0])

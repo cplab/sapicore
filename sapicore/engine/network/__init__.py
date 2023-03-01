@@ -11,8 +11,7 @@ from torch.nn import Module
 from sapicore.engine.neuron import Neuron
 from sapicore.engine.synapse import Synapse
 
-from sapicore.utils.io import parse_yaml
-from sapicore.utils.signals import flatten
+from sapicore.utils.io import load_yaml, flatten
 
 __all__ = ("Network",)
 
@@ -330,7 +329,7 @@ class Network(Module):
         """Constructs an objects from the YAML in `path` or from `cfg` dictionary if provided."""
         # load configuration dictionary from ensemble descriptor YAML.
         if path and not cfg:
-            cfg = parse_yaml(path)
+            cfg = load_yaml(path)
 
         # initialize the ensemble/synapse based on its class reference, given in its configuration file.
         temp_import = __import__(cfg["package"], globals(), locals(), ["*"])

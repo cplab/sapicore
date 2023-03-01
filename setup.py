@@ -7,7 +7,7 @@ with open("README.md") as f:
 setup(
     name="sapicore",
     version=__version__,
-    description="A PyTorch-based framework for neuromorphic modeling",
+    description="A PyTorch-based framework for neuromorphic modeling. ",
     long_description=long_description,
     url="https://github.com/cplab/sapicore",
     author="Framework architecture by Matthew Einhorn and Roy Moyal. "

@@ -8,9 +8,9 @@ from torch import Tensor
 from torch.nn import Module
 
 from sapicore.utils.constants import DT
-from sapicore.utils.io import dump_yaml
+from sapicore.utils.io import save_yaml
 from sapicore.utils.sweep import Sweep
-from sapicore.utils.logging import Loggable
+from sapicore.utils.loggable import Loggable
 
 from tree_config import Configurable, apply_config
 
@@ -41,7 +41,7 @@ class Component(Module, Configurable, Loggable):
     See Also
     --------
     :class:`~tree_config.Configurable`
-    :class:`~utils.logging.Loggable`
+    :class:`~utils.loggable.Loggable`
     :class:`~utils.sweep.Sweep`
 
     """
@@ -103,7 +103,7 @@ class Component(Module, Configurable, Loggable):
 
         # if `log_destination` was passed, save the configuration dictionary to that location.
         if os.path.exists(log_destination):
-            dump_yaml(self.configuration, log_destination)
+            save_yaml(self.configuration, log_destination)
 
     def forward(self, data: Tensor) -> dict:
         """Processes an input, updates the state of this component, and advances the simulation by one step.
@@ -135,7 +135,7 @@ class Component(Module, Configurable, Loggable):
         Note
         ----
         If a `sweep` key is not present in `configuration`, this method will pass silently, retaining the existing
-        configurable tensor values. It can be invoked safely from generic methods (e.g.,
+        configurable values. It can be invoked safely from generic methods (e.g.,
         :meth:`~engine.network.Network.build`).
 
         Parameters
@@ -152,8 +152,7 @@ class Component(Module, Configurable, Loggable):
         Warning
         -------
         This method mutates the underlying component object. To simply view the combinations, initialize a
-        :class:`utils.sweep.Sweep` object and call it with your desired search space dictionary and number
-        of combinations.
+        :class:`~utils.sweep.Sweep` object with your desired search space dictionary and number of combinations.
 
         """
         # safe to call if object has no sweep specification or empty configuration; method will return silently.

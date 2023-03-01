@@ -1,19 +1,18 @@
-import pytest
-import torch
-
 from typing import Callable
 from datetime import datetime as dt
 
+import pytest
+import torch
+
 from sapicore.engine.ensemble.analog import AnalogEnsemble
 from sapicore.engine.ensemble.spiking import LIFEnsemble, IZEnsemble
-
 from sapicore.utils.integration import RungeKutta
-from sapicore.utils.constants import DT
 
 import matplotlib.pyplot as plt
 
 UNITS = 1
 STEPS = 500
+INTERVAL = 25
 
 
 class Curve:
@@ -37,54 +36,57 @@ class Curve:
 class TestIntegration:
     @pytest.mark.functional
     def test_numeric_correctness(self):
-        """Demonstrate correctness of Euler and RK4 using example ODEs with simple analytical solutions."""
-        # define analytical curves, their respective ODEs, start time and start value.
+        """Demonstrates correctness of Euler and RK4 using example ODEs with simple analytical solutions."""
+        # define analytic curves, their respective ODEs, and t0 at which to start the simulation.
         curves = [
-            Curve(lambda t: torch.e**t, lambda x: x, 1.0),
-            Curve(lambda t: (t**2.0) / 4.0, lambda x: torch.sqrt(x), 4.0),
+            Curve(curve=lambda t: torch.e**t, ode=lambda x: x, t0=1.0),
+            Curve(curve=lambda t: (t**2.0) / 4.0, ode=lambda x: torch.sqrt(x), t0=4.0),
         ]
 
         for curve in curves:
+            # initialize two analog ensembles that integrate using Euler/RK4.
             analog_euler = AnalogEnsemble(num_units=UNITS, integrator=RungeKutta(order=1), equation=curve.ode)
             analog_rk4 = AnalogEnsemble(num_units=UNITS, integrator=RungeKutta(order=4), equation=curve.ode)
 
-            # set initial condition to e, the value of the analytical solution curve at t=1.
+            # update initial voltages to the value of the curve at its t0.
             analog_euler.voltage = torch.tensor(curve.y0)
             analog_rk4.voltage = torch.tensor(curve.y0)
 
-            # compute differences between underlying function and euler/rk4 throughout simulation.
+            # compute the underlying function and Euler/RK4 approximations in the interval [0, INTERVAL).
             underlying = []
             euler = []
             rk4 = []
 
-            for j in range(25):
-                # compute underlying curve at this time point.
-                underlying.append(curve(t=curve.t0 + (j + 1.0) * DT))
+            for j in range(INTERVAL):
+                # underlying curve at this time point.
+                underlying.append(curve(t=curve.t0 + (j + 1.0) * analog_euler.dt))
 
-                # integrate euler and rk4 ensembles.
+                # integrate ensembles directly, bypassing forward().
                 analog_euler.voltage = analog_euler.integrate()
                 analog_rk4.voltage = analog_rk4.integrate()
 
-                # store voltage values of euler and RK4 ensembles.
+                # store voltage values for the two integration modes.
                 euler.append(analog_euler.voltage.mean().item())
                 rk4.append(analog_rk4.voltage.mean().item())
 
-            # plots clearly show RK4 outperforming Euler.
+            # plots show RK4 outperforming Euler for our test cases y(t) = e^t and y(t) = t^2 / 4.
             plt.plot(underlying)
             plt.plot(rk4)
             plt.plot(euler)
-            plt.title("Underlying Function (Blue), RK4 (Orange), Euler (Green)")
+            plt.title("Ground Truth (Blue), RK4 (Orange), Euler (Green)")
 
             plt.show()
 
     @pytest.mark.parametrize("ref", [LIFEnsemble, IZEnsemble], ids=["LIF", "IZ"])
     @pytest.mark.functional
     def test_spiking_comparison(self, ref: type):
-        # initialize LIF ensembles with two different approximation schemes.
+        """Shows that Euler/RK4 integration makes a difference for the default spiking neuron models (IZ, LIF)."""
+        # initialize two spiking ensembles with Euler/RK4 integrators.
         euler = ref(identifier="Euler", num_units=UNITS, integrator=RungeKutta(order=1))
         rk4 = ref(identifier="RK4", num_units=UNITS, integrator=RungeKutta(order=4))
 
-        data = torch.zeros(UNITS) + (250.0 if isinstance(ref, LIFEnsemble) else 10.0)
+        # input current values were selected to trigger firing given the default LIF and IZ parameters.
+        data = torch.zeros(UNITS) + (105.0 if ref is LIFEnsemble else 10.0)
 
         euler_values = torch.zeros((STEPS, UNITS))
         rk4_values = torch.zeros((STEPS, UNITS))
@@ -104,7 +106,7 @@ class TestIntegration:
 
         print(
             f"\nCompared to Euler, RK4 took x{rk4_duration/euler_duration}. "
-            f"At DT={DT}, Steps={STEPS}, Euler-RK4 difference: {md:.2f} (SD={sd:.2f})"
+            f"At DT={euler.dt}, Steps={STEPS}, Mean Euler-RK4 difference: {md:.2f} (SD={sd:.2f})"
         )
 
         plt.plot(euler_values.tolist())

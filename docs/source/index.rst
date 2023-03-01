@@ -1,7 +1,7 @@
 .. mdinclude:: ../../README.md
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 8
    :caption: API Documentation
 
    api/api.rst

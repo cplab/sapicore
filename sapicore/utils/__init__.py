@@ -1,1 +1,1 @@
-""" Utility modules. """
+""" Utility classes and functions. """

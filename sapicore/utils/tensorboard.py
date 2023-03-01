@@ -1,4 +1,4 @@
-""" Handle writing scalar and image data to tensorboard. """
+""" Writes scalar and image data to tensorboard. """
 import os
 import numpy as np
 import h5py as hdf
@@ -14,7 +14,7 @@ __all__ = ("HDFData", "TensorboardWriter")
 
 
 class HDFData:
-    """Temporary class for reading HDF5 data logged to disk by :class:`~utils.io.DataAccumulatorHook`.
+    """Reads HDF5 data logged to disk by :class:`~utils.io.DataAccumulatorHook`.
 
     Parameters
     ----------
@@ -22,16 +22,17 @@ class HDFData:
         Path to HDF5 data file.
 
     key: str, optional
-        Specific key to read from HDF5. If not provided, method will read everything.
+        Specific key to read from HDF5. If not provided, the entire file will be read.
 
     buffer: dict, optional
-        Initialize an HDFData object with a preexisting dictionary, e.g. to save hyperparameters
+        For initializing an HDFData object with a preexisting dictionary, e.g. to save hyperparameters
         computed at runtime.
 
     Warning
     -------
-    Assumes HDF5 file only contains labeled datasets, not groups. A more generalized data loading protocol is
-    being implemented in the sister package Neural Dynamics Toolbox (NDT).
+    This class assumes that the HDF5 file only contains labeled datasets, not groups, in accordance with
+    the current implementation of :class:`~utils.io.DataAccumulatorHook`.
+    A generalized data loading protocol is being developed.
 
     """
 
@@ -46,7 +47,8 @@ class HDFData:
             self.read()
 
     def read(self):
-        # extracts desired datasets and/or fields from HDF5 file and puts them in the local buffer.
+        """Extracts desired datasets and/or fields from HDF5 file and adds them to the buffer."""
+        #
         with hdf.File(os.path.realpath(self.path), "r") as f:
             # add component identifier and class for reference.
             try:
@@ -71,7 +73,7 @@ class HDFData:
 class TensorboardWriter:
     """Reusable SummaryWriter instance endowed with methods handling tensorboard file I/O given a data object.
 
-    For ease of use, :meth:`TensorboardWriter.write` can be called with a multi-data buffer, e.g. in cases where
+    For ease of use, :meth:`write` can be called with a multi-data buffer, e.g. in cases where
     the same plotting settings apply to all objects.
 
     Parameters
@@ -153,7 +155,7 @@ class TensorboardWriter:
         plt.figure()
 
         for j in range(0, num_steps, settings.get("step", 100)):
-            # FIX understand why using smaller step sizes makes TB slider GUI randomly pick 10 timepoints instead of
+            # TODO understand why using smaller step sizes makes TB slider GUI randomly pick 10 timepoints instead of
             #  displaying them all.
             plt.grid(False)
             p = plt.imshow(array[j, :], cmap=plt.cm.viridis, aspect="auto")
@@ -219,8 +221,7 @@ class TensorboardWriter:
         Any workaround will likely require patching tensorboard, a task left to the intrepid maintainer.
         For now, configurable attributes can be logged as scalars for easy viewing of parameter value distributions.
 
-        Neural Dynamics Toolbox (NDT) may end up using a better maintained data visualization backend (e.g.,
-        streamlit).
+        Sapicore may end up using a better maintained data visualization library.
 
         """
         # in the scalar case, iterate over elements being described (e.g., neurons in an ensemble), necessarily 1D.

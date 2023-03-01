@@ -1,7 +1,7 @@
-"""Logging
-==========
+"""Loggable
+===========
 
-:mod:`~sapicore.utils.logging` provides the tools to configure the logging of
+:mod:`~sapicore.utils.loggable` provides the tools to configure the logging of
 Sapicore models. It supports logging of simple properties to tensorboard as
 well as arbitrary properties, including tensors and arrays to a H5 file.
 Individual properties can be included or excluded from logging using a config
@@ -11,7 +11,7 @@ configuration.
 Loggable
 --------
 
-The main API is the :class:`~sapicore.utils.logging.Loggable` that defines an API for
+The main API is the :class:`~sapicore.utils.loggable.Loggable` that defines an API for
 properties to support opting-in to logging. One lists all the properties that
 can potentially be logged in :attr:`~sapicore.utils.loggable.Loggable._loggable_props_`, on
 a per class basis. Sub classing extends
@@ -20,7 +20,7 @@ loggable properties it accumulates all the properties listed in all the
 :attr:`~sapicore.utils.loggable.Loggable._loggable_props_` of all the super classes in
 :attr:`~sapicore.utils.loggable.Loggable.loggable_props`.
 
-To supper logging of objects nested in other objects, we use
+To support logging of objects nested in other objects, we use
 :attr:`~sapicore.utils.loggable.Loggable._loggable_children_` to list all the properties that
 are objects that should be inspected for loggable properties.
 These are similarly all listed in :attr:`~sapicore.utils.loggable.Loggable.loggable_children`.

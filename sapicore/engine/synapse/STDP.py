@@ -1,8 +1,8 @@
 """ Synapses with spike-timing-dependent plasticity (STDP). """
 import torch
+from torch import Tensor
 
 from sapicore.engine.synapse import Synapse
-from sapicore.utils.constants import DT
 
 __all__ = ("STDPSynapse",)
 
@@ -17,22 +17,22 @@ class STDPSynapse(Synapse):
 
     Parameters
     ----------
-    tau_plus: float or torch.tensor
+    tau_plus: float or Tensor
         Time constant of potentiation STDP time window.
 
-    tau_minus: float or torch.tensor
+    tau_minus: float or Tensor
         Time constant of depression STDP time window.
 
-    mu_plus: float or torch.tensor
+    mu_plus: float or Tensor
         Positive dependence exponent (e.g., 1.0 for multiplicative STDP, 0.0 for additive STDP)
 
-    mu_minus: float or torch.tensor
+    mu_minus: float or Tensor
         Negative dependence exponent (e.g., 1.0 for multiplicative STDP, 0.0 for additive STDP)
 
-    alpha_plus: float or torch.tensor
+    alpha_plus: float or Tensor
         Limit on magnitude of weight modification for positive spike time difference.
 
-    alpha_minus: float or torch.tensor
+    alpha_minus: float or Tensor
         Limit on magnitude of weight modification for negative spike time difference.
 
     """
@@ -84,12 +84,12 @@ class STDPSynapse(Synapse):
         # toggle learning switch (should be on during training and off during testing).
         self.learning_switch = True
 
-    def update_weights(self) -> torch.tensor:
+    def update_weights(self) -> Tensor:
         """STDP weight update implementation.
 
         Returns
         -------
-        torch.tensor
+        Tensor
             2D tensor containing weight differences (dW).
 
         """
@@ -115,10 +115,10 @@ class STDPSynapse(Synapse):
 
         # add to total delta weight matrix (diffs are in simulation steps, tau are in ms).
         delta_weight = delta_weight + (delta_spike < 0.0).int() * (
-            self.alpha_plus * torch.exp(ltp_diffs / (self.tau_plus / DT))
+            self.alpha_plus * torch.exp(ltp_diffs / (self.tau_plus / self.dt))
         )
         delta_weight = delta_weight + (delta_spike > 0.0).int() * (
-            -self.alpha_minus * torch.exp(-ltd_diffs / (self.tau_minus / DT))
+            -self.alpha_minus * torch.exp(-ltd_diffs / (self.tau_minus / self.dt))
         )
 
         self.weights = self.weights.add(delta_weight)
@@ -135,12 +135,12 @@ class STDPSynapse(Synapse):
         """
         self.learning_switch = state
 
-    def forward(self, data: torch.tensor) -> dict:
+    def forward(self, data: Tensor) -> dict:
         """Updates weights if need be, then calls the parent :class:`~engine.synapse.Synapse` :meth:`forward` method.
 
         Parameters
         ----------
-        data: torch.tensor
+        data: Tensor
             Source ensemble spike output to be processed by this STDP synapse.
 
         Returns

@@ -7,15 +7,16 @@ from datetime import datetime
 
 import torch
 import networkx as nx
+
 import matplotlib.pyplot as plt
 from alive_progress import alive_bar
 
 from sapicore.engine.network import Network
 from sapicore.pipeline import Pipeline
 
-from sapicore.utils.seed import set_seed
-from sapicore.utils.signals import design_input_current
-from sapicore.utils.io import DataAccumulatorHook, ensure_dir, dump_yaml, log_settings
+from sapicore.utils.seed import fix_random_seed
+from sapicore.utils.signals import extend_input_current
+from sapicore.utils.io import DataAccumulatorHook, ensure_dir, save_yaml, log_settings
 from sapicore.utils.constants import DT, TIME_FORMAT, SEED
 from sapicore.utils.tensorboard import TensorboardWriter, HDFData
 
@@ -41,7 +42,7 @@ class Simulator(Pipeline):
         super().__init__(configuration=configuration, **kwargs)
 
         # set random seed for entire simulation and apply default logger configuration.
-        set_seed(SEED)
+        fix_random_seed(SEED)
         log_settings()
 
     def run(self):
@@ -67,7 +68,7 @@ class Simulator(Pipeline):
         run_dir = ensure_dir(os.path.join(root, stamp))
 
         # save a copy of the configuration to this run's directory for reference--need to handle dict-only case.
-        dump_yaml(self.configuration, os.path.join(run_dir, self.configuration.get("identifier", "run_cfg") + ".yaml"))
+        save_yaml(self.configuration, os.path.join(run_dir, self.configuration.get("identifier", "run_cfg") + ".yaml"))
 
         # load simulation parameters from configuration dictionary.
         steps = self.configuration.get("simulation", {}).get("steps")
@@ -106,12 +107,12 @@ class Simulator(Pipeline):
                 temp = torch.tensor(recipe.get(root_node))
                 if temp.dim() == 1:
                     # if specified as a 1D tensor, feed same current to all neurons in the tensor.
-                    currents[i] = design_input_current(temp, steps, root_node.num_units)
+                    currents[i] = extend_input_current(temp, steps, root_node.num_units)
                 else:
                     # if specified as a 2D tensor, feed Nth row to Nth neuron element (current format: units X steps).
                     # if current rows < num_units, the missing inputs will be 0s.
                     for j, row in enumerate(temp):
-                        currents[i][j, :] = design_input_current(row, steps, 1)
+                        currents[i][j, :] = extend_input_current(row, steps, 1)
 
         # describe the network to the user.
         num_neurons = sum([net.graph.nodes[i]["reference"].num_units for i in net.graph.nodes])

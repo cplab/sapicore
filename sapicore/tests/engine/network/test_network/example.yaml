@@ -43,11 +43,11 @@ simulation:
   current:
     I1: [[0.0], [0.0]]
 
-  # `True` for default data directory structure under `root`, `False` if not interested in logging simulation data to disk at all--overrides individual network component YAML `disk` setting.
+  # `True` for default data directory structure under `root`, `False` if not interested in loggable simulation data to disk at all--overrides individual network component YAML `disk` setting.
   disk: True
 
   # How data should be written to tensorboard for visualization (can be `False` or omitted).
-  # By default, all files in the output directory are scanned. If you would like to disable logging
+  # By default, all files in the output directory are scanned. If you would like to disable loggable
   # for a specific network component, you can do that by editing the `disk` field in its YAML.
   tensorboard:
     - spiked:

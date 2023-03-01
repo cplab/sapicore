@@ -14,10 +14,10 @@ model:
       # in this example, single note amplitudes are equal.
       amplitudes: [[5.0, 5.0, 5.0], [5.0, 5.0, 5.0]]
       # frequency combinations going into each oscillator unit.
-      frequencies: [[34.6, 41.2, 51.9], [30.9, 36.7, 46.2]]
+      frequencies: [[34.65, 41.2, 51.91], [30.86, 38.89, 46.25]]
       # phase shifts for each frequency component, to be multiplied by np.pi (all zeros by default).
       phases: [[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
-      # couple the amplitude of each frequency component to these frequencies (optional, may run without amp_freq).
+      # couple the amplitude of each frequency component to these frequencies (optional).
       amp_freq: [[2.0, 2.0, 2.0], [2.0, 2.0, 2.0]]
 
 loggable:

@@ -1,4 +1,4 @@
-""" Unit, integration, and functional tests """
+""" Unit, integration, and functional tests. """
 import os
 import torch
 

@@ -12,17 +12,20 @@ import yaml
 import h5py as hdf
 
 import torch
+from torch import Tensor
 from torch.nn import Module
 
-__all__ = ("DataAccumulatorHook", "ensure_dir", "parse_yaml", "dump_yaml", "log_settings")
+__all__ = ("DataAccumulatorHook", "ensure_dir", "flatten", "load_yaml", "save_yaml", "log_settings")
 
-# data chunks will be dumped to disk after reaching this size in MB.
-CHUNK_SIZE = 10.0
+CHUNK_SIZE = 50.0
+""" Data chunks will be dumped to disk after reaching this size in MB. """
 
 
 class DataAccumulatorHook(Module):
     """Wraps any :class:`~torch.nn.Module` object, accumulating selected attribute data on every forward call.
-    Selectable attributes are those included in the dictionary returned by the Module's forward method.
+
+    If used with a :class:`~engine.component.Component`, selectable attributes are those included in the dictionary
+    returned by the Module's forward method, and are a subset of the object's `_loggable_props_`.
 
     Parameters
     ----------
@@ -30,18 +33,18 @@ class DataAccumulatorHook(Module):
         Reference to the network component object whose loggable buffered attributes should be dumped to disk.
 
     log_dir: str
-        Path to this run's data dump directory.
+        Path to the desired data loggable directory.
 
     attributes: list of str
-        Instance attribute names to be logged. Defaults to the full list ``component.loggable_props`` if not specified.
+        Instance attribute names to be logged. Defaults to the full list `component.loggable_props`.
 
     entries: int
         Number of log entries, equal to the number of simulation steps. Used to ensure the last batch in the run
-        is written to disk despite its size being smaller than :attr:`~CHUNK_SIZE`.
+        is written to disk despite its size being smaller than :attr:`CHUNK_SIZE`.
 
     """
 
-    def __init__(self, component: Module, log_dir: str, attributes: list[str], entries: int):
+    def __init__(self, component: torch.nn.Module, log_dir: str, attributes: list[str], entries: int):
         super().__init__()
 
         self.log_dir = log_dir
@@ -49,35 +52,36 @@ class DataAccumulatorHook(Module):
         self.attributes = component.loggable_props if not attributes else attributes
         self.hdf_file_path = os.path.join(self.log_dir, self.component.identifier + ".h5")
 
-        # total number of forward calls to expect in this simulation run.
+        # total number of forward calls to expect in this simulation run (steps).
         self.entries = entries
 
-        # tensor for caching input until memory is full, at which point the chunk will be dumped to disk.
+        # tensor for caching input until memory threshold is reached, at which point a chunk will be saved to disk.
         self.cache = {}
         self.chunk_size = {}
-        # counter for iterations, to be checked against self.entries to ensure all data is written to disk.
+
+        # counter for iterations, to be checked against `entries` to ensure all data is written to disk.
         self.iterations = 0
 
-        # initialize HDF5 files and register forward hook.
-        self.initialize_state()
+        # initialize HDF5 files and register the forward hook.
+        self.initialize_hdf()
         component.register_forward_hook(self.save_outputs_hook())
 
-    def initialize_state(self) -> None:
+    def initialize_hdf(self) -> None:
         """Initializes HDF5 file on the first iteration of this data accumulator instance."""
         # detects whether we are in the first iteration before creating or appending to the file.
         if not os.path.exists(self.hdf_file_path):
             with hdf.File(os.path.join(self.log_dir, self.component.identifier + ".h5"), "a") as hf:
-                # write metadata to be able to identify this HDF with its nn.Module object.
+                # write metadata to be able to identify this HDF with its object.
                 hf.attrs["identifier"] = self.component.identifier
                 hf.attrs["class"] = type(self.component).__name__
 
-                # write configurable properties for future reference and tensorboard logging.
+                # write configurable properties for future reference, e.g. during tensorboard loggable.
                 if hasattr(self.component, "_config_props_"):
                     for prop in getattr(self.component, "_config_props_"):
                         # extract value to be logged.
                         value = getattr(self.component, prop)
 
-                        if type(value) is torch.Tensor:
+                        if type(value) is Tensor:
                             # if tensor, move to cpu.
                             value = value.cpu()
 
@@ -103,7 +107,7 @@ class DataAccumulatorHook(Module):
 
     def save_outputs_hook(self) -> Callable:
         def fn(_, __, output):
-            """Updates the output cache and appends to HDF5 file if memory is full or end is reached."""
+            """Updates the output cache and appends to destination HDF5 file if cache is full or simulation ends."""
             # increment iteration counter.
             self.iterations += 1
 
@@ -139,7 +143,7 @@ class DataAccumulatorHook(Module):
 
         return fn
 
-    def forward(self, data: torch.tensor) -> None:
+    def forward(self, data: Tensor) -> None:
         _ = self.component(data)
         return
 
@@ -161,14 +165,10 @@ def log_settings(
         Destination stream, `stdout` by default.
 
     file:
-        Destination file, None by default.
+        Destination file, `None` by default.
 
     formatting: str
         Message formatting.
-
-    Warning
-    -------
-    Future versions will include a Logger class and more extensive user-driven customization.
 
     """
     logging.basicConfig(
@@ -196,12 +196,17 @@ def ensure_dir(path: str = None) -> str:
     return path
 
 
-def parse_yaml(path: str) -> dict:
+def flatten(lst: list[list]) -> list:
+    """Flattens a list."""
+    return [item for sublist in lst for item in sublist]
+
+
+def load_yaml(path: str) -> dict:
     """Parses the YAML at `path`, returning a dictionary."""
     return yaml.safe_load(Path(path).read_text())
 
 
-def dump_yaml(data: dict, path: str):
-    """Saves a dictionary object `data` to the YAML file specified by `path`."""
+def save_yaml(data: dict, path: str):
+    """Saves a dictionary `data` to the YAML file specified by `path`."""
     with open(path, "w") as f:
         yaml.dump(data, f, default_flow_style=False)

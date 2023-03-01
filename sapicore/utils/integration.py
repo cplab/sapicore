@@ -1,4 +1,4 @@
-"""Integrator objects provide numerical methods for solving ODEs."""
+"""Integrator objects provide numerical methods for approximating ODE solutions."""
 from torch import Tensor
 
 from typing import Callable
@@ -15,11 +15,13 @@ class Integrator:
     identifier: str, optional
         Name of the integrator.
 
-    order: int, optional
-        Order of the integrator if applicable.
-
     step: float, optional
         Step size. Defaults to :attr:`~utils.constants.DT`.
+
+    Warning
+    -------
+    Users are encouraged to use the :class:`RungeKutta` object in their :meth:`~engine.neuron.Neuron.forward`
+    implementations, regardless of whether they anticipate using more advanced approximation methods.
 
     """
 
@@ -32,23 +34,20 @@ class Integrator:
             setattr(self, key, value)
 
     def __call__(self, x: Tensor, equation: Callable, **kwargs) -> Tensor:
-        """Approximates the function `equation`, whose keyword arguments are given as `kwargs`, given an
-        initial value `x` and a time step `step` (defaults to the global :attr:`~utils.constants.DT`).
+        """Approximates the next value of the ODE `equation`, whose keyword arguments are given as `kwargs`,
+        for an initial value `x` and a time step `step` (defaults to the global :attr:`~utils.constants.DT`).
 
         Returns
         -------
         Tensor
-            Approximate value(s) of the function at t0+DT, where t0 is the time `x` was obtained (current time).
+            Approximate value(s) of the function at t+DT, where t is the time `x` was obtained (current time).
 
         Raises
         ------
         NotImplementedError
-            The __call__ method must be implemented by each derived integrator class.
+            The __call__ method must be implemented by each derived :class:`~utils.integration.Integrator`.
 
-        Warning
-        -------
-        Users are encouraged to use forward Euler (Runge-Kutta order 1) in their :meth:`~engine.neuron.Neuron.forward`
-        implementations, regardless of whether they anticipate using more advanced approximation methods.
+
 
         """
         raise NotImplementedError
@@ -56,6 +55,10 @@ class Integrator:
 
 class RungeKutta(Integrator):
     """Generic Runge-Kutta integrator.
+
+    When called, approximates the next value of an ODE `equation`, whose keyword arguments are given as `kwargs`,
+    for an initial value `x` and a time step `step` (defaults to the global :attr:`~utils.constants.DT`),
+    using the Runge-Kutta method of order `order`.
 
     Parameters
     ----------
