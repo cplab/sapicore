@@ -4,8 +4,7 @@ Sapicore
 A Framework for Neuromorphic Modeling
 -------------------------------------
 
-A project of the Computational Physiology Laboratory at Cornell University.
-Complete documentation is [available](https://cplab.github.io/sapicore/index.html).
+A project of the [Computational Physiology Laboratory](https://cplab.net/) at Cornell University.
 
 -----------------
 
@@ -116,9 +115,8 @@ If you use Sapicore, please cite the following article:
 * Borthakur, A. (2022). [Sapinet: A sparse event-based spatiotemporal oscillator for learning in the
 wild](https://arxiv.org/abs/2204.06216). <i>arXiv:2204.06216</i>.
 
-If you are interested in dynamical perspectives on neural computation, particularly those involving
-oscillatory synchronization and top-down control over representational state transitions,
-check out and cite the following articles:
+If you are interested in dynamical perspectives on neural computation, oscillatory synchronization,
+or top-down control over representational state transitions, check out and cite the following articles:
 
 * Moyal, R. & Edelman, S. (2019). [Dynamic Computation in Visual Thalamocortical
 Networks](https://www.mdpi.com/1099-4300/21/5/500). <i>Entropy, 21</i>(5).

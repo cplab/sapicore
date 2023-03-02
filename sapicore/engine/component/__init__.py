@@ -60,16 +60,16 @@ class Component(Module, Configurable, Loggable):
         self.simulation_step = 0
         self.dt = DT
 
-        # developer may override or define arbitrary attributes at instantiation.
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
         # initialize configurable and loggable attributes with dummy tensors.
         for prop in self._config_props_:
             setattr(self, prop, torch.zeros(1, dtype=torch.float, device=self.device))
 
         for prop in self._loggable_props_:
             self.register_buffer(prop, torch.zeros(1, dtype=torch.float, device=self.device))
+
+        # developer may override or define arbitrary attributes at instantiation.
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     def configure(self, configuration: dict[str, Any], log_destination: str = None):
         """Applies a configuration to this object by adding the keys of `configuration` as instance attributes,

@@ -5,17 +5,38 @@ from sapicore.engine.synapse.STDP import STDPSynapse
 from sapicore.engine.network import Network
 
 from sapicore.pipeline import Pipeline
+from sapicore.utils.integration import RungeKutta
+from sapicore.utils.plotting import spike_raster
 from sapicore.utils.seed import fix_random_seed
 
 import matplotlib.pyplot as plt
 
 
+# experiment with the following parameters:
+INPUT = 5.0
+
+A = 0.1
+B = 0.27
+C = -65.0
+
+DELAY = 5.0
+WEIGHT_MIN = -5.0
+WEIGHT_MAX = 20.0
+WEIGHT_MULTIPLIER = 5.0
+
+NUM_UNITS = 2
+STEPS = 250
+LEARNING = False
+
+INTEGRATOR = RungeKutta(order=4)
+
+
 class BasicSimulation(Pipeline):
-    """Simulate a basic feedforward network with two spiking layers connected by a plastic synapse."""
+    """Simulate a basic feedforward network with two spiking IZ layers connected by one STDP synapse object."""
 
     _config_props_ = ("num_units", "steps")
 
-    def __init__(self, num_units: int = 2, steps: int = 200, learning: bool = True, **kwargs):
+    def __init__(self, num_units: int, steps: int, learning: bool = True, **kwargs):
         super().__init__(**kwargs)
 
         self.steps = steps
@@ -27,17 +48,21 @@ class BasicSimulation(Pipeline):
 
     def run(self):
         # initialize two default IZ ensembles (with RK4 numeric approximation).
-        l1 = IZEnsemble(identifier="L1", num_units=self.num_units)
-        l2 = IZEnsemble(identifier="L2", num_units=self.num_units, b=0.2632)
+        l1 = IZEnsemble(identifier="L1", num_units=self.num_units, a=A, b=B, c=C, integrator=INTEGRATOR)
+        l2 = IZEnsemble(identifier="L2", num_units=self.num_units, a=A, b=B, c=C, integrator=INTEGRATOR)
 
-        # initialize a default excitatory STDP synapse.
-        syn = STDPSynapse(src_ensemble=l1, dst_ensemble=l2, weight_min=0.0)
+        # initialize a default excitatory STDP synapse with random weights.
+        syn = STDPSynapse(
+            src_ensemble=l1, dst_ensemble=l2, delay_ms=DELAY, weight_max=WEIGHT_MAX, weight_min=WEIGHT_MIN
+        )
 
-        # connect the layers one-to-one and toggle learning on/off based on given setting.
-        syn.connect("one")
-        syn.weights = syn.weights * 15.0
+        # connect the layers all-to-all.
+        syn.connect("all")
 
-        # learning is turned on by default.
+        # multiply the random weights.
+        syn.weights = syn.weights * WEIGHT_MULTIPLIER
+
+        # toggle learning on/off based on given setting.
         syn.toggle_learning(self.learning)
 
         # initialize a network object and add our components.
@@ -47,32 +72,54 @@ class BasicSimulation(Pipeline):
         network.add_synapses(syn)
 
         # conjure an input data tensor.
-        data = torch.ones_like(l1.voltage) * 8.0
+        data = torch.ones_like(l1.voltage) * INPUT
 
         # initialize tensors to store rolling simulation data.
-        l1_results = torch.zeros((self.steps, self.num_units))
-        l2_results = torch.zeros((self.steps, self.num_units))
+        l1_voltage = torch.zeros((self.steps, self.num_units))
+        l2_voltage = torch.zeros((self.steps, self.num_units))
+
+        l1_spiked = torch.zeros((self.steps, self.num_units))
+        l2_spiked = torch.zeros((self.steps, self.num_units))
 
         # run the simulation for `steps`.
         for i in range(self.steps):
             network(data)
 
-            l1_results[i, :] = l1.voltage
-            l2_results[i, :] = l2.voltage
+            l1_voltage[i, :] = l1.voltage
+            l2_voltage[i, :] = l2.voltage
+
+            l1_spiked[i, :] = l1.spiked
+            l2_spiked[i, :] = l2.spiked
 
         # alternatively, accumulate data into a nested dictionary using a list comprehension.
         # output = [network(data) for _ in range(self.steps)]
 
+        # plot all voltages.
         plt.figure()
-        plt.plot(l1_results)
-        plt.title("First Layer Voltages")
+        plt.plot(l1_voltage)
+        plt.title("Layer I Voltages")
 
         plt.figure()
-        plt.plot(l2_results)
-        plt.title("Second Layer Voltages")
+        plt.plot(l2_voltage)
+        plt.title("Layer II Voltages")
+
+        # plot spikes.
+        plt.figure()
+        spike_raster(torch.hstack((l1_spiked, l2_spiked)))
+        plt.title("Presynaptic (Top Half) / Postsynaptic (Bottom Half)")
+
+        # plot weights.
+        plt.figure()
+        plt.grid(False)
+
+        plt.imshow(syn.weights, cmap=plt.cm.viridis, aspect="auto")
+        plt.clim(torch.min(syn.weights), torch.max(syn.weights))
+
+        plt.title("Synaptic Weights L1 (x) to L2 (y)")
+        plt.colorbar()
 
         plt.show()
 
 
 if __name__ == "__main__":
-    BasicSimulation(num_units=2, steps=500, learning=True).run()
+    BasicSimulation(num_units=NUM_UNITS, steps=STEPS, learning=LEARNING).run()

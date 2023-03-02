@@ -17,8 +17,8 @@ from sapicore.pipeline import Pipeline
 from sapicore.utils.seed import fix_random_seed
 from sapicore.utils.signals import extend_input_current
 from sapicore.utils.io import DataAccumulatorHook, ensure_dir, save_yaml, log_settings
-from sapicore.utils.constants import DT, TIME_FORMAT, SEED
 from sapicore.utils.tensorboard import TensorboardWriter, HDFData
+from sapicore.utils.constants import DT, TIME_FORMAT, SEED
 
 from sapicore.tests import ROOT
 

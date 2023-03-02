@@ -69,19 +69,19 @@ class Network(Module):
         self.device = device
 
         self.graph = DiGraph() if not graph else graph
-        self.roots = None
+        self.roots = []
 
         # simulation-related common instance attributes.
         self.simulation_step = 0
         self.traversal_order = []
 
-        # developer may override or define arbitrary attributes at instantiation.
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
         # network construction from configuration file overrides programmatic initialization.
         if configuration:
             self.build()
+
+        # developer may override or define arbitrary attributes at instantiation.
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
         # automatically mark root nodes by their in-degree.
         self._find_roots()
@@ -265,6 +265,10 @@ class Network(Module):
             injections during the simulation being implemented by biases.
 
         """
+        # wrap incoming data in a list if necessary (single root).
+        if not isinstance(data, list):
+            data = [data]
+
         # follow outgoing synapses between vertices, forwarding the entire network on each iteration.
         for i, ensemble in enumerate(self.traversal_order):
             # list all synapses coming in and out of this ensemble. Networkx references it by its string identifier.
@@ -274,12 +278,14 @@ class Network(Module):
             # shortcut to actual ensemble reference.
             ensemble_ref = self.graph.nodes[ensemble].get("reference")
 
-            if ensemble_ref.identifier in self.roots:
-                # if this is a root node, treat stream from data loader as inbound synaptic input.
-                integrated_data = data[self.roots.index(ensemble_ref.identifier)]
-            else:
+            if ensemble_ref.identifier not in self.roots:
                 # apply a summation function to synaptic data flowing into this ensemble (torch.sum by default).
                 integrated_data = self.summation([synapse.output for synapse in incoming_synapses]).to(self.device)
+
+            else:
+                # if this is a root node, treat stream from data loader as inbound synaptic input.
+                feedback = [synapse.output for synapse in incoming_synapses]
+                integrated_data = self.summation(data + feedback)
 
             # forward current ensemble.
             ensemble_ref(integrated_data)
@@ -312,12 +318,25 @@ class Network(Module):
         return [ref.get("reference") for _, _, ref in list(self.graph.out_edges(node, data=True))]
 
     def _find_roots(self):
-        """Locates one or more node identifiers, corresponding to :class:`~engine.neuron.Neuron` or a child thereof
-        (including ensembles), that are exposed to external input. Those are used as starting points for the multi-BFS
+        """Identifies nodes that are exposed to external input. Those are used as starting points for the multi-BFS
         forward sweep, whose order also gets updated every time this method is called.
+
+        Warning
+        -------
+        Roots are updated on network initialization and on every application of :meth:`add_ensemble` and
+        :meth:`add_synapse`. If adding a synapse results in a rootless recurrent network, all nodes will have
+        in-degree > 0. In such cases, the method will mark the first ensemble added `self.get_ensembles()[0]`
+        as the root and direct external input to it. This behavior can be modified by setting `self.roots`
+        directly after building the network.
+
         """
-        # networkx has wrong type hinting for in_degree's return value, but it can be iterable (not always int).
-        self.roots = [node for node, degree in self.graph.in_degree() if degree == 0]
+        updated_roots = [node for node, degree in self.graph.in_degree() if degree == 0]
+        if updated_roots:
+            self.roots = updated_roots
+
+        elif self.get_ensembles():
+            # if the network became rootless after adding a synapse, default to the first ensemble as the root.
+            self.roots = [self.get_ensembles()[0].identifier]
 
         # breadth-first search (BFS) iterator used to traverse the network graph layer by layer.
         # returns a list of layers, first one consisting of the root nodes. Flatten and visit sequentially.

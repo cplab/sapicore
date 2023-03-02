@@ -100,10 +100,11 @@ class LIFNeuron(SpikingNeuron):
         self.voltage = self.voltage + threshold_exceeded * (self.volt_thresh - self.voltage)
 
         # figure out which neurons in the tensor are currently refractory.
-        refractory = self.refractory_steps > (self.refractory_steps * 0 + 0.1)
+        refractory = self.refractory_steps > 0
+        over_resting = self.voltage > self.volt_rest
 
         # if refractory, add difference between resting and current membrane potential. Otherwise, do nothing.
-        self.voltage = self.voltage + refractory.int() * (self.volt_rest - self.voltage)
+        self.voltage = self.voltage + (refractory.int() * over_resting.int()) * (self.volt_rest - self.voltage)
 
         # decrement refractory steps, taking care to zero out negatives.
         self.refractory_steps = relu(self.refractory_steps - 1)

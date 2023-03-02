@@ -78,7 +78,7 @@ class Synapse(Component):
         dst_ensemble: [Neuron] = None,
         weight_max: float = 1000.0,
         weight_min: float = -1000.0,
-        delay_ms: float = 2.0,
+        delay_ms: float = 0.0,
         simple_delays: bool = True,
         weight_init_method: Callable = xavier_uniform_,
         **kwargs
@@ -134,16 +134,18 @@ class Synapse(Component):
         # output 1D tensor containing data for the destination ensemble.
         self.register_buffer("output", torch.zeros(self.matrix_shape[0], dtype=torch.float, device=self.device))
 
-        # developer may override or define arbitrary attributes at instantiation.
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
         # default initialization method for weights (can be overriden).
         self.weights = self.weight_init_method(tensor=self.weights)
 
         # if autograd parameter provided to constructor at build time, turn autograd on or off for the weights.
         if hasattr(self, "autograd"):
             self.weights.requires_grad_(self.autograd)
+
+        # developer may override or define arbitrary attributes at instantiation.
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+        self.clamp_weights()
 
     def connect(self, mode: str = "all", prop: float = 1.0):
         """Applies a predefined connectivity mask strategy.
@@ -258,8 +260,19 @@ class Synapse(Component):
         return tensor(valid_data, device=self.device)
 
     # child classes would typically only implement one or more of the methods below this line.
+    def clamp_weights(self) -> Tensor:
+        """Clamps weights to min/max weight range if need be."""
+        # enforce weight limits by adding the difference from threshold for cells exceeded.
+        weight_plus = self.weights > self.weight_max
+        weight_minus = self.weights < self.weight_min
+
+        self.weights = self.weights.add(weight_plus.int() * (self.weight_max - self.weights))
+        self.weights = self.weights.add(weight_minus.int() * (self.weight_min - self.weights))
+
+        return self.weights
+
     def update_weights(self) -> Tensor:
-        """Static weight update rule, placeholder for child classes (e.g., STDP)."""
+        """Static weight update rule. Placeholder for plastic synapse derivative classes (e.g., STDP)."""
         pass
 
     def forward(self, data: Tensor) -> dict:
@@ -280,23 +293,25 @@ class Synapse(Component):
 
         Note
         ----
-        Each neuron in the recipient ensemble may have a different delayed view of the source ensemble activity.
-        This means that N vector multiplications must be performed: sig(W[k,i]*dd[i]) where N is the number of
-        elements in the source ensemble, k the index of a destination element, i the index of a source element,
-        W a weight, and dd the delayed data transmitted from presynaptic neuron i to postsynaptic neuron k.
+        The simple transmission delay implementation, for runtime efficiency, assumes that recipient synapse elements
+        all have a shared "view" of incoming activity in the presynaptic ensemble. This means a single matrix
+        multiplication (dst x src) by (src x 1) = (dst x 1) is performed. A smaller queue list of length
+        `src_ensemble.num_units` is maintained, as opposed to `src_ensemble.matrix_shape`.
 
-        Warning
-        -------
-        The previous implementation assumed, for simplicity and runtime efficiency, that recipient synapse elements
-        all have a shared "view" of incoming activity--that meant matmul (dst x src) by (src x 1) = (dst x 1),
-        also maintaining a smaller queue of size `src_ensemble.num_units` as opposed to `src_ensemble.matrix_shape`
-        in this version.
+        If `simple_delays` is toggled **off**, each neuron in the recipient ensemble may have a different delayed
+        view of the source ensemble activity. This means that N vector multiplications must be performed:
+        sig(W[k,i]*dd[i]) where N is the number of elements in the source ensemble, k the index of a destination
+        element, i the index of a source element, W a weight, and dd the delayed data transmitted from the
+        presynaptic neuron i to the postsynaptic neuron k.
 
         """
         # use a list of queues to track transmission delays and "release" input after the fact.
         self.delayed_data = self.queue_input(data)
 
-        # mask non-connections (repeated on every iteration in case connection mask updated during simulation).
+        # enforce weight limits.
+        self.clamp_weights()
+
+        # mask non-connections (repeated on every iteration in case mask was updated during simulation).
         self.weights = self.weights.multiply(self.connections)
 
         if self.simple_delays:
@@ -308,13 +323,6 @@ class Synapse(Component):
             # this loop is unavoidable, as N vector multiplications with different delayed_data are needed.
             for i in range(self.matrix_shape[0]):
                 self.output[i] = torch.matmul(self.weights[i, :], self.delayed_data[i, :])
-
-        # enforce weight limits by adding the difference from threshold for cells exceeded.
-        weight_plus = self.weights > self.weight_max
-        weight_minus = self.weights < self.weight_min
-
-        self.weights = self.weights.add(weight_plus.int() * (self.weight_max - self.weights))
-        self.weights = self.weights.add(weight_minus.int() * (self.weight_min - self.weights))
 
         # advance simulation step and return output dictionary.
         self.simulation_step += 1
