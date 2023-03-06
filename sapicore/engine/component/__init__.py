@@ -1,5 +1,4 @@
-"""Component objects handle universal attributes and logic common to classes that may serve as model components.
-Those include neurons, synapses, and their derivatives."""
+"""Components handle universal parameters and logic common to neurons, synapses, and their derivatives."""
 from typing import Any
 import os
 
@@ -8,9 +7,9 @@ from torch import Tensor
 from torch.nn import Module
 
 from sapicore.utils.constants import DT
-from sapicore.utils.io import save_yaml
-from sapicore.utils.sweep import Sweep
 from sapicore.utils.loggable import Loggable
+from sapicore.utils.sweep import Sweep
+from sapicore.utils.io import save_yaml
 
 from tree_config import Configurable, apply_config
 

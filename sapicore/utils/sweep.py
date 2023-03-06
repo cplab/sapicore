@@ -3,7 +3,9 @@ from typing import Any
 
 import torch
 import scipy
+
 import numpy as np
+import pandas as pd
 
 from sapicore.utils.constants import SEED
 from sapicore.utils.seed import fix_random_seed
@@ -71,8 +73,14 @@ class Sweep:
         # generate argument combinations from `search_space`.
         self.combinations = self.generate_combinations()
 
-    def __call__(self, *args, **kwargs):
-        return self.combinations
+    def __call__(self, dataframe: bool = False):
+        """Calling the object will return the combinations as either a list of dictionaries (default)
+        or a pandas dataframe."""
+        if dataframe:
+            return pd.DataFrame(self.combinations)
+
+        else:
+            return self.combinations
 
     def heterogenize(self, obj: Any, unravel: bool = True):
         """Initializes attribute tensors heterogeneously based on a given sweep search dictionary.
