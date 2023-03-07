@@ -26,6 +26,7 @@ Workflow
    :caption: Workflow
    :recursive:
 
+   model
    pipeline
 
 Utilities

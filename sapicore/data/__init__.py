@@ -2,8 +2,10 @@
 import os
 import urllib.request
 
+from natsort import natsorted
 from glob import glob
 
+import torch
 import pandas as pd
 
 from torch import Tensor
@@ -22,7 +24,7 @@ class AxisDescriptor:
     name: str, optional
         Name of the descriptor (i.e., the variable whose value is given by the labels).
 
-    labels: list, optional
+    labels: list or Tensor, optional
         Label values given as a list.
 
     axis: int, optional
@@ -44,7 +46,7 @@ class AxisDescriptor:
 
     """
 
-    def __init__(self, name: str = None, labels: list = None, axis: int = 1):
+    def __init__(self, name: str = None, labels: list | Tensor = None, axis: int = 1):
         self.name = name
         self.axis = axis
         self.labels = labels
@@ -72,15 +74,16 @@ class Data(Dataset):
     root: str, optional
         Local root directory for this dataset.
 
-    remote_url: str, optional
-        Remote URL from which to fetch this dataset, if applicable.
+    remote_urls: str or list of str, optional
+        File-wise remote URL(s) from which to fetch this dataset, if applicable.
 
-    force_download: bool, optional
-        Whether to force download even if the set is in the local directory. Defaults to `False`.
+    download: bool, optional
+        Whether to download the set regardless of whether it already exists in the local directory.
+        Defaults to `False`, in which case the method checks if a download is necessary.
 
     See Also
     --------
-    `PyTorch Storage Class<https://discuss.pytorch.org/t/memory-mapped-tensor/8954>`_
+    `PyTorch Storage Class <https://discuss.pytorch.org/t/memory-mapped-tensor/8954>`_
 
     """
 
@@ -88,27 +91,34 @@ class Data(Dataset):
         self,
         identifier: str = None,
         root: str = None,
-        remote_url: str = None,
+        remote_urls: str = None,
         samples: Tensor = None,
-        force_download: bool = False,
-        **kwargs: AxisDescriptor,
+        download: bool = False,
+        **kwargs,
     ):
         # dataset identifier, sometimes used with default methods.
         self.identifier = identifier
 
         # local and remote directories.
         self.root = root
-        self.remote_url = remote_url
+        self.remote_urls = remote_urls
 
         # optional, data tensor provided by user at instantiation.
         self.samples = samples
+
+        # label vectors describing particular axes.
+        self.descriptors = {}
+
+        # developer may override or define arbitrary attributes at instantiation.
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
         # fetch dataset from remote URL if `root` doesn't exist or is empty.
         download_required = bool(self.root) and (
             not os.path.exists(self.root) or len(os.listdir(os.path.dirname(self.root))) == 0
         )
 
-        if force_download or download_required:
+        if download or download_required:
             # TODO add integrity checks.
             self._download()
 
@@ -116,9 +126,13 @@ class Data(Dataset):
             # passes silently if not implemented by the user.
             self._standardize()
 
-        # label vectors describing particular axes.
-        self.descriptors = {}
+        # add descriptor labels from kwargs if provided (can be a CSV or AxisDescriptors).
         self.add_descriptors(**kwargs)
+
+    def __call__(self):
+        """Calling a dataset will invoke :meth:`load` and return a self reference."""
+        self.load()
+        return self
 
     def __getitem__(self, index: int | tuple[int]):
         """Utilizes the user-specified :meth:`read_data` to slice into the data or access specific file(s),
@@ -135,16 +149,35 @@ class Data(Dataset):
         return len(self.samples)
 
     def _download(self):
-        """Downloads a dataset to the `root` directory from `remote_url`."""
-        # create the destination file directory if it doesn't exist.
-        ensure_dir(os.path.dirname(self.root))
+        """Downloads one or more files to the `root` directory from `remote_urls`.
+
+        Raises
+        ------
+        TypeError
+            If a URL is not provided and the data does not exist locally at `root`.
+
+        ValueError
+            If the URL provided is invalid.
+
+        """
+        # create the destination directory if it doesn't exist.
+        ensure_dir(self.root)
+
+        # if given a single URL, wrap it in a list.
+        if isinstance(self.remote_urls, str):
+            self.remote_urls = [self.remote_urls]
 
         try:
-            # download file from remote URL.
-            urllib.request.urlretrieve(self.remote_url, self.root)
+            # download file(s).
+            for url in self.remote_urls:
+                file = url.split("/")[-1]
+                urllib.request.urlretrieve(url, os.path.join(self.root, file))
 
-        except ValueError:
-            print(f"Could not fetch data, invalid URL ({self.remote_url}).")
+        except TypeError as e:
+            raise TypeError(e)
+
+        except ValueError as e:
+            raise ValueError(e)
 
     def _standardize(self):
         """Standardizes an external data directory tree, e.g. a remote repository, possibly converting it to a
@@ -161,6 +194,29 @@ class Data(Dataset):
 
         """
         pass
+
+    def access_data(self, index: int | tuple[int]):
+        """Specifies how to access data by mapping indices to actual samples (e.g., from file(s) in `root`).
+
+        The default implementation slices into `self.samples` to accommodate the trivial cases where the user has
+        directly initialized this :class:`Data` object with a `samples` tensor or loaded its values by reading
+        a file that fits in memory (the latter case would be handled by :meth:`load_data`).
+
+        More sophisticated use cases may require lazy loading or navigating HDF5 files. That kind of logic should
+        be implemented here by derivative classes.
+
+        Parameters
+        ----------
+        index: int or tuple of int
+            Index(ices) to slice into.
+
+        Note
+        ----
+        Where audio/image files are concerned (each being a labeled "sample"), use this method to read
+        and potentially transform them.
+
+        """
+        return self.samples[index]
 
     def add_descriptors(self, file: str = None, include: list[str] = None, **kwargs: AxisDescriptor):
         """Extracts labels from file(s) in the data `root` directory, if given, and adds named
@@ -207,77 +263,55 @@ class Data(Dataset):
 
         return df
 
-    def load_data(self, files: str | list[str] = None, indices: tuple[int] | list[tuple[int]] = None):
-        """Populates the `samples` tensor buffer by loading data from one or more `files` into memory,
-        potentially selecting only `indices`.
+    def load(self, indices: tuple[int] | list[tuple[int]] = None, kind: str = None):
+        """Populates the `samples` tensor buffer and/or `descriptors` attribute table by loading one or more files
+        into memory, potentially selecting only `indices`. Since different datasets have different formats,
+        users will have to override this method.
 
         Parameters
         ----------
-        files: str or list of str
-            One or more paths to data files.
-
         indices: tuple of int or list of tuple of int
             Specific indices to include, one for each file.
+
+        kind: str
+            Kind of content to load: "data" or "descriptors"/"labels" (defaults to both).
 
         Warning
         -------
         Populating the `samples` buffer with the entire dataset should only be done when it can fit in memory.
-        For large sets, :meth:`access_data` should be overriden to implement some form of lazy loading.
+        For large sets, the buffer needs not be used, and :meth:`access_data` should be overriden
+        to implement some form of lazy loading.
 
         """
         pass
 
-    def access_data(self, index: int | tuple[int]):
-        """Specifies how to access data by mapping indices to actual samples (e.g., from file(s) in `root`).
+    def save(self, destination: str, kind: str = None):
+        """Dump the contents of the `samples` buffer and/or `descriptors` attribute table to disk at `destination`.
+        Since different datasets have different formats, users will have to override this method.
 
-        The default implementation slices into `self.samples` to accommodate the trivial cases where the user has
-        directly initialized this :class:`Data` object with a `samples` tensor or loaded its values by reading
-        a file that fits in memory (the latter case would be handled by :meth:`load_data`).
-
-        More sophisticated use cases may require lazy loading or navigating HDF5 files. That kind of logic should
-        be implemented here by derivative classes.
+        While the default implementation saves the tensor as a .pt file, users are encouraged to override
+        this method for every dataset and pick/design a format appropriate for their data.
 
         Parameters
         ----------
-        index: int or tuple of int
-            Index(ices) to slice into.
+        destination: str
+            Path to the desired output file.
+
+        kind: str
+            Kind of content to save: "data" or "descriptors"/"labels" (defaults to both).
 
         """
-        return self.samples[index]
+        if kind is None or kind == "descriptors" or kind == "labels":
+            if destination.endswith(".csv"):
+                table = self.aggregate_descriptors()
+                pd.to_csv(table, ensure_dir(destination))
 
-    def select_cond(self, conditions: str | list[str], axis: int = 0) -> list[int]:
-        """Selects sample indices by descriptor values based on a pandas logical statement applied to one or more
-        :class:`AxisDescriptor` objects, aggregated into a dataframe using :meth:`aggregate_descriptors`.
+        if kind is None or kind == "data":
+            if destination.endswith(".pt"):
+                torch.save(self.samples, ensure_dir(destination))
 
-        Importantly, these filtering operations can be performed before loading any data to memory, as they only
-        depend on :class:`AxisDescriptor` objects attached to this dataset.
-
-        Note
-        ----
-        Applying selection criteria with pd.eval syntax is simple:
-
-        * "age > 21" would execute `pd.eval("self.table.age > 21", target=df)`.
-        * "lobe.isin['F', 'P']" would execute `pd.eval("self.table.lobe.isin(['F', 'P']", target=df)`.
-
-        Where `df` is the table attribute of the :class:`~data.descriptor.Descriptor` the condition is applied to.
-
-        The selection operation comes down to: array[:, table[table[<field>].isin([<values>])].index.to_list()]
-        So, once filtered specific `indices` for axis=0, Data.load() just loads file[indices, :, :].
-
-        """
-        # wrap a single string condition in a list if necessary.
-        if isinstance(conditions, str):
-            conditions = [conditions]
-
-        # aggregate axis descriptors into a pandas dataframe (table).
-        df = self.aggregate_descriptors(axis=axis)
-
-        # evaluate the expressions and filter the dataframe.
-        for expression in conditions:
-            df = df[pd.eval("df." + expression, target=df).to_list()]
-
-        # return indices where expressions evaluated to true.
-        return df.index.to_list()
+            elif destination.endswith(".csv"):
+                pd.to_csv(self.samples, ensure_dir(destination))
 
     def scan_root(self, pattern: str = "*", recursive: bool = False) -> list[str]:
         """Scans the `root` directory and returns a list of files found that match the glob `pattern`
@@ -297,4 +331,38 @@ class Data(Dataset):
             for f in glob(os.path.join(self.root, pattern), recursive=recursive):
                 files.append(f)
 
-        return files
+        return natsorted(files)
+
+    def select_cond(self, conditions: str | list[str], axis: int = 0) -> list[int]:
+        """Selects sample indices by descriptor values based on a pandas logical statement applied to one or more
+        :class:`AxisDescriptor` objects, aggregated into a dataframe using :meth:`aggregate_descriptors`.
+
+        Importantly, these filtering operations can be performed before loading any data to memory, as they only
+        depend on :class:`AxisDescriptor` objects attached to this dataset.
+
+        Note
+        ----
+        Applying selection criteria with pd.eval syntax is simple:
+
+        * "age > 21" would execute `pd.eval("self.table.age > 21", target=df)`.
+        * "lobe.isin['F', 'P']" would execute `pd.eval("self.table.lobe.isin(['F', 'P']", target=df)`.
+
+        Where `df` is the table attribute of the :class:`~data.descriptor.Descriptor` the condition is applied to.
+
+        The selection operation comes down to: array[:, table[table[<field>].isin([<values>])].index.to_list()].
+        Once filtered specific `indices` for axis=0, just load file[indices, :, :].
+
+        """
+        # wrap a single string condition in a list if necessary.
+        if isinstance(conditions, str):
+            conditions = [conditions]
+
+        # aggregate axis descriptors into a pandas dataframe (table).
+        df = self.aggregate_descriptors(axis=axis)
+
+        # evaluate the expressions and filter the dataframe.
+        for expression in conditions:
+            df = df[pd.eval("df." + expression, target=df).to_list()]
+
+        # return indices where expressions evaluated to true.
+        return df.index.to_list()

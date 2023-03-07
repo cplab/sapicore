@@ -1,4 +1,3 @@
-""" Data test suite. """
 import pytest
 import os
 
@@ -30,6 +29,8 @@ class TestData:
 
         # register the above axis descriptors (label vectors) with our Data object.
         data.add_descriptors(study=study, animal=animal, sensor=sensor)
+
+        # get the descriptors in tabular form if need be.
         table = data.aggregate_descriptors()
 
         # demonstrate logical selection of sample indices based on label values.
@@ -41,12 +42,12 @@ class TestData:
         # container for models trained in each CV fold.
         models = []
 
-        for i, (train, test) in enumerate(iter(cv)):
+        for i, (train, test) in enumerate(cv):
             # initialize a new model for this cross validation fold and append it to the list.
             # a dummy network is used, but a real one could be initialized by providing a `configuration` dict.
             models.append(Model(Network()))
 
-            # data from a particular fold would be accessed with `data[tr]` or `data[te]`.
+            # repeats each sample for a random number of steps (simulating variable exposure durations).
             models[i].fit(data[train], repetitions=torch.randint(low=2, high=7, size=(data[train].shape[0],)))
 
             # verify correctness of cross validation folds.
@@ -64,7 +65,7 @@ class TestData:
     )
     @pytest.mark.unit
     def test_fetch(self, url_):
-        Data(remote_url=url_, root=os.path.join(TEST_ROOT, os.path.basename(url_)))
+        Data(remote_urls=url_, root=os.path.join(TEST_ROOT, os.path.basename(url_)))
 
 
 if __name__ == "__main__":

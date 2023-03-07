@@ -36,6 +36,7 @@ setup(
         "matplotlib",
         "PyYAML",
         "nixio",
+        "natsort",
         "alive_progress",
         "tree-config",
     ],

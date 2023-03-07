@@ -34,7 +34,7 @@ class Simulator(Pipeline):
     ----------
     configuration: dict or str
         Configuration dictionary or path to a configuration YAML. If the path provided is relative, the simulation
-        pipeline will assume that the root is sapicore/tests, in order to support execution of YAML-configured tests.
+        pipeline will assume that the root is `sapicore/tests` to support execution of YAML-configured tests.
 
     """
 
@@ -57,7 +57,7 @@ class Simulator(Pipeline):
         # get full path to project root directory from configuration file.
         root = self.configuration.get("root")
         if not root:
-            raise KeyError('Configuration missing project "root" key.')
+            raise KeyError("Configuration missing project 'root' key.")
 
         elif not os.path.isabs(root):
             # if full path not provided, the relative path is appended to sapinet/tests.
@@ -70,7 +70,7 @@ class Simulator(Pipeline):
         # save a copy of the configuration to this run's directory for reference--need to handle dict-only case.
         save_yaml(self.configuration, os.path.join(run_dir, self.configuration.get("identifier", "run_cfg") + ".yaml"))
 
-        # load simulation parameters from configuration dictionary.
+        # load simulation settings from configuration dictionary.
         steps = self.configuration.get("simulation", {}).get("steps")
         disk = self.configuration.get("simulation", {}).get("disk")
         tensorboard = self.configuration.get("simulation", {}).get("tensorboard")
@@ -89,10 +89,10 @@ class Simulator(Pipeline):
         # set up data accumulator hooks if required. Note that they are automatically applied on forward calls.
         if disk:
             for ensemble in net.get_ensembles():
-                DataAccumulatorHook(ensemble, data_dir, ensemble._loggable_props_, steps)
+                DataAccumulatorHook(ensemble, data_dir, ensemble.get_loggable(), steps)
 
             for synapse in net.get_synapses():
-                DataAccumulatorHook(synapse, data_dir, synapse._loggable_props_, steps)
+                DataAccumulatorHook(synapse, data_dir, synapse.get_loggable(), steps)
 
         # design input current time series for each root ensemble exposed to external input.
         net_roots = [net.graph.nodes[i]["reference"] for i in net.roots]
@@ -100,7 +100,7 @@ class Simulator(Pipeline):
         currents = [torch.zeros(size=(r.num_units, steps), dtype=torch.float, device=DEVICE) for r in net_roots]
         recipe = self.configuration.get("simulation", {}).get("current")
 
-        # if user provided a current recipe in the YAML, parse it.
+        # if user provided an input current recipe in the YAML, parse it.
         if recipe:
             for i, root_node in enumerate(net.roots):
                 # extract recipe for this root node.

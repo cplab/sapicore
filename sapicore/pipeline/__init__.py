@@ -1,4 +1,4 @@
-"""Pipelines are configurable scripts.
+"""Configurable workflows and scripts.
 
 Pipelines are flexible objects consisting of two logical parts: configurable parameters and a custom
 script defined by overriding the abstract method :meth:`~Pipeline.run`.

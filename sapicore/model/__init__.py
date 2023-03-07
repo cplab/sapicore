@@ -1,4 +1,4 @@
-"""Models provide an ML-focused API.
+"""ML-focused API for neuromorphic models.
 
 Models are networks endowed with fit() and predict() methods.
 
@@ -16,8 +16,8 @@ class Model(BaseEstimator):
 
     Note
     ----
-    In a machine learning context, any spiking network can be used in multiple ways, e.g. as a classifier
-    or as a generative model. While :mod:`engine` is mostly about form (network architecture and information flow),
+    In a machine learning context, spiking networks can be used in multiple ways, e.g. as classifiers
+    or as generative models. While :mod:`engine` is mostly about form (network architecture and information flow),
     :mod:`model` is all about function (how to fit the model to data and how to use it once trained).
 
     """

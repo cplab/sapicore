@@ -173,3 +173,11 @@ class Component(Module, Configurable, Loggable):
 
         """
         return {prop: getattr(self, prop) for prop in self._loggable_props_}
+
+    def get_loggable(self):
+        """Returns this component's loggable property tuple."""
+        return self._loggable_props_
+
+    def get_configurable(self):
+        """Returns this component's configurable property tuple."""
+        return self._config_props_
