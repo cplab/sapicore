@@ -1,0 +1,45 @@
+# This is a model-simulation configuration file describing a Leaky Integrate-and-Fire (LIF) network
+# consisting of a mitral cell (MC) excitatory ensemble and a granule cell (GC) inhibitory ensemble.
+
+identifier: EPL
+
+# Full path to project directory. If a relative path is provided, assumes the root is ../sapicore.
+root: ../tutorials/EPL
+
+# Model architecture.
+model:
+  # Paths to ensemble configuration files. Can be absolute or relative to `root`.
+  ensembles:
+    # Mitral cell layer.
+    - ensembles/MC.yaml
+    # Granule cell layer.
+    - ensembles/GC.yaml
+
+  # Paths to synapse configuration files. Can be absolute or relative to `root`.
+  synapses:
+    - synapses/MC->GC.yaml
+    - synapses/GC->MC.yaml
+
+# Simulation settings.
+simulation:
+  steps: 2000
+  disk: True
+
+  # How data should be written to tensorboard for visualization (can be `False` or omitted).
+  tensorboard:
+    - spiked:
+        kind: raster
+        format: image
+
+    - voltage:
+        kind: trace
+        format: scalar
+
+    - output:
+        kind: trace
+        format: scalar
+
+    - weights:
+        kind: heatmap
+        format: image
+        step: 100

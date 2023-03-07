@@ -24,8 +24,6 @@ class Pipeline(Configurable):
     """
 
     def __init__(self, configuration: dict | str = None, **kwargs):
-        super().__init__(**kwargs)
-
         # parse configuration from YAML if given and use resulting dictionary to initialize attributes.
         if isinstance(configuration, str) and os.path.exists(configuration):
             apply_config(self, load_config(None, configuration))

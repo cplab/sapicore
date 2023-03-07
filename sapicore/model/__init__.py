@@ -8,6 +8,8 @@ from sklearn.base import BaseEstimator
 
 from sapicore.engine.network import Network
 
+from alive_progress import alive_bar
+
 
 class Model(BaseEstimator):
     """Model base class.
@@ -46,8 +48,10 @@ class Model(BaseEstimator):
             the i-th row in the batch is repeated `repetitions[i]` times.
 
         """
-        for i, row in enumerate(batch):
-            [self.network(row) for _ in range(repetitions if isinstance(repetitions, int) else repetitions[i])]
+        with alive_bar(total=batch.shape[0], force_tty=True) as bar:
+            for i, row in enumerate(batch):
+                [self.network(row) for _ in range(repetitions if isinstance(repetitions, int) else repetitions[i])]
+                bar()
 
     def predict(self, data: Tensor) -> Tensor:
         """Predicts the labels of samples in `data`.
@@ -55,4 +59,9 @@ class Model(BaseEstimator):
         Specifies how to leverage this model class to perform classification.
 
         """
+        pass
+
+    def rsa(self, data: Tensor):
+        """Perform rudimentary representational similarity analysis on the model responses to `data`,
+        obtaining a distance matrix whose structure should correspond to that of `data`."""
         pass

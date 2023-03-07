@@ -189,7 +189,8 @@ def ensure_dir(path: str = None) -> str:
     Returns
     -------
     path: str
-        The same file path, so it can be used in the calling context (e.g., if :func:`ensure_dir` wraps an assignment).
+        The same file path, so it can be used in the calling context (e.g., if :func:`ensure_dir`
+        wraps an assignment).
 
     """
     os.makedirs(path, exist_ok=True)

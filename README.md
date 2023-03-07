@@ -4,10 +4,6 @@ Sapicore
 A Framework for Neuromorphic Modeling
 -------------------------------------
 
-A project of the [Computational Physiology Laboratory](https://cplab.net/) at Cornell University.
-
------------------
-
 Sapicore is a spiking neural network (SNN) simulator built with PyTorch. It streamlines
 the design and testing of heterogeneous model architectures with nontrivial dynamics.
 
@@ -128,7 +124,7 @@ action](https://www.sciencedirect.com/science/article/abs/pii/S007961231730050X)
 
 Authors
 -------
-A project of the Computational Physiology Laboratory at Cornell University.
+A project of the [Computational Physiology Laboratory](https://cplab.net/) at Cornell University.
 
 - Framework architecture by Matthew Einhorn and Roy Moyal.
 - Neuromorphic algorithms by Roy Moyal, Ayon Borthakur, and Thomas Cleland.

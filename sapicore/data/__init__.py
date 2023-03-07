@@ -1,13 +1,12 @@
 """ Data operations. """
 import os
+from glob import glob
 import urllib.request
 
+import pandas as pd
 from natsort import natsorted
-from glob import glob
 
 import torch
-import pandas as pd
-
 from torch import Tensor
 from torch.utils.data import Dataset
 
@@ -17,7 +16,7 @@ __all__ = ("AxisDescriptor", "Data")
 
 
 class AxisDescriptor:
-    """Describes one axis of an N-dimensional :class:`Data` array by a vector of `labels`.
+    """Describes one axis of an N-dimensional :class:`Data` array with a vector of `labels`.
 
     Parameters
     ----------
@@ -66,20 +65,21 @@ class Data(Dataset):
     identifier: str, optional
         Name for this dataset.
 
-    samples: Tensor, optional
-        A buffer holding data samples in tensor form. Useful for initializing Data objects on the fly, e.g.
-        during data synthesis. Users may leverage :meth:`access_data` to manage disk I/O, e.g.
-        using :class:`torch.Storage`, memory mapped arrays/tensors, or HDF5 lazy loading.
-
     root: str, optional
         Local root directory for this dataset.
 
     remote_urls: str or list of str, optional
         File-wise remote URL(s) from which to fetch this dataset, if applicable.
 
+    samples: Tensor, optional
+        A buffer holding data samples in tensor form. Useful for initializing Data objects on the fly, e.g.
+        during data synthesis. Users may leverage :meth:`access_data` to manage disk I/O, e.g.
+        using :class:`torch.storage.Storage`, memory mapped arrays/tensors, or HDF5 lazy loading.
+
     download: bool, optional
         Whether to download the set regardless of whether it already exists in the local directory.
-        Defaults to `False`, in which case the method checks if a download is necessary.
+        Defaults to `False`, in which case the download only commences if the `root` doesn't exist
+        or is empty.
 
     See Also
     --------
@@ -106,7 +106,7 @@ class Data(Dataset):
         # optional, data tensor provided by user at instantiation.
         self.samples = samples
 
-        # label vectors describing particular axes.
+        # container for axis descriptors (label vectors describing specific data axes).
         self.descriptors = {}
 
         # developer may override or define arbitrary attributes at instantiation.
@@ -119,14 +119,13 @@ class Data(Dataset):
         )
 
         if download or download_required:
-            # TODO add integrity checks.
             self._download()
 
-            # converts the foreign dataset to a single file in a user-determined format, e.g. hdf5 or npz.
+            # converts the foreign dataset to a single file in a user-determined format.
             # passes silently if not implemented by the user.
             self._standardize()
 
-        # add descriptor labels from kwargs if provided (can be a CSV or AxisDescriptors).
+        # add descriptor labels from kwargs if provided (path to a CSV file or AxisDescriptor object(s)).
         self.add_descriptors(**kwargs)
 
     def __call__(self):
@@ -135,17 +134,14 @@ class Data(Dataset):
         return self
 
     def __getitem__(self, index: int | tuple[int]):
-        """Utilizes the user-specified :meth:`read_data` to slice into the data or access specific file(s),
+        """Utilizes the user-specified :meth:`access_data` to slice into the data or access specific file(s),
         returning the value(s) at `index`."""
         return self.access_data(index)
 
     def __len__(self):
         """The default implementation addresses trivial cases where the set is loaded to memory (in `self.samples`).
-
         Users should override this method when dealing with large datasets, e.g. ones that live in
-        gigantic HDF5 files that are dynamically loaded.
-
-        """
+        gigantic HDF5 files that are dynamically loaded."""
         return len(self.samples)
 
     def _download(self):
@@ -181,10 +177,10 @@ class Data(Dataset):
 
     def _standardize(self):
         """Standardizes an external data directory tree, e.g. a remote repository, possibly converting it to a
-        single file at `root` for subsequent operations. Should only be performed once after fetching the data
-        from its remote source, if applicable.
+        single condensed file at `root` for subsequent operations. Should only be performed once after fetching
+        the data from its remote source, if applicable.
 
-        This method should be implemented by child classes that deal with arbitrarily formatted external sets.
+        This method is meant to be implemented by child classes that deal with arbitrarily formatted external sets.
         It may also serve as a bridge between Sapicore and specialized libraries, e.g. MNE for EEG/MEG data.
 
         Warning
@@ -200,7 +196,7 @@ class Data(Dataset):
 
         The default implementation slices into `self.samples` to accommodate the trivial cases where the user has
         directly initialized this :class:`Data` object with a `samples` tensor or loaded its values by reading
-        a file that fits in memory (the latter case would be handled by :meth:`load_data`).
+        a file that fits in memory (the latter case would be handled by :meth:`load`).
 
         More sophisticated use cases may require lazy loading or navigating HDF5 files. That kind of logic should
         be implemented here by derivative classes.
@@ -208,12 +204,12 @@ class Data(Dataset):
         Parameters
         ----------
         index: int or tuple of int
-            Index(ices) to slice into.
+            Index(es) to slice into.
 
         Note
         ----
         Where audio/image files are concerned (each being a labeled "sample"), use this method to read
-        and potentially transform them.
+        and potentially transform them, returning the finished product.
 
         """
         return self.samples[index]
@@ -251,7 +247,7 @@ class Data(Dataset):
             self.descriptors[key] = value
 
     def aggregate_descriptors(self, axis: int = 0) -> pd.DataFrame:
-        """Condenses the referenced :class:`~data.Data` set's :class:`~AxisDescriptor` objects into a
+        """Condenses the referenced :class:`~Data` set's :class:`~AxisDescriptor` objects into a
         pandas dataframe `table`. Performed for row (sample) descriptors by default, but can also be
         used to aggregate :class:`AxisDescriptor` objects describing any other `axis` of this dataset.
 
@@ -279,7 +275,7 @@ class Data(Dataset):
         Warning
         -------
         Populating the `samples` buffer with the entire dataset should only be done when it can fit in memory.
-        For large sets, the buffer needs not be used, and :meth:`access_data` should be overriden
+        For large sets, the buffer should not be used; :meth:`access_data` should be overriden
         to implement some form of lazy loading.
 
         """
@@ -347,10 +343,7 @@ class Data(Dataset):
         * "age > 21" would execute `pd.eval("self.table.age > 21", target=df)`.
         * "lobe.isin['F', 'P']" would execute `pd.eval("self.table.lobe.isin(['F', 'P']", target=df)`.
 
-        Where `df` is the table attribute of the :class:`~data.descriptor.Descriptor` the condition is applied to.
-
-        The selection operation comes down to: array[:, table[table[<field>].isin([<values>])].index.to_list()].
-        Once filtered specific `indices` for axis=0, just load file[indices, :, :].
+        Where `df` is the table attribute of the :class:`~AxisDescriptor` the condition is applied to.
 
         """
         # wrap a single string condition in a list if necessary.
