@@ -1,16 +1,24 @@
 """ Data operations. """
+from typing import Callable
+
 import os
-from glob import glob
 import urllib.request
 
+from copy import deepcopy
+from glob import glob
+
+import numpy as np
 import pandas as pd
 from natsort import natsorted
 
 import torch
 from torch import Tensor
 from torch.utils.data import Dataset
+from sklearn.model_selection import BaseCrossValidator
 
+from sapicore.data.sampling import BalancedSampler, CV
 from sapicore.utils.io import ensure_dir
+
 
 __all__ = ("AxisDescriptor", "Data")
 
@@ -50,8 +58,11 @@ class AxisDescriptor:
         self.axis = axis
         self.labels = labels
 
+    def __getitem__(self, index: int | tuple[int]):
+        return self.labels[index]
+
     def __str__(self):
-        return str(self.labels)
+        return self.labels
 
 
 class Data(Dataset):
@@ -272,10 +283,15 @@ class Data(Dataset):
         kind: str
             Kind of content to load: "data" or "descriptors"/"labels" (defaults to both).
 
+        Note
+        ----
+        When it comes to data I/O, each dataset will have be treated differently, depending on size and
+        other considerations. It is up to the user to decide what is best for their particular dataset.
+
         Warning
         -------
         Populating the `samples` buffer with the entire dataset should only be done when it can fit in memory.
-        For large sets, the buffer should not be used; :meth:`access_data` should be overriden
+        For large sets, the buffer should not be used directly or naively; :meth:`access_data` should be overriden
         to implement some form of lazy loading.
 
         """
@@ -283,7 +299,7 @@ class Data(Dataset):
 
     def save(self, destination: str, kind: str = None):
         """Dump the contents of the `samples` buffer and/or `descriptors` attribute table to disk at `destination`.
-        Since different datasets have different formats, users will have to override this method.
+        Since different datasets have different formats, users may wish to override this method.
 
         While the default implementation saves the tensor as a .pt file, users are encouraged to override
         this method for every dataset and pick/design a format appropriate for their data.
@@ -294,7 +310,7 @@ class Data(Dataset):
             Path to the desired output file.
 
         kind: str
-            Kind of content to save: "data" or "descriptors"/"labels" (defaults to both).
+            Kind of content to save: "data" or "descriptors"/"labels" (saves everything by default).
 
         """
         if kind is None or kind == "descriptors" or kind == "labels":
@@ -329,12 +345,12 @@ class Data(Dataset):
 
         return natsorted(files)
 
-    def select_cond(self, conditions: str | list[str], axis: int = 0) -> list[int]:
+    def select(self, conditions: str | list[str], axis: int = 0) -> list[int]:
         """Selects sample indices by descriptor values based on a pandas logical statement applied to one or more
         :class:`AxisDescriptor` objects, aggregated into a dataframe using :meth:`aggregate_descriptors`.
 
-        Importantly, these filtering operations can be performed before loading any data to memory, as they only
-        depend on :class:`AxisDescriptor` objects attached to this dataset.
+        Importantly, these filtering operations can be performed prior to loading any data to memory, as they only
+        depend on :class:`AxisDescriptor` objects (labels) attached to this dataset.
 
         Note
         ----
@@ -359,3 +375,75 @@ class Data(Dataset):
 
         # return indices where expressions evaluated to true.
         return df.index.to_list()
+
+    def sample(self, method: Callable, axis: int = 0, **kwargs):
+        """Applies `method` to sample from this dataset once without mutating it, returning
+        a copy of the object containing only the data and labels at the sampled indices.
+
+        The method can be a reference to a :class:`~sklearn.model_selection.BaseCrossValidator`.
+        In that case, the keyword arguments should include any applicable keyword arguments,
+        e.g. `shuffle`, `label_key`, `group_key` if applicable (see also :class:`~data.sampling.CV`).
+
+        If `method` is not a base cross validator, keyword arguments will be passed to it directly.
+
+        Parameters
+        ----------
+        method: Callable or BaseCrossValidator
+            Method used to sample from this dataset.
+
+        axis: int, optional
+            Axis along which selection is performed. Defaults to zero (that is, rows/samples).
+
+        kwargs:
+            retain: int or float
+                The number or proportion of samples to retain.
+
+            shuffle: bool
+                If using a :class:`sklearn.model_selection.BaseCrossValidator` to sample,
+                whether to toggle the `shuffle` parameter on.
+
+            label_keys: str or list of str
+                Label key(s) by which to stratify sampling, if applicable.
+
+            group_key: str
+                Label key by which to group sampling, if applicable.
+
+        Returns
+        -------
+        Data
+            A subset of this dataset.
+
+        """
+
+        if isinstance(method, BalancedSampler):
+            # special case of the balanced sampler, which uses the aggregated descriptor dataframe.
+            subset = method(frame=self.aggregate_descriptors(), **kwargs)
+
+        # determine whether a BaseCrossValidator was provided and if so, set it up.
+        # `method` is called empty because sklearn CV objects are ABCMeta (hence unrecognizable) until called.
+        elif isinstance(method(), BaseCrossValidator):
+            # determine the number of folds based on `retain` and the dataset length as defined by __len__.
+            # if `retain` not provided as a keyword argument, treat this as a 2-split.
+            retain = kwargs.get("retain", 0.5)
+            folds = int(self.__len__() * retain) if isinstance(retain, float) else self.__len__() // retain
+
+            # if `shuffle` provided as a keyword argument, use its value in the method call (default to True).
+            validator = method(folds, shuffle=kwargs.get("shuffle", True))
+            iterator = CV(data=self, cross_validator=validator, **kwargs)
+
+            # use the first fold.
+            _, subset = next(iter(iterator))
+
+        else:
+            # in all other cases, directly apply the method provided.
+            subset = method(**kwargs)
+
+        # create a deep copy of this data object and mutate it.
+        partial_data = deepcopy(self)
+        partial_data.samples = self.access_data(subset)
+
+        for k in partial_data.descriptors.keys():
+            if partial_data.descriptors[k].axis == axis:
+                partial_data.descriptors[k].labels = np.array(partial_data.descriptors[k].labels)[subset].tolist()
+
+        return partial_data

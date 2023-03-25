@@ -10,11 +10,7 @@ setup(
     description="A PyTorch-based framework for neuromorphic modeling. ",
     long_description=long_description,
     url="https://github.com/cplab/sapicore",
-    author="Framework architecture by Matthew Einhorn and Roy Moyal. "
-    "Engine infrastructure, simulator, and visualization tools by Roy Moyal. "
-    "Neuromorphic algorithms by Ayon Borthakur, Roy Moyal, and Thomas Cleland. "
-    "Tutorials and tutorials by Roy Moyal and Jeremy Forest. "
-    "Project of the Computational Physiology Laboratory at Cornell University",
+    author="Roy Moyal, Matthew Einhorn, Jeremy Forest, Ayon Borthakur, Thomas Cleland",
     author_email="rm875@cornell.edu, me263@cornell.edu, ab2535@cornell.edu, tac29@cornell.edu",
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -36,6 +32,7 @@ setup(
         "matplotlib",
         "PyYAML",
         "nixio",
+        "dill",
         "natsort",
         "alive_progress",
         "tree-config",

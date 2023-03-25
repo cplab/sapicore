@@ -37,7 +37,6 @@ class Pipeline(Configurable):
             setattr(self, key, value)
 
     def __repr__(self):
-        """String representation of this pipeline's attributes."""
         return str(vars(self))
 
     def run(self) -> None:

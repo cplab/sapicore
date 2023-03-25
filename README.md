@@ -1,60 +1,54 @@
 Sapicore
 ========
 
+A project of the [Computational Physiology Laboratory](https://cplab.net/) at Cornell University.
+
 A Framework for Neuromorphic Modeling
 -------------------------------------
 
 Sapicore is a spiking neural network (SNN) simulator built with PyTorch. It streamlines
 the design and testing of heterogeneous model architectures with nontrivial dynamics.
 
-We provide programmatic and dictionary/YAML-based APIs for specifying model architectures,
-running simulation pipelines, and performing rudimentary output data exploration.
+We provide programmatic and YAML-based APIs for specifying network structure and behavior,
+designing simulation pipelines, utilizing models for classification and clustering, and data visualization.
+
 Sapicore's incremental class hierarchy includes efficient default implementations of neuron
 and synapse models commonly used in neuroscience and machine learning applications.
 Users may write their own dataloaders, derivative classes, and specification files in separate repositories.
 
-Sapicore interfaces with industry-standard ML libraries (e.g.,
+Sapicore interfaces with industry-standard ML libraries, including
 [ray](https://docs.ray.io/en/latest/ray-core/walkthrough.html),
 [scikit-learn](https://scikit-learn.org/stable/), [networkX](https://networkx.org/), and
-[tensorboard](https://pytorch.org/docs/stable/tensorboard.html)).
-We also support object configuration using [tree-config](https://github.com/matham/tree-config/).
+[tensorboard](https://pytorch.org/docs/stable/tensorboard.html).
+Object configuration using [tree-config](https://github.com/matham/tree-config/) is also supported.
 
 ***
 
 Current Release
 ---------------
-Sapicore 0.3.0.dev0 is currently in beta. The current version includes the following features:
+Sapicore 0.3.0 is in beta. The current version includes the following features:
 
 * Spiking neurons (LIF and IZ).
 * Analog neurons and oscillators.
 * Static and STDP synapses.
-* Network construction and simulation tools.
-* Configurable pipelines.
+* Network design and simulation tools.
+* Scikit-compatible model API (fit/predict).
+* Sampling and cross validation tools.
+* Data classes with basic ETL support.
 * Visualization tools.
 
-To simulate a network from a YAML configuration, simply run:
+To simulate a network from a YAML configuration using the default simulation pipeline:
 
-    python simulation.py -config /path/to/your/filename.yaml
+    python simulation.py -config /path/to/config_file.yaml -out /path/to/destination_dir
 
-See the `tutorials` directory and configuration files under `tests/engine/network/test_network`
-for instructive examples.
+See `tutorials` and `tests/engine/network/test_network` for instructive scripts and YAML files.
 
 ***
 
 Installation
 ------------
-General requirements (see ``setup.py`` for more information):
-
-* Python 3.10+
-* Scientific Stack
-* PyTorch 1.12.0+
-* NetworkX 2.8.8+
-* Tensorboard 2.9.0+
-
-For developers:
-
-* Pytest 7.1.2+
-* Sphinx 5.3.0+
+Basic requirements include Python 3.10+, PyTorch 1.12+, NetworkX, and the scientific stack (numpy, scipy, pandas).
+Developers should also install pytest and sphinx. See ``setup.py`` for more information.
 
 To install the latest stable version of Sapicore:
 
@@ -64,12 +58,12 @@ To install the most recent development version:
 
 	pip install https://github.com/cplab/sapicore/archive/refs/heads/main.zip
 
-To run tests, change directory to the one containing `pytest.ini` (currently `sapicore`) and call:
+To run tests, change directory to the one containing `pytest.ini` (`sapicore`) and call:
 
     pytest -v -s
 
 To run tests with a coverage report, run `sapicore/tests/scripts/run_tests.py`.
-The HTML will be generated in a separate directory on the same level (open `index.html`).
+The coverage report will be generated in a separate directory on the same level (open `index.html`).
 
 ***
 
@@ -124,9 +118,11 @@ action](https://www.sciencedirect.com/science/article/abs/pii/S007961231730050X)
 
 Authors
 -------
-A project of the [Computational Physiology Laboratory](https://cplab.net/) at Cornell University.
+[Roy Moyal](https://scholar.google.com/citations?user=P8Ztxr4AAAAJ),
+[Matthew Einhorn](https://matham.dev/about/), [Jeremy Forest](https://jeremyforest.github.io/),
+[Ayon Borthakur](https://borthakurayon.github.io/), Thomas Cleland.
 
-- Framework architecture by Matthew Einhorn and Roy Moyal.
+- Engine, simulator, data classes, and visualization tools by Roy Moyal.
 - Neuromorphic algorithms by Roy Moyal, Ayon Borthakur, and Thomas Cleland.
-- Engine infrastructure, simulator, and visualization tools by Roy Moyal.
+- Framework architecture by Matthew Einhorn and Roy Moyal.
 - Tutorials and examples by Roy Moyal and Jeremy Forest.

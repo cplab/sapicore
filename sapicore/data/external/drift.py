@@ -1,5 +1,7 @@
+"""UCSD Drift dataset."""
 import os
 import shutil
+
 from zipfile import ZipFile
 
 import torch
@@ -12,11 +14,25 @@ from sapicore.data import Data, AxisDescriptor
 
 
 class DriftDataset(Data):
+    """Processing logic for the UCSD drift dataset.
+
+    Implements the protected :meth:`~data.Data._standardize` to extract, transform, and save samples and labels
+    from the raw .dat files downloaded from the UCI repository.
+
+    See Also
+    --------
+    `Drift dataset specification <https://archive.ics.uci.edu/ml/datasets/Gas%20Sensor%20Array%20Drift%20Dataset#>`_
+
+    """
+
     def __init__(self, root: str, **kwargs):
-        super().__init__(root=root, **kwargs)
+        super().__init__(
+            root=root,
+            remote_urls="https://archive.ics.uci.edu/ml/machine-learning-databases/00224/Dataset.zip",
+            **kwargs
+        )
 
     def _standardize(self):
-        """Processes the raw downloaded USCD drift dataset files to facilitate subsequent operations."""
         # the file retrieved from the UCSD repository needs to be unzipped.
         with ZipFile(os.path.join(self.root, "Dataset.zip"), "r") as zf:
             zf.extractall(path=os.path.join(self.root))
@@ -25,7 +41,7 @@ class DriftDataset(Data):
         os.remove(os.path.join(self.root, "Dataset.zip"))
         for file in os.listdir(os.path.join(self.root, "Dataset")):
             shutil.move(os.path.join(self.root, "Dataset", file), os.path.join(self.root, file))
-        shutil.rmtree(os.path.join(self.root, "Dataset"))
+        shutil.rmtree(os.path.join(self.root, "..", "Dataset"))
 
         # scan the root directory for .dat files.
         raw_files = self.scan_root(pattern="*.dat")
@@ -36,6 +52,7 @@ class DriftDataset(Data):
 
         # initialize an empty axis descriptor for the single label vector given in the drift dataset.
         self.add_descriptors(chemical=AxisDescriptor(name="chemical", labels=[], axis=0))
+        self.add_descriptors(batch=AxisDescriptor(name="batch", labels=[], axis=0))
 
         for i, file in enumerate(raw_files):
             # load and convert from sparse matrix to standard numpy array.
@@ -52,29 +69,27 @@ class DriftDataset(Data):
             )
 
             self.descriptors["chemical"].labels.extend(labels)
+            self.descriptors["batch"].labels.extend([i + 1 for _ in range(len(labels))])
 
         # concatenate the data frames and add a batch identifier column.
-        unified_data = pd.concat(unified_data, keys=[f"B{i+1}" for i in range(len(raw_files))]).reset_index()
+        unified_data = pd.concat(unified_data, keys=[i + 1 for i in range(len(raw_files))]).reset_index()
         unified_data = unified_data.rename(
             columns={unified_data.level_0.name: "batch", unified_data.level_1.name: "sample"}
         )
 
         # dump the resulting frame and labels to CSV for human readability.
         unified_data["chemical"] = self.descriptors["chemical"].labels
+        unified_data["batch"] = self.descriptors["batch"].labels
+
         unified_data.to_csv(os.path.join(self.root, "data.csv"), index=False)
 
         # dump the data and label tensors to .pt for loading convenience.
         torch.save(self.samples, os.path.join(self.root, "data.pt"))
-        torch.save(torch.tensor(self.descriptors["chemical"].labels), os.path.join(self.root, "labels.pt"))
+        torch.save(self.aggregate_descriptors(), os.path.join(self.root, "labels.pt"))
 
     def load(self, indices: tuple[int] | list[tuple[int]] = None, kind: str = None):
-        """Load drift data and labels to memory from the .pt files saved by :meth:`standardize`.
+        """Load drift data and labels to memory from the .pt files saved by :meth:`~data.Data._standardize`.
         Overwrites `samples` and `descriptors`.
-
-        Note
-        ----
-        When it comes to disk I/O, each dataset will have its own optimal treatment, depending on size and
-        other considerations. It is up to the user to decide what it is for their particular dataset.
 
         """
         if kind is None or kind == "descriptors" or kind == "labels":
@@ -84,7 +99,10 @@ class DriftDataset(Data):
             if indices is not None:
                 labels = labels[indices]
 
-            self.add_descriptors(chemical=AxisDescriptor(name="chemical", labels=labels, axis=0))
+            # for the drift set specifically, we know that all labels describe the 0th axis (rows, samples).
+            self.add_descriptors(
+                **{col: AxisDescriptor(name=col, labels=labels[col].to_list(), axis=0) for col in labels}
+            )
 
         if kind is None or kind == "data":
             self.samples = torch.load(os.path.join(self.root, "data.pt"))

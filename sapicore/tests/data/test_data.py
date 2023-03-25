@@ -2,10 +2,10 @@ import pytest
 import os
 
 import torch
-from sklearn.model_selection import StratifiedGroupKFold
+from sklearn.model_selection import StratifiedKFold, StratifiedGroupKFold
 
 from sapicore.data import Data, AxisDescriptor
-from sapicore.data.sampling import CV
+from sapicore.data.sampling import BalancedSampler, CV
 
 from sapicore.utils.sweep import Sweep
 from sapicore.tests import ROOT
@@ -20,7 +20,7 @@ class TestData:
     @pytest.mark.unit
     def test_data_pipeline(self):
         # initialize a dummy dataset with balanced labels.
-        data = Data(samples=torch.rand(16, 4))
+        data = Data(samples=torch.rand(8, 4))
         params = Sweep({"grid": {"study": [1, 2], "animal": ["A", "B", "C", "D"]}}, 8)(dataframe=True)
 
         study = AxisDescriptor(name="study", labels=params["study"].tolist(), axis=0)
@@ -30,14 +30,22 @@ class TestData:
         # register the above axis descriptors (label vectors) with our Data object.
         data.add_descriptors(study=study, animal=animal, sensor=sensor)
 
-        # get the descriptors in tabular form if need be.
-        table = data.aggregate_descriptors()
+        # get the descriptors in tabular form.
+        data.aggregate_descriptors()
+
+        # demonstrate stratified sampling w.r.t. one descriptor using a base cross validator.
+        data.sample(method=StratifiedKFold, shuffle=True, retain=4, label_keys="animal")
+
+        # demonstrate balanced sampling w.r.t. two descriptors using a BalancedSampler (1 for each crossing).
+        data.sample(method=BalancedSampler(replace=False, stratified=False), group_keys=["animal", "study"], n=1)
 
         # demonstrate logical selection of sample indices based on label values.
-        data.select_cond(["study.isin([1])", "animal=='A'"])
+        data.select(["study.isin([1])", "animal=='A'"])
 
         # set up a cross validation object, leveraging scikit-learn.
-        cv = CV(data=data, cross_validator=StratifiedGroupKFold(2, shuffle=True), label_key="animal", group_key="study")
+        cv = CV(
+            data=data, cross_validator=StratifiedGroupKFold(2, shuffle=True), label_keys="animal", group_key="study"
+        )
 
         # container for models trained in each CV fold.
         models = []
@@ -50,11 +58,6 @@ class TestData:
             # repeats each sample for a random number of steps (simulating variable exposure durations).
             models[i].fit(data[train], repetitions=torch.randint(low=2, high=7, size=(data[train].shape[0],)))
 
-            # verify correctness of cross validation folds.
-            print(f"\n\nFold {i+1}\n------")
-            print(f"Train: {table.iloc[train]}")
-            print(f"*********\nTest: {table.iloc[test]}")
-
     @pytest.mark.parametrize(
         "url_",
         [
@@ -65,7 +68,7 @@ class TestData:
     )
     @pytest.mark.unit
     def test_fetch(self, url_):
-        Data(remote_urls=url_, root=os.path.join(TEST_ROOT, os.path.basename(url_)))
+        Data(remote_urls=url_, root=os.path.join(TEST_ROOT, os.path.basename(url_).split(".")[0]))
 
 
 if __name__ == "__main__":

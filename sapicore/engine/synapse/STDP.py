@@ -132,6 +132,12 @@ class STDPSynapse(Synapse):
         state: bool
             Toggle learning on if True, off if False.
 
+        Note
+        ----
+        Fine-grained control over which synapse elements are toggled on will be added in the future, to support
+        more sophisticated algorithms. Currently, the global learning switch is meant to be used, e.g.,
+        when feeding test samples to a trained network with STDP synapses.
+
         """
         self.learning_switch = state
 

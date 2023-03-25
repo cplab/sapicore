@@ -32,7 +32,7 @@ INTEGRATOR = RungeKutta(order=4)
 
 
 class BasicSimulation(Pipeline):
-    """Simulate a basic feedforward network with two spiking IZ layers connected by one STDP synapse object."""
+    """Simulate a basic feedforward network with two spiking IZ layers connected by one STDP synapse matrix."""
 
     _config_props_ = ("num_units", "steps")
 
@@ -56,7 +56,8 @@ class BasicSimulation(Pipeline):
             src_ensemble=l1, dst_ensemble=l2, delay_ms=DELAY, weight_max=WEIGHT_MAX, weight_min=WEIGHT_MIN
         )
 
-        # connect the layers all-to-all.
+        # connect the layers all-to-all. see `engine.synapse.Synapse.connect` for additional settings.
+        # you may also edit the `syn.connections` attribute directly (a matrix of shape source X destination).
         syn.connect("all")
 
         # multiply the random weights.

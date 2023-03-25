@@ -3,11 +3,11 @@ Select or exclude marked tests by category with `-m` (unit, integration, functio
 
 This script generates an HTML coverage report under tests/coverage_report.
 """
-import os
-from argparse import ArgumentParser
-
 import pytest
 from coverage import Coverage
+
+import os
+from argparse import ArgumentParser
 
 from sapicore.utils.io import ensure_dir
 from sapicore.tests import ROOT

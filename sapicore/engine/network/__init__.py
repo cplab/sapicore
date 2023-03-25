@@ -8,10 +8,11 @@ from networkx import DiGraph
 import torch
 from torch.nn import Module
 
+from sapicore.engine.component import Component
 from sapicore.engine.neuron import Neuron
 from sapicore.engine.synapse import Synapse
 
-from sapicore.utils.io import load_yaml, flatten
+from sapicore.utils.io import DataAccumulatorHook, flatten, load_yaml
 
 __all__ = ("Network",)
 
@@ -85,6 +86,28 @@ class Network(Module):
 
         # automatically mark root nodes by their in-degree.
         self._find_roots()
+
+    def __getitem__(self, item: str) -> Component | None:
+        """Look up and return a network component by its string identifier."""
+        if self.graph.nodes.get(item):
+            return self.graph.nodes.get(item)["reference"]
+
+        elif self.graph.edges.get(item.split("->")):
+            return self.graph.edges.get(item.split("->"))["reference"]
+
+        return None
+
+    def __str__(self):
+        """Describe the network to the user."""
+        num_neurons = sum([self.graph.nodes[i]["reference"].num_units for i in self.graph.nodes])
+
+        total_synapses = sum([s[0] * s[1] for s in [i.matrix_shape for i in self.get_synapses()]])
+        active_synapses = sum([conn.sum() for conn in [i.connections for i in self.get_synapses()]]).item()
+
+        return (
+            f"'{self.identifier}': {len(self.graph.nodes)} layers, {num_neurons} neurons, "
+            f"{len(self.graph.edges)} synapse matrices with {active_synapses}/{total_synapses} active connections."
+        )
 
     def add_ensembles(self, *args: Neuron | dict | str):
         """Adds ensemble nodes to the network graph from paths to YAML, from pre-initialized
@@ -206,6 +229,32 @@ class Network(Module):
             ]
             self.add_synapses(*synapse_paths)
 
+    def data_hook(self, data_dir: str, steps: int, *args: Component):
+        """Attach a data accumulator forward hook to some or all network components.
+
+        Parameters
+        ----------
+        data_dir: str
+            Path to directory in which to save intermediate simulation output.
+
+        steps: int
+            Total number of simulation steps in the experiment to be logged.
+            Required for HDF5 sizing and chunk management.
+
+        args: Component, optional
+            Components to attach data hooks to. If not provided, data will be logged for all components.
+
+        """
+        if not args:
+            for ensemble in self.get_ensembles():
+                DataAccumulatorHook(ensemble, data_dir, ensemble.get_loggable(), steps)
+
+            for synapse in self.get_synapses():
+                DataAccumulatorHook(synapse, data_dir, synapse.get_loggable(), steps)
+        else:
+            for comp in args:
+                DataAccumulatorHook(comp, data_dir, comp.get_loggable(), steps)
+
     # To micromanage the forward/backward sweeps, subclass Network and override summation(), forward(), backward().
     @staticmethod
     def summation(synaptic_input: list[torch.tensor]) -> torch.tensor:
@@ -265,10 +314,6 @@ class Network(Module):
             injections during the simulation being implemented by biases.
 
         """
-        # wrap incoming data in a list if necessary (single root).
-        if not isinstance(data, list):
-            data = [data]
-
         # follow outgoing synapses between vertices, forwarding the entire network on each iteration.
         for i, ensemble in enumerate(self.traversal_order):
             # list all synapses coming in and out of this ensemble. Networkx references it by its string identifier.
@@ -283,9 +328,11 @@ class Network(Module):
                 integrated_data = self.summation([synapse.output for synapse in incoming_synapses]).to(self.device)
 
             else:
-                # if this is a root node, treat stream from data loader as inbound synaptic input.
+                # if this is a root node, treat its stream from the data loader as inbound synaptic input.
+                external = [data[self.roots.index(ensemble_ref.identifier)]] if isinstance(data, list) else [data]
                 feedback = [synapse.output for synapse in incoming_synapses]
-                integrated_data = self.summation(data + feedback)
+
+                integrated_data = self.summation(external + feedback)
 
             # forward current ensemble.
             ensemble_ref(integrated_data)

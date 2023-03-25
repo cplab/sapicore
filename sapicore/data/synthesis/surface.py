@@ -1,1 +1,1 @@
-""" Generate nontrivial n-dimensional surfaces and sample data points from them. """
+""" Sample points from nontrivial n-dimensional generated surfaces. """
