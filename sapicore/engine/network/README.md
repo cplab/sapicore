@@ -23,6 +23,3 @@ corresponding to each incoming edge).
 
 * The sweep continues until the entire graph has been traversed, with each node forwarded once and all outgoing
 edges from every node forwarded once.
-
-The current implementation uses NetworkX for its built-in analytical tools, good visualization and performance,
-and popularity.

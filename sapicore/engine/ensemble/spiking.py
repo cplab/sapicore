@@ -23,11 +23,11 @@ class LIFEnsemble(Ensemble, LIFNeuron):
         """Constructs a LIF ensemble, inheriting its attributes from :class:`~engine.neuron.spiking.LIF.LIFNeuron`."""
         super().__init__(**kwargs)
 
-    def heterogenize(self, unravel: bool = True):
+    def heterogenize(self, num_combinations: int, unravel: bool = True):
         """Ensures that calling :meth:`~heterogenize` will also update the voltage to what could be
         a changed resting potential."""
 
-        super().heterogenize(unravel=unravel)
+        super().heterogenize(num_combinations=self.num_units, unravel=unravel)
         self.voltage = self.volt_rest.detach().clone()
 
 
@@ -38,9 +38,9 @@ class IZEnsemble(Ensemble, IZNeuron):
         """Constructs a LIF ensemble, inheriting its attributes from :class:`~engine.neuron.spiking.LIF.LIFNeuron`."""
         super().__init__(**kwargs)
 
-    def heterogenize(self, unravel: bool = True):
+    def heterogenize(self, num_combinations: int, unravel: bool = True):
         """Ensures that calling :meth:`~heterogenize` will also update the voltage to what could be
         a changed resting potential."""
 
-        super().heterogenize(unravel=unravel)
+        super().heterogenize(num_combinations=self.num_units, unravel=unravel)
         self.voltage = self.c.detach().clone()

@@ -20,18 +20,15 @@ class Integrator:
 
     Warning
     -------
-    Users are encouraged to use the :class:`RungeKutta` object in their :meth:`~engine.neuron.Neuron.forward`
-    implementations, regardless of whether they anticipate using more advanced approximation methods.
+    Users are encouraged to use the :class:`RungeKutta` object in their :meth:`~engine.neuron.Neuron.integrate`
+    implementations (which in turn should be used in :meth:`~engine.neuron.Neuron.forward`), regardless of whether
+    they anticipate using more advanced approximation methods.
 
     """
 
     def __init__(self, identifier: str = None, step: int = DT, **kwargs):
         self.identifier = identifier
         self.step = step
-
-        # developer may override or define arbitrary attributes at instantiation.
-        for key, value in kwargs.items():
-            setattr(self, key, value)
 
     def __call__(self, x: Tensor, equation: Callable, **kwargs) -> Tensor:
         """Approximates the next value of the ODE `equation`, whose keyword arguments are given as `kwargs`,

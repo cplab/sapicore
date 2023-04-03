@@ -155,8 +155,6 @@ class TensorboardWriter:
         plt.figure()
 
         for j in range(0, num_steps, settings.get("step", 100)):
-            # TODO understand why using smaller step sizes makes TB slider GUI randomly pick 10 timepoints instead of
-            #  displaying them all.
             plt.grid(False)
             p = plt.imshow(array[j, :], cmap=plt.cm.viridis, aspect="auto")
 

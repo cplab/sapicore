@@ -17,10 +17,6 @@ from sapicore.utils.io import DataAccumulatorHook, flatten, load_yaml
 __all__ = ("Network",)
 
 
-# project root source directory (.../sapicore).
-ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
-
-
 class Network(Module):
     """Generalized spiking neural network instance. Maintains and orchestrates the processing of multiple
     ensembles connected by synapses.
@@ -59,9 +55,7 @@ class Network(Module):
 
     """
 
-    def __init__(
-        self, identifier: str = None, device: str = "cpu", configuration: dict = None, graph: DiGraph = None, **kwargs
-    ):
+    def __init__(self, identifier: str = None, device: str = "cpu", configuration: dict = None, graph: DiGraph = None):
         super().__init__()
 
         # model-related common instance attributes.
@@ -79,10 +73,6 @@ class Network(Module):
         # network construction from configuration file overrides programmatic initialization.
         if configuration:
             self.build()
-
-        # developer may override or define arbitrary attributes at instantiation.
-        for key, value in kwargs.items():
-            setattr(self, key, value)
 
         # automatically mark root nodes by their in-degree.
         self._find_roots()
@@ -136,11 +126,9 @@ class Network(Module):
                 self.graph.add_node(ensemble.identifier, reference=ensemble)
 
             elif isinstance(ensemble, str):
-                if os.path.exists(os.path.join(ROOT, ensemble)):
+                if os.path.exists(ensemble):
                     # add the ensemble reference to the graph as a node.
-                    ensemble, comp_cfg = self._object_from_configuration(
-                        path=os.path.join(ROOT, ensemble), comp_type="ensemble"
-                    )
+                    ensemble, comp_cfg = self._object_from_configuration(path=ensemble, comp_type="ensemble")
                     self.graph.add_node(ensemble.identifier, reference=ensemble)
                 else:
                     logging.info(f"Could not add ensemble, invalid path given: {ensemble}")
@@ -149,7 +137,7 @@ class Network(Module):
                 raise TypeError("Ensembles must be given as object references, dictionaries, or paths to YAML.")
 
             # heterogenize modifies the object iff a `sweep` specification was provided in the model configuration.
-            ensemble.heterogenize()
+            ensemble.heterogenize(num_combinations=ensemble.num_units)
 
         # update root node list.
         self._find_roots()
@@ -176,11 +164,9 @@ class Network(Module):
                 self.graph.add_edge(synapse.src_ensemble.identifier, synapse.dst_ensemble.identifier, reference=synapse)
 
             elif type(synapse) is str:
-                if os.path.exists(os.path.join(ROOT, synapse)):
+                if os.path.exists(synapse):
                     # add the synapse reference to the graph as a node.
-                    synapse, comp_cfg = self._object_from_configuration(
-                        path=os.path.join(ROOT, synapse), comp_type="synapse"
-                    )
+                    synapse, comp_cfg = self._object_from_configuration(path=synapse, comp_type="synapse")
                     self.graph.add_edge(*synapse.identifier.split("->"), reference=synapse)
                 else:
                     logging.info(f"Could not add synapse, invalid path given: {synapse}")
@@ -189,7 +175,7 @@ class Network(Module):
                 raise TypeError("Synapses must be given as object references, dictionaries, or paths to YAML.")
 
             # # heterogenize modifies the object iff a `sweep` specification was provided in the model configuration.
-            synapse.heterogenize()
+            synapse.heterogenize(num_combinations=synapse.num_units)
 
         # update root node list.
         self._find_roots()
@@ -272,13 +258,7 @@ class Network(Module):
         """Processes a backward sweep for this network object.
 
         This is not required for SNNs that learn with STDP and can be implemented by child classes that
-        might require a backward pass, e.g. DNN variants.
-
-        Warning
-        -------
-        You are encouraged to take advantage of well-established libraries for declaring and instantiating classic
-        DNN variants that learn with backpropagation. This simulation engine is SNN-centric and was designed
-        and optimized for that use case.
+        might require a backward pass.
 
         """
         pass
@@ -349,10 +329,10 @@ class Network(Module):
         # build and pass a state dictionary for use by calling module.
         state = {"ensembles": {}, "synapses": {}}
         for comp in self.get_ensembles():
-            state["ensembles"][comp.identifier] = comp.state()
+            state["ensembles"][comp.identifier] = comp.loggable_state()
 
         for comp in self.get_synapses():
-            state["synapses"][comp.identifier] = comp.state()
+            state["synapses"][comp.identifier] = comp.loggable_state()
 
         return state
 

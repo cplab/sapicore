@@ -81,7 +81,7 @@ class PING(Pipeline):
         # connect the layers one-to-one and toggle learning on/off.
         for synapse in network.get_synapses():
             synapse.connect("one")
-            synapse.toggle_learning(self.learning)
+            synapse.set_learning(self.learning)
 
         # conjure an input data tensor.
         data = torch.zeros((self.steps, l1.voltage.shape[0]))

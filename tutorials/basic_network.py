@@ -64,7 +64,7 @@ class BasicSimulation(Pipeline):
         syn.weights = syn.weights * WEIGHT_MULTIPLIER
 
         # toggle learning on/off based on given setting.
-        syn.toggle_learning(self.learning)
+        syn.set_learning(self.learning)
 
         # initialize a network object and add our components.
         network = Network()

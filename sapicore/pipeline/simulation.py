@@ -7,6 +7,7 @@ from datetime import datetime
 
 import torch
 from torch import Tensor
+
 from alive_progress import alive_bar
 
 from sapicore.pipeline import Pipeline
@@ -16,13 +17,13 @@ from sapicore.engine.network import Network
 from sapicore.utils.seed import fix_random_seed
 from sapicore.utils.signals import extend_input_current
 from sapicore.utils.tensorboard import TensorboardWriter, HDFData
+
 from sapicore.utils.constants import DT, TIME_FORMAT, SEED
 from sapicore.utils.io import ensure_dir, save_yaml, log_settings
 
 from sapicore.tests import ROOT
 
-# default hardware device for this pipeline.
-DEVICE = "cpu" if not torch.cuda.is_available() else "cuda:0"
+__all__ = ("Simulator",)
 
 
 class Simulator(Pipeline):
@@ -37,15 +38,56 @@ class Simulator(Pipeline):
 
     """
 
-    def __init__(self, configuration: dict | str = None, **kwargs):
+    def __init__(self, configuration: dict | str, **kwargs):
+        # loads the configuration if a path is provided.
         super().__init__(configuration=configuration, **kwargs)
 
-        # set random seed for entire simulation and apply default logger configuration.
-        fix_random_seed(SEED)
+        if self.configuration and self.configuration.get("device"):
+            # set hardware device from configuration.
+            self.device = self.configuration.get("device")
+
+        else:
+            # set default hardware device for this pipeline.
+            self.device = "cpu" if not torch.cuda.is_available() else "cuda:0"
+
+        self.initialize(**kwargs)
+
+    def initialize(self, seed: int = None):
+        """Initializes the simulation pipeline. Validates project root path, sets random number generation seed,
+        and applies log message configuration.
+
+        Parameters
+        ----------
+        seed: int, optional
+            Random seed to be used throughout the simulation. Applied to all relevant libraries.
+            If not provided, looks up "seed" in the configuration dictionary.
+            If not found, the project default :attr:`utils.constants.SEED` is used to ensure reproducibility.
+
+        Warning
+        -------
+        Deterministic behavior is vital when conducting reproducible experiments. This is one of many safeguards
+        included in Sapicore. Users who wish to modify this default behavior will have to consciously override
+        :meth:`~Simulator.initialize`.
+
+        """
+        # account for the relative path case, e.g. if invoked by pytest.
+        project_root = self.configuration.get("root")
+        if not project_root:
+            raise KeyError("Configuration missing project 'root' key.")
+
+        # account for the relative path case, e.g. if invoked by pytest.
+        if not os.path.isabs(project_root):
+            self.configuration["root"] = os.path.join(ROOT, project_root)
+
+        # set random seed for entire simulation based on config, kwarg, or default (in this order of preference).
+        random_seed = seed if seed else self.configuration.get("seed", SEED)
+        fix_random_seed(random_seed)
+
+        # apply default logger configuration.
         log_settings()
 
     def run(self):
-        """Run the simulation based on the given configuration.
+        """Runs the simulation based on the given configuration.
 
         Raises
         ------
@@ -55,12 +97,6 @@ class Simulator(Pipeline):
         """
         # get full path to project root directory from configuration file.
         root = self.configuration.get("root")
-        if not root:
-            raise KeyError("Configuration missing project 'root' key.")
-
-        elif not os.path.isabs(root):
-            # if full path not provided, the relative path is appended to sapinet/tests.
-            root = os.path.join(ROOT, root)
 
         # create timestamped run directory.
         stamp = datetime.now().strftime(TIME_FORMAT)
@@ -79,7 +115,7 @@ class Simulator(Pipeline):
         data_dir = ensure_dir(os.path.join(run_dir, "data"))
 
         # initialize a model whose network has the given configuration.
-        model = Model(network=Network(configuration=self.configuration, device=DEVICE))
+        model = Model(network=Network(configuration=self.configuration, device=self.device))
 
         # describe the network to the user and plot its architecture.
         logging.info(model.network)
@@ -110,7 +146,7 @@ class Simulator(Pipeline):
 
         """
         net_roots = [net.graph.nodes[i]["reference"] for i in net.roots]
-        currents = [torch.zeros(size=(r.num_units, steps), dtype=torch.float, device=DEVICE) for r in net_roots]
+        currents = [torch.zeros(size=(r.num_units, steps), dtype=torch.float, device=self.device) for r in net_roots]
 
         recipe = self.configuration.get("simulation", {}).get("current")
         if recipe:

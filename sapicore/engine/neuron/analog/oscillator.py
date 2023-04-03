@@ -19,9 +19,7 @@ utils.signals.Wave:
 
 """
 from math import pi
-
-import torch
-from torch import tensor, Tensor
+from torch import as_tensor, tensor, Tensor
 
 from sapicore.engine.neuron.analog import AnalogNeuron
 from sapicore.utils.signals import Wave
@@ -70,17 +68,10 @@ class OscillatorNeuron(AnalogNeuron):
         """Constructs an iterator-based oscillator."""
         super().__init__(**kwargs)
 
-        # cast list arguments to tensors if need be.
-        amplitudes = tensor(amplitudes, device=self.device) if isinstance(amplitudes, list) else amplitudes
-        frequencies = tensor(frequencies, device=self.device) if isinstance(frequencies, list) else frequencies
-        phases = tensor(phases, device=self.device) if isinstance(phases, list) else phases
-        amp_freq = tensor(amp_freq, device=self.device) if isinstance(amp_freq, list) else amp_freq
-
-        # set configurable oscillator parameters to given tensor or to default if none.
-        self.amplitudes = amplitudes if amplitudes is not None else torch.tensor([5.0], device=self.device)
-        self.frequencies = frequencies if frequencies is not None else torch.tensor([40.0], device=self.device)
-        self.phases = phases if phases is not None else torch.tensor([0.0], device=self.device)
-        self.amp_freq = amp_freq if amp_freq is not None else torch.tensor([0.0], device=self.device)
+        self.amplitudes = as_tensor(amplitudes if amplitudes else [5.0], device=self.device)
+        self.frequencies = as_tensor(frequencies if frequencies else [40.0], device=self.device)
+        self.phases = as_tensor(phases if phases else [0.0], device=self.device)
+        self.amp_freq = as_tensor(amp_freq if amp_freq else [0.0], device=self.device)
 
         # placeholder for wave iterator.
         self.iter = []
@@ -122,4 +113,4 @@ class OscillatorNeuron(AnalogNeuron):
         self.simulation_step += 1
 
         # return current state(s) of loggable attributes as a dictionary.
-        return self.state()
+        return self.loggable_state()

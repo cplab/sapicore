@@ -1,6 +1,4 @@
 """Synapses connect neurons or ensembles to each other."""
-import logging
-
 from collections import deque
 from typing import Callable
 
@@ -81,7 +79,7 @@ class Synapse(Component):
         delay_ms: float = 0.0,
         simple_delays: bool = True,
         weight_init_method: Callable = xavier_uniform_,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(**kwargs)
 
@@ -93,7 +91,6 @@ class Synapse(Component):
             self.matrix_shape = (dst_ensemble.num_units, src_ensemble.num_units)
 
         except AttributeError:
-            logging.info("Attempted to initialize synapse object with no source and destination ensembles.")
             self.matrix_shape = (1, 1)
 
         self.num_units = torch.prod(torch.tensor(self.matrix_shape), 0).item()
@@ -167,6 +164,11 @@ class Synapse(Component):
             E.g., if prop = 0.2 and matrix_shape is (100, 5), 20 random row elements (destination neurons)
             in the connectivity mask will be set to 1.
 
+        Raises
+        ------
+        ValueError
+            If `mode` was set to a value other than "all", "one", "prop", or "rand".
+
         Warning
         -------
         Attempting to initialize one-to-one connectivity between ensembles of different sizes will necessarily
@@ -198,16 +200,16 @@ class Synapse(Component):
                 self.connections[np.unravel_index(ids_enabled, shape=self.matrix_shape)] = 1.0
 
             case _:
-                return
+                raise ValueError(f"Incorrect mode specified {mode}. Use 'all', 'one', 'prop', or 'rand'.")
 
         # if synapse represents a connection from an ensemble to itself, zero out diagonal of mask matrix.
         if self.src_ensemble is self.dst_ensemble:
             self.connections.fill_diagonal_(0)
 
-    def heterogenize(self, unravel: bool = True):
+    def heterogenize(self, num_combinations: int, unravel: bool = True):
         """Diversifies parameters in accordance with this synapse configuration dictionary and recomputes
         the spike delay queue in case values were altered."""
-        super().heterogenize(unravel=unravel)
+        super().heterogenize(num_combinations=self.num_units, unravel=unravel)
 
         # recompute delay steps and reinitialize queue.
         if self.simple_delays:
@@ -247,7 +249,8 @@ class Synapse(Component):
         """
         if self.simple_delays:
             # append updated presynaptic data to the queues, each corresponding to one presynaptic element.
-            [self.delay_queue[i].append(value) for i, value in enumerate(current_data)]
+            for i, value in enumerate(current_data):
+                self.delay_queue[i].append(value)
 
         else:
             # append updated presynaptic data to the delayed view of each postsynaptic element (src X dst queues).
@@ -312,7 +315,7 @@ class Synapse(Component):
         self.clamp_weights()
 
         # mask non-connections (repeated on every iteration in case mask was updated during simulation).
-        self.weights = self.weights.multiply(self.connections)
+        self.weights = self.weights.multiply_(self.connections)
 
         if self.simple_delays:
             self.output = torch.matmul(self.weights, self.delayed_data)
@@ -327,4 +330,4 @@ class Synapse(Component):
         # advance simulation step and return output dictionary.
         self.simulation_step += 1
 
-        return self.state()
+        return self.loggable_state()

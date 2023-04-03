@@ -3,11 +3,11 @@ Sapicore
 
 A project of the [Computational Physiology Laboratory](https://cplab.net/) at Cornell University.
 
-A Framework for Neuromorphic Modeling
--------------------------------------
+A Framework for Spiking Neural Network Modeling
+-----------------------------------------------
 
 Sapicore is a spiking neural network (SNN) simulator built with PyTorch. It streamlines
-the design and testing of heterogeneous model architectures with nontrivial dynamics.
+the design and iterative testing of neuroscience-inspired models with nontrivial dynamics.
 
 We provide programmatic and YAML-based APIs for specifying network structure and behavior,
 designing simulation pipelines, utilizing models for classification and clustering, and data visualization.
@@ -119,10 +119,10 @@ action](https://www.sciencedirect.com/science/article/abs/pii/S007961231730050X)
 Authors
 -------
 [Roy Moyal](https://scholar.google.com/citations?user=P8Ztxr4AAAAJ),
-[Matthew Einhorn](https://matham.dev/about/), [Jeremy Forest](https://jeremyforest.github.io/),
-[Ayon Borthakur](https://borthakurayon.github.io/), Thomas Cleland.
+[Matthew Einhorn](https://matham.dev/about/), [Jeremy Forest](https://jeremyforest.netlify.app/),
+[Ayon Borthakur](https://borthakurayon.github.io/), [Thomas Cleland](https://cplab.net/people/thomas-cleland/).
 
-- Engine, simulator, data classes, and visualization tools by Roy Moyal.
-- Neuromorphic algorithms by Roy Moyal, Ayon Borthakur, and Thomas Cleland.
 - Framework architecture by Matthew Einhorn and Roy Moyal.
-- Tutorials and examples by Roy Moyal and Jeremy Forest.
+- Engine, simulator, data classes, and visualization tools by Roy Moyal.
+- Algorithms by Roy Moyal, Ayon Borthakur, and Thomas Cleland.
+- Tutorials, utilities, and examples by Roy Moyal and Jeremy Forest.

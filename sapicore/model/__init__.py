@@ -1,4 +1,4 @@
-"""Fit, test, and use neuromorphic models.
+"""Train and test neuromorphic models.
 
 Models are networks endowed with the methods :meth:`fit`, :meth:`predict`, :meth:`similarity`, :meth:`load`,
 and :meth:`save`. This class provides an ML-focused API for the training and usage of sapicore
@@ -19,6 +19,7 @@ from torch import Tensor
 from sklearn.base import BaseEstimator
 
 from sapicore.engine.network import Network
+from sapicore.utils.io import ensure_dir
 
 
 class Model(BaseEstimator):
@@ -38,14 +39,10 @@ class Model(BaseEstimator):
         super().__init__()
         self.network = network
 
-        # developer may override or define arbitrary attributes at instantiation.
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
     def fit(self, data: Tensor | list[Tensor], repetitions: int | list[int] | Tensor = 1):
         """Applies :meth:`engine.network.Network.forward` sequentially on a block of samples `data`.
 
-        The given samples may be obtained, e.g., from a :class:`data.sampling.CV` cross validator object.
+        The given samples may be obtained, e.g., from a :class:`~data.sampling.CV` cross validator object.
 
         Parameters
         ----------
@@ -60,8 +57,8 @@ class Model(BaseEstimator):
 
         Warning
         -------
-        :meth:`fit` does not return intermediate output. Users should register forward hooks to efficiently
-        stream data to disk throughout the simulation (see :meth:`engine.network.Network.data_hook`).
+        :meth:`~model.Model.fit` does not return intermediate output. Users should register forward hooks to
+        efficiently stream data to disk throughout the simulation (see :meth:`~engine.network.Network.data_hook`).
 
         """
         # wrap 2D tensor data in a list if need be, to make subsequent single- and multi-root operations uniform.
@@ -125,6 +122,7 @@ class Model(BaseEstimator):
         Users may override this method when other formats are called for.
 
         """
+        ensure_dir(os.path.dirname(path))
         torch.save(self.network, path, pickle_module=dill)
 
     def load(self, path: str) -> Network:
@@ -165,5 +163,8 @@ class Model(BaseEstimator):
         May be extended and/or moved to a dedicated visualization package in future versions.
 
         """
+        plt.figure()
         nx.draw(self.network.graph, node_size=500, with_labels=True, pos=nx.kamada_kawai_layout(self.network.graph))
+
         plt.savefig(fname=os.path.join(path, self.network.identifier + ".svg"))
+        plt.clf()

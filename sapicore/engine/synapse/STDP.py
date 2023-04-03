@@ -81,8 +81,9 @@ class STDPSynapse(Synapse):
         self.src_last_spiked = torch.zeros(self.matrix_shape[1], dtype=torch.float, device=self.device)
         self.dst_last_spiked = torch.zeros(self.matrix_shape[0], dtype=torch.float, device=self.device)
 
-        # toggle learning switch (should be on during training and off during testing).
-        self.learning_switch = True
+        # enable or disable learning (weight updates).
+        # in typical cases, should generally be on during training and off during testing.
+        self.learning = True
 
     def update_weights(self) -> Tensor:
         """STDP weight update implementation.
@@ -124,7 +125,7 @@ class STDPSynapse(Synapse):
         self.weights = self.weights.add(delta_weight)
         return delta_weight
 
-    def toggle_learning(self, state: bool = False) -> None:
+    def set_learning(self, state: bool = False) -> None:
         """Switch weight updates on or off, e.g. before a training/testing round commences.
 
         Parameters
@@ -139,7 +140,7 @@ class STDPSynapse(Synapse):
         when feeding test samples to a trained network with STDP synapses.
 
         """
-        self.learning_switch = state
+        self.learning = state
 
     def forward(self, data: Tensor) -> dict:
         """Updates weights if need be, then calls the parent :class:`~engine.synapse.Synapse` :meth:`forward` method.
@@ -155,7 +156,7 @@ class STDPSynapse(Synapse):
             Dictionary containing `weights`, `connections`, and `output` for further processing.
 
         """
-        if self.learning_switch:
+        if self.learning:
             self.update_weights()
 
         return super().forward(data)

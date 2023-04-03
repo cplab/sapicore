@@ -2,7 +2,6 @@
 from typing import Any
 import os
 
-import torch
 from torch import Tensor
 from torch.nn import Module
 
@@ -59,18 +58,7 @@ class Component(Module, Configurable, Loggable):
         self.simulation_step = 0
         self.dt = DT
 
-        # initialize configurable and loggable attributes with dummy tensors.
-        for prop in self._config_props_:
-            setattr(self, prop, torch.zeros(1, dtype=torch.float, device=self.device))
-
-        for prop in self._loggable_props_:
-            self.register_buffer(prop, torch.zeros(1, dtype=torch.float, device=self.device))
-
-        # developer may override or define arbitrary attributes at instantiation.
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-    def configure(self, configuration: dict[str, Any], log_destination: str = None):
+    def configure(self, configuration: dict[str, Any] = None, log_destination: str = None):
         """Applies a configuration to this object by adding the keys of `configuration` as instance attributes,
         initializing their values, and updating the `_config_props_` tuple to reflect the new keys.
 
@@ -78,8 +66,9 @@ class Component(Module, Configurable, Loggable):
 
         Parameters
         ----------
-        configuration: dict or str
-            Parameters to be applied to this neuron, given as a dictionary.
+        configuration: dict or str, optional
+            Parameters to be applied to this component, given as a dictionary.
+            If None, this method can be used strictly for saving the configuration to YAML without changing it.
 
         log_destination: str, optional
             Path to a destination YAML file where the configuration will be saved.
@@ -94,11 +83,17 @@ class Component(Module, Configurable, Loggable):
 
         """
         # apply this object's configuration by adding or updating instance variables.
-        apply_config(self, configuration)
+        if configuration:
+            self.configuration = configuration
+            apply_config(self, configuration)
 
-        # override _loggable_properties_ if provided in the configuration dictionary.
-        if configuration.get("loggable"):
-            self._loggable_props_ = configuration.get("loggable")
+            # override _loggable_properties_ if provided in the configuration dictionary.
+            if configuration.get("loggable"):
+                self._loggable_props = []
+                self._loggable_props_ = configuration.get("loggable")
+
+                # refresh the cache so that the new properties are added.
+                _ = self.loggable_props
 
         # if `log_destination` was passed, save the configuration dictionary to that location.
         if os.path.exists(log_destination):
@@ -127,7 +122,7 @@ class Component(Module, Configurable, Loggable):
         """
         raise NotImplementedError
 
-    def heterogenize(self, unravel: bool = True):
+    def heterogenize(self, num_combinations: int, unravel: bool = True):
         """Edits configurable tensor attributes based on a sweep search dictionary if one was provided by the user
         within this object's `configuration` dictionary.
 
@@ -139,6 +134,9 @@ class Component(Module, Configurable, Loggable):
 
         Parameters
         ----------
+        num_combinations: int
+            Total number of combinations to return.
+
         unravel: bool
             When the property is a 2D tensor, dictates whether combination values should be assigned
             to individual elements (True) or overwrite entire rows (False).
@@ -158,12 +156,12 @@ class Component(Module, Configurable, Loggable):
         if self.configuration and self.configuration.get("model", {}).get("sweep"):
             # the sweep object maintains a list of valid parameter combinations, each of which is a dictionary.
             sweep = Sweep(
-                search_space=self.configuration.get("model", {}).get("sweep"), num_combinations=self.num_units
+                search_space=self.configuration.get("model", {}).get("sweep"), num_combinations=num_combinations
             )
             # modify this instance in-place.
             sweep.heterogenize(obj=self, unravel=unravel)
 
-    def state(self) -> dict:
+    def loggable_state(self) -> dict:
         """Returns a dictionary of this object's loggable properties and their states as of this simulation step.
 
         Returns
@@ -172,12 +170,12 @@ class Component(Module, Configurable, Loggable):
             Dictionary containing loggable property names and their values.
 
         """
-        return {prop: getattr(self, prop) for prop in self._loggable_props_}
+        return {prop: getattr(self, prop) for prop in self.loggable_props}
 
     def get_loggable(self):
         """Returns this component's loggable property tuple."""
-        return self._loggable_props_
+        return self.loggable_props
 
     def get_configurable(self):
         """Returns this component's configurable property tuple."""
-        return self._config_props_
+        return self._config_props

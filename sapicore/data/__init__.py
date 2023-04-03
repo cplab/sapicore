@@ -120,10 +120,6 @@ class Data(Dataset):
         # container for axis descriptors (label vectors describing specific data axes).
         self.descriptors = {}
 
-        # developer may override or define arbitrary attributes at instantiation.
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
         # fetch dataset from remote URL if `root` doesn't exist or is empty.
         download_required = bool(self.root) and (
             not os.path.exists(self.root) or len(os.listdir(os.path.dirname(self.root))) == 0

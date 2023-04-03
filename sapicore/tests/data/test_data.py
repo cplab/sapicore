@@ -61,10 +61,9 @@ class TestData:
     @pytest.mark.parametrize(
         "url_",
         [
-            "ftp://www.sccn.ucsd.edu/pub/eeglab_data.set",
             "https://archive.ics.uci.edu/ml/machine-learning-databases/00224/Dataset.zip",
         ],
-        ids=["UCSD.EEG", "UCSD.DRIFT"],
+        ids=["DRIFT"],
     )
     @pytest.mark.unit
     def test_fetch(self, url_):

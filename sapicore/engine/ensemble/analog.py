@@ -66,7 +66,7 @@ class OscillatorEnsemble(Ensemble, OscillatorNeuron):
         self.num_wave_comps = num_wave_comps
 
         # expand configurable tensors to accommodate 2D specification format of multi-component sine waves.
-        for prop in self._config_props_:
+        for prop in self._config_props:
             temp = getattr(self, prop)
             zeros = torch.zeros(size=(self.num_units, self.num_wave_comps), dtype=torch.float, device=self.device)
 
@@ -75,7 +75,7 @@ class OscillatorEnsemble(Ensemble, OscillatorNeuron):
         # create the wave iterator for each element of this oscillator ensemble.
         self.register_waveforms()
 
-    def heterogenize(self, unravel: bool = True):
+    def heterogenize(self, num_combinations: int, unravel: bool = True):
         """Ensures that calling an oscillator's `heterogenize()` will result in a correct row-wise treatment of
         tensor attributes and update the waveform iterators.
 
@@ -85,5 +85,5 @@ class OscillatorEnsemble(Ensemble, OscillatorNeuron):
         when ensembles are initialized from file and dynamically imported).
 
         """
-        super().heterogenize(unravel=False)
+        super().heterogenize(num_combinations=self.num_units, unravel=False)
         self.register_waveforms()

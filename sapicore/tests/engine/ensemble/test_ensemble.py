@@ -18,8 +18,8 @@ class TestEnsemble:
     @pytest.mark.parametrize(
         "arg_",
         [
-            AnalogEnsemble(arbitrary_kwarg="", device=TEST_DEVICE),
-            AnalogEnsemble(num_units=1000, device=TEST_DEVICE, arbitrary_kwarg=""),
+            AnalogEnsemble(device=TEST_DEVICE),
+            AnalogEnsemble(num_units=1000, device=TEST_DEVICE),
         ],
         ids=["DEFAULT", "MULTIUNIT"],
     )
@@ -27,7 +27,6 @@ class TestEnsemble:
     def test_analog(self, arg_: AnalogEnsemble | OscillatorEnsemble):
         """Task initialization test cases."""
         # verify that all attributes are initialized.
-        assert hasattr(arg_, "arbitrary_kwarg")
         assert all(hasattr(arg_, attr) for attr in ["identifier", "input", "voltage", "num_units"])
 
         # verify that loggable attributes are torch tensors on the correct device.
@@ -57,8 +56,8 @@ class TestEnsemble:
     @pytest.mark.parametrize(
         "arg_",
         [
-            LIFEnsemble(device=TEST_DEVICE, arbitrary_kwarg=""),
-            IZEnsemble(num_units=1000, device=TEST_DEVICE, arbitrary_kwarg=""),
+            LIFEnsemble(device=TEST_DEVICE),
+            IZEnsemble(num_units=1000, device=TEST_DEVICE),
         ],
         ids=["LIF", "IZ"],
     )

@@ -7,17 +7,19 @@ with open("README.md") as f:
 setup(
     name="sapicore",
     version=__version__,
-    description="A PyTorch-based framework for neuromorphic modeling. ",
+    description="A framework for spiking neural network modeling. ",
     long_description=long_description,
     url="https://github.com/cplab/sapicore",
     author="Roy Moyal, Matthew Einhorn, Jeremy Forest, Ayon Borthakur, Thomas Cleland",
-    author_email="rm875@cornell.edu, me263@cornell.edu, ab2535@cornell.edu, tac29@cornell.edu",
+    author_email="rm875@cornell.edu, me263@cornell.edu, ab2535@cornell.edu, ayon.borthakur@ai.iith.ac.in, "
+    "tac29@cornell.edu",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     packages=find_packages(),
     install_requires=[
@@ -36,8 +38,9 @@ setup(
         "natsort",
         "alive_progress",
         "tree-config",
+        "pytest",
     ],
     extras_require={
-        "dev": ["pytest", "coverage", "flake8", "sphinx", "sphinx-rtd-theme"],
+        "dev": ["coverage", "flake8", "sphinx", "sphinx-rtd-theme", "m2r2"],
     },
 )

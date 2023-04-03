@@ -118,10 +118,6 @@ class CV:
 
         self.groups = self.data.descriptors[group_key].labels if group_key else None
 
-        # developer may override or define arbitrary attributes at instantiation.
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
     def __iter__(self):
         self.index = 0
         self.splitter = self.cross_validator.split(X=self.labels, y=self.labels, groups=self.groups)

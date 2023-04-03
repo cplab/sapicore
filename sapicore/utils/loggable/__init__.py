@@ -1,77 +1,83 @@
-"""Loggable
-===========
+"""The ``Loggable`` module provides tools for configuring the logging of Sapicore models.
+It supports logging simple properties to tensorboard as well as arbitrary properties,
+including tensors and arrays, to HDF5 files.
 
-:mod:`~sapicore.utils.loggable` provides the tools to configure the logging of
-Sapicore models. It supports logging of simple properties to tensorboard as
-well as arbitrary properties, including tensors and arrays to a H5 file.
 Individual properties can be included or excluded from logging using a config
-dict that can be saved to a yaml file, similarly to :mod:`tree-config`
-configuration.
+dict that can be saved to a YAML, similarly to :mod:`tree-config` configuration.
 
 Loggable
 --------
 
-The main API is the :class:`~sapicore.utils.loggable.Loggable` that defines an API for
-properties to support opting-in to logging. One lists all the properties that
-can potentially be logged in :attr:`~sapicore.utils.loggable.Loggable._loggable_props_`, on
-a per class basis. Sub classing extends
-:attr:`~sapicore.utils.loggable.Loggable._loggable_props_`, and to get the list of potentially
-loggable properties it accumulates all the properties listed in all the
-:attr:`~sapicore.utils.loggable.Loggable._loggable_props_` of all the super classes in
-:attr:`~sapicore.utils.loggable.Loggable.loggable_props`.
+:class:`~sapicore.utils.loggable.Loggable` defines an API for properties to support opting-in to logging.
+Users may list loggable properties by including them in :attr:`~utils.loggable.Loggable._loggable_props_`
+on a per class basis.
 
-To support logging of objects nested in other objects, we use
-:attr:`~sapicore.utils.loggable.Loggable._loggable_children_` to list all the properties that
-are objects that should be inspected for loggable properties.
-These are similarly all listed in :attr:`~sapicore.utils.loggable.Loggable.loggable_children`.
+Subclassing extends :attr:`~utils.loggable.Loggable._loggable_props_`, which are accumulated across
+all superclasses when :attr:`~utils.loggable.Loggable.loggable_props` is called. The latter also
+updates the cache list :attr:`~utils.loggable.Loggable._loggable_props`.
+Setting `utils.loggable.Loggable._loggable_props_`, in and of itself, will NOT update the cache.
 
-Configuration
--------------
+To support the logging of nested objects, we use :attr:`~utils.loggable.Loggable._loggable_children_`
+to list all objects that should be inspected for loggable properties. These are similarly listed in
+:attr:`~utils.loggable.Loggable.loggable_children`.
 
-:func:`read_loggable_from_object`, :func:`read_loggable_from_file`,
-:func:`update_loggable_from_object`, :func:`dump_loggable`,
-:func:`load_save_get_loggable_properties`, and
-:func:`get_loggable_properties` provide the functions to get all the loggable
-properties either as a yaml file or dict that can be edited, or as a flat list
-of the properties. They all
-provide a mapping from the property name to a bool indicting whether the
-property should be logged.
+API
+---
 
-E.g. a model such as:
+Users may obtain the loggable properties as YAML files, dictionaries, or flat lists of properties using
+the following functions:
 
-.. code-block:: python
+:func:`read_loggable_from_object`, :func:`read_loggable_from_file`, :func:`update_loggable_from_object`,
+:func:`dump_loggable`, :func:`load_save_get_loggable_properties`, and :func:`get_loggable_properties`.
 
-    class Model(Loggable):
+They all provide a mapping from the property name to a boolean indicting whether the property should be logged.
 
-        _loggable_props_ = ('name', )
-
-        name = 'chair'
-
-would generate the dict ``{'name': True}`` using
-``read_loggable_from_object(Model(), True)`` and a yaml file containing
-``name: true`` when dumped using
-``dump_config('loggable.yaml', read_loggable_from_object(Model(), True))``.
-
-Logging
+Example
 -------
+The following class inherits from Loggable:
 
-:func:`log_tensor_board` supports taking the flat list of properties and
+    >>> class Example(Loggable):
+    >>>     _loggable_props_: tuple[str] = ("voltage",)
+    >>>     def __init__(self, voltage: list[float]):
+    >>>         super().__init__()
+    >>>         self.voltage = voltage
+
+After instantiating an object, refresh the cache and obtain the loggable properties:
+
+    >>> dummy = Example(voltage=[1, 2, 3])
+    >>> print(dummy.loggable_props)
+    ['voltage']
+
+To check which attributes are loggable:
+
+    >>> read_loggable_from_object(dummy, True)
+    {'voltage': True}
+
+Note
+----
+:func:`~utils.loggable.log_tensor_board` supports taking the flat list of properties and
 logging all the properties that are set to be logged to the tensorboard
-format on disk using a ``torch.utils.tensorboard.SummaryWriter`` instance.
+format on disk using a :class:`~torch.utils.tensorboard.SummaryWriter` instance.
 
 Similarly, :class:`NixLogWriter` supports logging arbitrary tensors and numpy
 arrays to a nix HDF5 file. :class:`NixLogReader` can then be used to load the
 data from the nix file into scalars or numpy arrays of the original shape.
+
+Warning
+-------
+This module may change significantly in Sapicore > 0.3.0.
+
 """
 from typing import Tuple, List, Dict, Any, Union, Optional
 from pathlib import Path
+
 import os
 import numpy as np
 import torch
 import nixio as nix
 import datetime
-
 import sapicore
+
 from tree_config.utils import get_class_bases
 from tree_config.yaml import yaml_dumps
 from tree_config import dump_config, read_config_from_file
@@ -94,64 +100,43 @@ LogDataItem = Tuple[Any, str, nix.DataArray, nix.DataArray, nix.DataArray, nix.D
 
 
 class Loggable:
-    """The :class:`Loggable` can be used as a base-class for objects that need
-    to control which of its properties can be logged. E.g. when getting
-    all the properties that need to be logged, :func:`read_loggable_from_object`
-    will call :meth:`loggable_props` and :meth:`loggable_children`, which looks
-    up all the properties from :attr:`_loggable_props_` and
+    """The :class:`~utils.loggable.Loggable` can be used as a base class for objects that need to control which
+    of its properties can be logged.
+
+    When getting loggable properties, :func:`read_loggable_from_object` will call :meth:`loggable_props` and
+    :meth:`loggable_children`, which looks up all the properties from :attr:`_loggable_props_` and
     :attr:`_loggable_children_`.
 
-    For example:
+    Example
+    -------
+    The following class has two loggable properties:
 
-    .. code-block:: python
+    >>> class LoggableModel(Loggable):
+    >>>     _loggable_props_ = ("frame", "color")
+    >>>     frame: str = "square"
+    >>>     color: str = "blue"
 
-        class LoggableModel(Loggable):
+    This snippet will return what they are after instantiating an object of this class:
 
-            _loggable_props_ = ('frame', 'color')
+    >>> LoggableModel().loggable_props
+    ['frame', 'color']
 
-            frame = 'square'
-            color = 'blue'
+    To accumulate over loggable children as well:
 
-    Then:
+    >>> read_loggable_from_object(LoggableModel(), True)
+    {'frame': True, 'color': True}
 
-    .. code-block:: python
-
-        >>> read_loggable_from_object(LoggableModel(), True)
-        {'frame': True, 'color': True}
     """
 
     _loggable_props_: Tuple[str] = ()
-
     _loggable_props: List[str] = None
-
     _loggable_children_: Dict[str, str] = {}
-
     _loggable_children: Dict[str, str] = None
 
     @property
     def loggable_props(self) -> List[str]:
-        """A property containing the list of the names of all the properties of
-        the instance that could be loggable (i.e. listed in
-        ``_loggable_props_`` of the class and it's super classes).
-
-        E.g.:
-
-        .. code-block:: python
-
-            class Model(Loggable):
-
-                _loggable_props_ = ('name', )
-
-                name = 'chair'
-
-        then:
-
-        .. code-block:: python
-
-            >>> model = Model()
-            >>> app.loggable_props
-            ['name']
-        """
+        """A property containing a list of instance attribute names that are loggable (i.e., listed in
+        `_loggable_props_` of this class and its parent classes)."""
         props = self._loggable_props
         if props is None:
             props = {}
@@ -174,31 +159,23 @@ class Loggable:
 
     @property
     def loggable_children(self) -> Dict[str, str]:
-        """A property containing the dict of the friendly/property names of
-            all the children objects of this instance that could be loggable (i.e.
-            listed in ``_loggable_children_`` of the class and it's super classes).
+        """A property containing a dictionary of loggable attribute names from derivative classes (i.e.,
+            listed in `_loggable_children_` of this class and its parent classes).
 
-        E.g.:
+        Example
+        -------
+        >>> class Thing(Loggable):
+        >>>     _loggable_children_ = {"useful": "box"}
+        >>>     box: str = None
+        >>>
+        >>> class Box(Loggable):
+        >>>     pass
+        >>>
+        >>> model = Thing()
+        >>> model.box = Box()
+        >>> model.loggable_children
+        {'useful': 'box'}
 
-        .. code-block:: python
-
-            class Model(Loggable):
-
-                _loggable_children_ = {'the box': 'box'}
-
-                box = None
-
-            class Box(Loggable):
-                pass
-
-        then:
-
-        .. code-block:: python
-
-            >>> model = Model()
-            >>> model.box = Box()
-            >>> model.loggable_children
-            {'the box': 'box'}
         """
         children = self._loggable_children
         if children is None:
@@ -808,11 +785,9 @@ class NixLogReader:
         with NixLogReader('log.h5') as reader:
             print('Logged experiments: ', reader.get_experiment_names())
             # prints e.g. `Logged experiments:  ['example']`
-            print('Logged properties: ',
-                reader.get_experiment_property_paths('example'))
+            print('Logged properties: ', reader.get_experiment_property_paths('example'))
             # prints e.g. `Logged properties:  [('neuron_1', 'activation'), ...`
-            print('Activation: ', reader.get_experiment_property_data(
-                'example', ('neuron_1', 'activation')))
+            print('Activation: ', reader.get_experiment_property_data('example', ('neuron_1', 'activation')))
             # prints `Activation:  (array([0, 1, 2], dtype=int64), [array([0...`
     """
 

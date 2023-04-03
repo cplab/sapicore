@@ -21,23 +21,27 @@ class Pipeline(Configurable):
     configuration: dict or str, optional
         Dictionary or path to YAML to use with :meth:`apply_config`.
 
+    Raises
+    ------
+    FileNotFoundError
+        If provided with an invalid string `configuration` path.
+
     """
 
     def __init__(self, configuration: dict | str = None, **kwargs):
-        # parse configuration from YAML if given and use resulting dictionary to initialize attributes.
-        if isinstance(configuration, str) and os.path.exists(configuration):
-            apply_config(self, load_config(None, configuration))
-            self.configuration = load_config(self, filename=configuration)
+        if isinstance(configuration, str):
+            # parse configuration from YAML if given and use resulting dictionary to initialize attributes.
+            content = load_config(None, configuration) if os.path.exists(configuration) else None
 
-        elif isinstance(configuration, dict):
-            apply_config(self, configuration)
+            if not content:
+                raise FileNotFoundError(f"Could not find a configuration YAML at {configuration}")
 
-        # developer may define arbitrary attributes at instantiation.
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+            else:
+                # apply the configuration to this pipeline object.
+                configuration = content
+                apply_config(self, configuration)
 
-    def __repr__(self):
-        return str(vars(self))
+        self.configuration = configuration
 
     def run(self) -> None:
         """Pipeline implementation, to be overridden by the user."""

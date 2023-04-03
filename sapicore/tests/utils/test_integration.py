@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 UNITS = 1
 STEPS = 500
 INTERVAL = 25
+PLOT = False
 
 
 class Curve:
@@ -70,12 +71,13 @@ class TestIntegration:
                 rk4.append(analog_rk4.voltage.mean().item())
 
             # plots show RK4 outperforming Euler for our test cases y(t) = e^t and y(t) = t^2 / 4.
-            plt.plot(underlying)
-            plt.plot(rk4)
-            plt.plot(euler)
-            plt.title("Ground Truth (Blue), RK4 (Orange), Euler (Green)")
+            if PLOT:
+                plt.plot(underlying)
+                plt.plot(rk4)
+                plt.plot(euler)
+                plt.title("Ground Truth (Blue), RK4 (Orange), Euler (Green)")
 
-            plt.show()
+                plt.show()
 
     @pytest.mark.parametrize("ref", [LIFEnsemble, IZEnsemble], ids=["LIF", "IZ"])
     @pytest.mark.functional
@@ -104,15 +106,16 @@ class TestIntegration:
         md = (euler_values - rk4_values).mean()
         sd = (euler_values - rk4_values).std()
 
-        print(
-            f"\nCompared to Euler, RK4 took x{rk4_duration/euler_duration}. "
-            f"At DT={euler.dt}, Steps={STEPS}, Mean Euler-RK4 difference: {md:.2f} (SD={sd:.2f})"
-        )
+        if PLOT:
+            print(
+                f"\nCompared to Euler, RK4 took x{rk4_duration / euler_duration}. "
+                f"At DT={euler.dt}, Steps={STEPS}, Mean Euler-RK4 difference: {md:.2f} (SD={sd:.2f})"
+            )
 
-        plt.plot(euler_values.tolist())
-        plt.plot(rk4_values.tolist())
-        plt.title("Euler/RK4 Voltage Traces")
-        plt.show()
+            plt.plot(euler_values.tolist())
+            plt.plot(rk4_values.tolist())
+            plt.title("Euler/RK4 Voltage Traces")
+            plt.show()
 
 
 if __name__ == "__main__":

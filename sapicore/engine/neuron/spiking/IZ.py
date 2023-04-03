@@ -135,4 +135,4 @@ class IZNeuron(SpikingNeuron):
         self.simulation_step += 1
 
         # return current state(s) of loggable attributes as a dictionary.
-        return self.state()
+        return self.loggable_state()

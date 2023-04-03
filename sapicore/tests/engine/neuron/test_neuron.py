@@ -21,8 +21,8 @@ class TestNeuron:
     @pytest.mark.parametrize(
         "arg_",
         [
-            Neuron(identifier="Test", arbitrary_kwarg="", device=TEST_DEVICE),
-            SpikingNeuron(arbitrary_kwarg="", device=TEST_DEVICE),
+            Neuron(identifier="Test", device=TEST_DEVICE),
+            SpikingNeuron(device=TEST_DEVICE),
         ],
         ids=["NEURON", "SPIKING"],
     )
@@ -30,7 +30,6 @@ class TestNeuron:
     def test_base(self, arg_: Neuron):
         """Basic initialization test cases."""
         # verify that all attributes are initialized.
-        assert hasattr(arg_, "arbitrary_kwarg")
         assert all(
             hasattr(arg_, attr)
             for attr in (["identifier", "input", "voltage"] + ["spiked"] if isinstance(arg_, SpikingNeuron) else [])
@@ -44,12 +43,11 @@ class TestNeuron:
         with pytest.raises(NotImplementedError):
             arg_.forward(data=torch.zeros(1))
 
-    @pytest.mark.parametrize("arg_", [AnalogNeuron(arbitrary_kwarg="", device=TEST_DEVICE)], ids=["ANALOG"])
+    @pytest.mark.parametrize("arg_", [AnalogNeuron(device=TEST_DEVICE)], ids=["ANALOG"])
     @pytest.mark.unit
     def test_analog(self, arg_: AnalogNeuron):
         """Task initialization test cases."""
         # verify that all attributes are initialized.
-        assert hasattr(arg_, "arbitrary_kwarg")
         assert all(hasattr(arg_, attr) for attr in ["identifier", "input", "voltage"])
 
         # verify that loggable attributes are torch tensors on the correct device.
@@ -79,8 +77,8 @@ class TestNeuron:
     @pytest.mark.parametrize(
         "arg_",
         [
-            OscillatorNeuron(arbitrary_kwarg="", device=TEST_DEVICE),
-            OscillatorNeuron(amplitudes=[5.0, 10.0], frequencies=[20.0, 40.0], arbitrary_kwarg="", device=TEST_DEVICE),
+            OscillatorNeuron(device=TEST_DEVICE),
+            OscillatorNeuron(amplitudes=[5.0, 10.0], frequencies=[20.0, 40.0], device=TEST_DEVICE),
             OscillatorNeuron(amplitudes=[5.0, 10.0], frequencies=[20.0, 40.0], phases=[0.0, 0.0], device=TEST_DEVICE),
             OscillatorNeuron(
                 device=TEST_DEVICE,
@@ -103,7 +101,7 @@ class TestNeuron:
     @pytest.mark.parametrize(
         "arg_",
         [
-            LIFNeuron(device=TEST_DEVICE, arbitrary_kwarg=""),
+            LIFNeuron(device=TEST_DEVICE),
             LIFNeuron(
                 volt_thresh=-50.0,
                 volt_rest=-60.0,
@@ -111,7 +109,6 @@ class TestNeuron:
                 tau_mem=5.0,
                 tau_ref=2.0,
                 device=TEST_DEVICE,
-                arbitrary_kwarg="",
             ),
         ],
         ids=["DEFAULT", "CUSTOM"],

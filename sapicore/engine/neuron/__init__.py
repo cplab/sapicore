@@ -10,6 +10,8 @@ All classes derived from :class:`~engine.neuron.Neuron` must implement the paren
 
 """
 from typing import Callable
+
+import torch
 from torch import Tensor
 
 from sapicore.engine.component import Component
@@ -37,7 +39,7 @@ class Neuron(Component):
         This is because RK4 needs to compute f(v[t]) at different points, e.g. half a time step forward.
 
     integrator: Integrator, optional
-        Specifies an :class:`utils.integration.Integrator` to be used when approximating the next value(s)
+        Specifies an :class:`~utils.integration.Integrator` to be used when approximating the next value(s)
         of this neuron's dynamic variable(s), e.g. voltage. Requires explicitly defining `equation`.
         Defaults to Runge-Kutta of order 4 to increase accuracy at a small performance penalty.
 
@@ -60,11 +62,7 @@ class Neuron(Component):
 
     _loggable_props_: tuple[str] = ("input", "voltage")
 
-    # these instance attributes are registered as pytorch buffers.
-    input: Tensor  # tensor storing input to the neuron.
-    voltage: Tensor  # tensor storing membrane voltages.
-
-    def __init__(self, equation: Callable = None, integrator: Integrator = RungeKutta(order=4), **kwargs):
+    def __init__(self, equation: Callable = None, integrator: Integrator = None, **kwargs):
         """Initializes generic instance attributes shared by all analog and spiking neuron derived classes."""
         # register universal attributes and tracking variables shared across components.
         super().__init__(**kwargs)
@@ -73,7 +71,21 @@ class Neuron(Component):
         self.equation = equation
 
         # integrators, though optional, should be incorporated into forward() if used at all.
-        self.integrator = integrator
+        self.integrator = RungeKutta(order=4) if integrator is None else integrator
+
+        # register the `input` and `voltage` tensor buffers, shared by all neuron child classes.
+        self.input = torch.zeros(1, dtype=torch.float, device=self.device)
+        self.voltage = torch.zeros(1, dtype=torch.float, device=self.device)
+
+    @property
+    def num_units(self):
+        """Number of functional units represented by this object.
+
+        Neurons are singletons by coercion, as they are meant to express unit dynamics.
+        Derivatives of :class:`~engine.ensemble.Ensemble` can modify this property and duplicate units as necessary.
+
+        """
+        return 1
 
     def forward(self, data: Tensor) -> dict:
         """Passes input through the neuron.
