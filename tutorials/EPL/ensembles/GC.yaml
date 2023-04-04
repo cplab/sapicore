@@ -3,7 +3,7 @@ class: LIFEnsemble
 
 model:
   identifier: GC
-  num_units: 512
+  num_units: 64
 
   sweep:
     fixed:

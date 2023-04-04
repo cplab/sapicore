@@ -41,7 +41,8 @@ def spike_raster(data: torch.Tensor, line_size: float = 0.25) -> plt.eventplot:
 
         # Create raster plot with inverted y-axis to display columns in ascending order.
         plot = plt.eventplot(np.transpose(np.array(positions)[:]), linelengths=line_size, colors="black")
-        plt.yticks(range(data.shape[1]))
+        # plt.yticks(range(data.shape[1]))
+        plt.yticks([])
         plt.gca().invert_yaxis()
 
     else:

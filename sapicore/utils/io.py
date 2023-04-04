@@ -85,23 +85,8 @@ class DataAccumulatorHook(Module):
                 hf.attrs["identifier"] = self.component.identifier
                 hf.attrs["class"] = type(self.component).__name__
 
-                # write configurable properties for future reference, e.g. during tensorboard loggable.
-                if hasattr(self.component, "_config_props_"):
-                    for prop in getattr(self.component, "_config_props_"):
-                        # extract value to be logged.
-                        value = getattr(self.component, prop)
-
-                        if type(value) is Tensor:
-                            # if tensor, move to cpu.
-                            value = value.cpu()
-
-                        try:
-                            hf.attrs[prop] = value
-                        except TypeError:
-                            # skip field if not compatible with HDF5 (e.g., a method reference).
-                            pass
-
-                # create datasets for loggable properties. Max shape unlimited in first axis, used for the expansion.
+                # create datasets for loggable properties.
+                # max shape unlimited in first axis, so that it can be expanded on every simulation step.
                 for attr in self.attributes:
                     attr_tensor = getattr(self.component, attr)
                     expanded_dimensions = attr_tensor[None, :].shape
@@ -114,6 +99,25 @@ class DataAccumulatorHook(Module):
                         chunks=True,
                         maxshape=tuple([s if j > 0 else None for j, s in enumerate(expanded_dimensions)]),
                     )
+
+                # write configurable properties ONCE for future reference, e.g. during tensorboard loggable.
+                if hasattr(self.component, "_config_props"):
+                    for prop in getattr(self.component, "_config_props"):
+                        # create a dataset for this configurable property.
+                        hf.create_dataset(name=prop, shape=attr_tensor.shape, compression="lzf")
+
+                        # extract value to be logged and move to CPU if applicable.
+                        value = getattr(self.component, prop)
+                        if type(value) is Tensor:
+                            # if tensor, move to cpu.
+                            value = value.cpu()
+
+                        try:
+                            # store the configurable value or tensor in the dataset.
+                            hf[prop][:] = value
+                        except TypeError:
+                            # skip field if not compatible with HDF5 (e.g., a method reference).
+                            pass
 
     def save_outputs_hook(self) -> Callable:
         def fn(_, __, output):
@@ -193,7 +197,7 @@ def load_apply_config(configuration: str, apply_to: object = None) -> dict:
     content = load_config(None, configuration) if os.path.exists(configuration) else None
 
     if not content:
-        raise FileNotFoundError(f"Could not find a configuration YAML at {configuration}")
+        raise FileNotFoundError(f"Could not find a configuration YAML at {os.path.realpath(configuration)}")
 
     else:
         # apply the configuration to this pipeline object.

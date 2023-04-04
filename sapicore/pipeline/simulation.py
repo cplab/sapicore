@@ -115,6 +115,7 @@ class Simulator(Pipeline):
         data_dir = ensure_dir(os.path.join(run_dir, "data"))
 
         # initialize a model whose network has the given configuration.
+        logging.info("Instantiating the network.")
         model = Model(network=Network(configuration=self.configuration, device=self.device))
 
         # describe the network to the user and plot its architecture.
@@ -181,7 +182,7 @@ class Simulator(Pipeline):
 
                 # write what was asked.
                 tensorboard_settings = self.configuration.get("simulation", {}).get("tensorboard", 0)
-                if type(tensorboard_settings) is list:
+                if isinstance(tensorboard_settings, list):
                     for task in tensorboard_settings:
                         for attr, settings in task.items():
                             # read only requested key from file.

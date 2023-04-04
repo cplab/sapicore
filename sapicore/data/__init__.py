@@ -198,7 +198,7 @@ class Data(Dataset):
         """
         pass
 
-    def access_data(self, index: int | tuple[int]):
+    def access_data(self, index: int | tuple[int], axis: int = None):
         """Specifies how to access data by mapping indices to actual samples (e.g., from file(s) in `root`).
 
         The default implementation slices into `self.samples` to accommodate the trivial cases where the user has
@@ -213,13 +213,19 @@ class Data(Dataset):
         index: int or tuple of int
             Index(es) to slice into.
 
+        axis: int, optional
+            Optionally, a specific axis along which to apply index selection.
+
         Note
         ----
         Where audio/image files are concerned (each being a labeled "sample"), use this method to read
         and potentially transform them, returning the finished product.
 
         """
-        return self.samples[index]
+        if axis:
+            return self.samples.index_select(axis, index)
+        else:
+            return self.samples[index]
 
     def add_descriptors(self, file: str = None, include: list[str] = None, **kwargs: AxisDescriptor):
         """Extracts labels from file(s) in the data `root` directory, if given, and adds named
@@ -410,14 +416,14 @@ class Data(Dataset):
             A subset of this dataset.
 
         """
-
-        if isinstance(method, BalancedSampler):
-            # special case of the balanced sampler, which uses the aggregated descriptor dataframe.
-            subset = method(frame=self.aggregate_descriptors(), **kwargs)
-
         # determine whether a BaseCrossValidator was provided and if so, set it up.
-        # `method` is called empty because sklearn CV objects are ABCMeta (hence unrecognizable) until called.
-        elif isinstance(method(), BaseCrossValidator):
+        # `method` must be called because sklearn CV objects are ABCMeta (hence unrecognizable) until called.
+        try:
+            is_cv = isinstance(method(), BaseCrossValidator)
+        except TypeError:
+            is_cv = False
+
+        if is_cv:
             # determine the number of folds based on `retain` and the dataset length as defined by __len__.
             # if `retain` not provided as a keyword argument, treat this as a 2-split.
             retain = kwargs.get("retain", 0.5)
@@ -430,13 +436,17 @@ class Data(Dataset):
             # use the first fold.
             _, subset = next(iter(iterator))
 
+        elif isinstance(method, BalancedSampler):
+            # special case of the balanced sampler, which uses the aggregated descriptor dataframe.
+            subset = method(frame=self.aggregate_descriptors(), **kwargs)
+
         else:
             # in all other cases, directly apply the method provided.
             subset = method(**kwargs)
 
         # create a deep copy of this data object and mutate it.
         partial_data = deepcopy(self)
-        partial_data.samples = self.access_data(subset)
+        partial_data.samples = self.access_data(subset, axis=axis)
 
         for k in partial_data.descriptors.keys():
             if partial_data.descriptors[k].axis == axis:

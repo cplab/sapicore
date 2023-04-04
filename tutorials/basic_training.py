@@ -5,6 +5,8 @@ from argparse import ArgumentParser
 
 import torch
 from torch import Tensor
+
+from torch.nn.functional import normalize
 from sklearn.model_selection import StratifiedKFold
 
 from sapicore.data.sampling import BalancedSampler, CV
@@ -18,6 +20,7 @@ from sapicore.utils.io import log_settings
 from sapicore.utils.seed import fix_random_seed
 from sapicore.tests import ROOT
 
+GAIN = 200.0
 TEST_ROOT = os.path.join(ROOT, "tests", "data", "test_data")
 
 
@@ -78,8 +81,15 @@ class DriftExperiment(Pipeline):
             n=3,
         )
 
+        # take only the first feature (`DR`) from each sensor (there are 8 features X 16 sensors).
+        total_features = drift_subset.samples.shape[1]
+        drift_subset = drift_subset.sample(lambda: torch.arange(0, total_features, 8), axis=1)
+
         # move data tensor to GPU if necessary.
         drift_subset.samples = drift_subset.samples.to(self.device)
+
+        # L1-normalize features and multiply by desired gain factor.
+        drift_subset.samples = GAIN * normalize(drift_subset.samples, p=1.0)
 
         # set up a cross validation object for our experiment.
         cv = CV(data=drift_subset, cross_validator=StratifiedKFold(self.cv_folds, shuffle=True), label_keys="chemical")
@@ -89,7 +99,8 @@ class DriftExperiment(Pipeline):
             model = EPL(network=Network(configuration=self.configuration, device=self.device))
 
             logging.info(
-                f"Simulating CV fold {i+1} with {len(train)} samples, " f"each sustained for {self.stim_duration}ms."
+                f"CV fold {i+1} with {len(train)} samples, "
+                f"each sustained for {self.stim_duration} simulation steps (ms)."
             )
 
             # maintains each sample `stim_duration` steps (milliseconds).
@@ -128,7 +139,7 @@ if __name__ == "__main__":
     DriftExperiment(
         configuration=args.config,
         log_dir=args.output,
-        stim_duration=100,
+        stim_duration=25,
         cv_folds=2,
         device="cuda:0" if torch.cuda.is_available() else "cpu",
     ).run()

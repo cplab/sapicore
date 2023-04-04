@@ -3,7 +3,7 @@ class: LIFEnsemble
 
 model:
   identifier: MC
-  num_units: 128
+  num_units: 16
 
   sweep:
     fixed:
