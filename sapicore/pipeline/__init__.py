@@ -7,8 +7,8 @@ To facilitate the development and testing of models, Sapicore provides a compact
 pipeline with a sample configuration YAML. Advanced users may use those as a basis for custom workflows.
 
 """
-import os
-from tree_config import Configurable, load_config, apply_config
+from tree_config import Configurable
+from sapicore.utils.io import load_apply_config
 
 __all__ = ("Pipeline",)
 
@@ -30,16 +30,7 @@ class Pipeline(Configurable):
 
     def __init__(self, configuration: dict | str = None, **kwargs):
         if isinstance(configuration, str):
-            # parse configuration from YAML if given and use resulting dictionary to initialize attributes.
-            content = load_config(None, configuration) if os.path.exists(configuration) else None
-
-            if not content:
-                raise FileNotFoundError(f"Could not find a configuration YAML at {configuration}")
-
-            else:
-                # apply the configuration to this pipeline object.
-                configuration = content
-                apply_config(self, configuration)
+            configuration = load_apply_config(configuration, apply_to=self)
 
         self.configuration = configuration
 

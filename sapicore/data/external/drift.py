@@ -41,7 +41,7 @@ class DriftDataset(Data):
         os.remove(os.path.join(self.root, "Dataset.zip"))
         for file in os.listdir(os.path.join(self.root, "Dataset")):
             shutil.move(os.path.join(self.root, "Dataset", file), os.path.join(self.root, file))
-        shutil.rmtree(os.path.join(self.root, "..", "Dataset"))
+        shutil.rmtree(os.path.join(self.root, "Dataset"))
 
         # scan the root directory for .dat files.
         raw_files = self.scan_root(pattern="*.dat")

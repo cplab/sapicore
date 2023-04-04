@@ -1,9 +1,9 @@
 """ Train a model on a real-world dataset with cross validation. """
 import os
 import logging
-
 from argparse import ArgumentParser
 
+import torch
 from torch import Tensor
 from sklearn.model_selection import StratifiedKFold
 
@@ -44,11 +44,18 @@ class DriftExperiment(Pipeline):
     """Instantiates a minimal EPL network using the dictionary API and trains it on UCSD drift data."""
 
     def __init__(
-        self, configuration: str | dict, stim_duration: int = 500, cv_folds: int = 2, log_dir: str = None, **kwargs
+        self,
+        configuration: str | dict,
+        stim_duration: int = 500,
+        cv_folds: int = 2,
+        log_dir: str = None,
+        device: str = None,
+        **kwargs,
     ):
 
         super().__init__(configuration=configuration, cv_folds=cv_folds, **kwargs)
 
+        self.device = device
         self.log_dir = log_dir
         self.cv_folds = cv_folds
         self.stim_duration = stim_duration
@@ -71,13 +78,15 @@ class DriftExperiment(Pipeline):
             n=3,
         )
 
+        # move data tensor to GPU if necessary.
+        drift_subset.samples = drift_subset.samples.to(self.device)
+
         # set up a cross validation object for our experiment.
-        # in this case, folds are stratified w.r.t. chemical but uniform w.r.t. batch number.
         cv = CV(data=drift_subset, cross_validator=StratifiedKFold(self.cv_folds, shuffle=True), label_keys="chemical")
 
         for i, (train, test) in enumerate(cv):
-            logging.info("Initializing a new copy of the EPL network.")
-            model = EPL(network=Network(configuration=self.configuration))
+            logging.info("Instantiating a new copy of the EPL network.")
+            model = EPL(network=Network(configuration=self.configuration, device=self.device))
 
             logging.info(
                 f"Simulating CV fold {i+1} with {len(train)} samples, " f"each sustained for {self.stim_duration}ms."
@@ -108,7 +117,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-out",
         action="store",
-        dest="out",
+        dest="output",
         metavar="FILE",
         required=False,
         help="Destination path for storing trained model .pt files.",
@@ -116,4 +125,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # run the experiment from the given configuration dictionary.
-    DriftExperiment(configuration=args.config, log_dir=args.out, stim_duration=100, cv_folds=2).run()
+    DriftExperiment(
+        configuration=args.config,
+        log_dir=args.output,
+        stim_duration=100,
+        cv_folds=2,
+        device="cuda:0" if torch.cuda.is_available() else "cpu",
+    ).run()

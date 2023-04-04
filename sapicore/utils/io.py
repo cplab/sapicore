@@ -15,7 +15,17 @@ import torch
 from torch import Tensor
 from torch.nn import Module
 
-__all__ = ("DataAccumulatorHook", "ensure_dir", "flatten", "load_yaml", "save_yaml", "log_settings")
+from tree_config import apply_config, load_config
+
+__all__ = (
+    "DataAccumulatorHook",
+    "ensure_dir",
+    "flatten",
+    "load_yaml",
+    "save_yaml",
+    "log_settings",
+    "load_apply_config",
+)
 
 CHUNK_SIZE = 50.0
 """ Data chunks will be dumped to disk after reaching this size in MB. """
@@ -176,6 +186,23 @@ def log_settings(
         format=formatting,
         handlers=[logging.StreamHandler(stream)] + ([logging.FileHandler(file)] if file else []),
     )
+
+
+def load_apply_config(configuration: str, apply_to: object = None) -> dict:
+    # parse configuration from YAML if given and use resulting dictionary to initialize attributes.
+    content = load_config(None, configuration) if os.path.exists(configuration) else None
+
+    if not content:
+        raise FileNotFoundError(f"Could not find a configuration YAML at {configuration}")
+
+    else:
+        # apply the configuration to this pipeline object.
+        configuration = content
+
+        if apply_to:
+            apply_config(apply_to, configuration)
+
+    return configuration
 
 
 def ensure_dir(path: str = None) -> str:

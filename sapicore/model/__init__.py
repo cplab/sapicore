@@ -35,7 +35,7 @@ class Model(BaseEstimator):
 
     """
 
-    def __init__(self, network: Network, **kwargs):
+    def __init__(self, network: Network = None, **kwargs):
         super().__init__()
         self.network = network
 

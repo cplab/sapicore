@@ -11,7 +11,7 @@ setup(
     long_description=long_description,
     url="https://github.com/cplab/sapicore",
     author="Roy Moyal, Matthew Einhorn, Jeremy Forest, Ayon Borthakur, Thomas Cleland",
-    author_email="rm875@cornell.edu, me263@cornell.edu, ab2535@cornell.edu, ayon.borthakur@ai.iith.ac.in, "
+    author_email="rm875@cornell.edu, me263@cornell.edu, jerem.forest@gmail.com, ayon.borthakur@ai.iith.ac.in, "
     "tac29@cornell.edu",
     classifiers=[
         "Development Status :: 4 - Beta",
