@@ -111,7 +111,7 @@ class Synapse(Component):
 
             # maintains delayed data queues
             self.delay_queue = [
-                deque(torch.zeros(delay.int(), device=self.device)) for delay in self.delay_ms.int() / self.dt
+                deque(torch.zeros(delay.int(), device=self.device)) for delay in (self.delay_ms / self.dt).int()
             ]
         else:
             # the extensive delay setting, where delayed input views may vary across postsynaptic elements.
@@ -134,15 +134,19 @@ class Synapse(Component):
         # default initialization method for weights (can be overriden).
         self.weights = self.weight_init_method(tensor=self.weights)
 
+        # clamp weights to acceptable range given this synapse's min and max.
+        self.weights = torch.clamp(self.weights, self.weight_min, self.weight_max)
+
+        # if synapse represents a connection from an ensemble to itself, zero out diagonal of mask matrix.
+        if self.src_ensemble is self.dst_ensemble:
+            self.connections.fill_diagonal_(0)
+
         # if autograd parameter provided to constructor at build time, turn autograd on or off for the weights.
         if hasattr(self, "autograd"):
             self.weights.requires_grad_(self.autograd)
 
-        # developer may override or define arbitrary attributes at instantiation.
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-        self.clamp_weights()
+        # specifies which loggable attribute should be considered this unit's output.
+        self.output_field = "output"
 
     def connect(self, mode: str = "all", prop: float = 1.0):
         """Applies a predefined connectivity mask strategy.
@@ -188,7 +192,6 @@ class Synapse(Component):
                 torch.randperm(self.matrix_shape[0])
 
                 self.connections = torch.zeros_like(self.connections)
-
                 for i in range(self.matrix_shape[1]):
                     self.connections[torch.randperm(self.matrix_shape[0])[:selection_size], i] = 1
 
@@ -202,10 +205,6 @@ class Synapse(Component):
             case _:
                 raise ValueError(f"Incorrect mode specified {mode}. Use 'all', 'one', 'prop', or 'rand'.")
 
-        # if synapse represents a connection from an ensemble to itself, zero out diagonal of mask matrix.
-        if self.src_ensemble is self.dst_ensemble:
-            self.connections.fill_diagonal_(0)
-
     def heterogenize(self, num_combinations: int, unravel: bool = True):
         """Diversifies parameters in accordance with this synapse configuration dictionary and recomputes
         the spike delay queue in case values were altered."""
@@ -214,7 +213,7 @@ class Synapse(Component):
         # recompute delay steps and reinitialize queue.
         if self.simple_delays:
             self.delay_queue = [
-                deque(torch.zeros(delay.int(), device=self.device)) for delay in self.delay_ms.int() / self.dt
+                deque(torch.zeros(delay.int(), device=self.device)) for delay in (self.delay_ms / self.dt).int()
             ]
 
         else:
@@ -263,17 +262,6 @@ class Synapse(Component):
         return tensor(valid_data, device=self.device)
 
     # child classes would typically only implement one or more of the methods below this line.
-    def clamp_weights(self) -> Tensor:
-        """Clamps weights to min/max weight range if need be."""
-        # enforce weight limits by adding the difference from threshold for cells exceeded.
-        weight_plus = self.weights > self.weight_max
-        weight_minus = self.weights < self.weight_min
-
-        self.weights = self.weights.add(weight_plus.int() * (self.weight_max - self.weights))
-        self.weights = self.weights.add(weight_minus.int() * (self.weight_min - self.weights))
-
-        return self.weights
-
     def update_weights(self) -> Tensor:
         """Static weight update rule. Placeholder for plastic synapse derivative classes (e.g., STDP)."""
         pass
@@ -312,7 +300,7 @@ class Synapse(Component):
         self.delayed_data = self.queue_input(data)
 
         # enforce weight limits.
-        self.clamp_weights()
+        self.weights = torch.clamp(self.weights, self.weight_min, self.weight_max)
 
         # mask non-connections (repeated on every iteration in case mask was updated during simulation).
         self.weights = self.weights.multiply_(self.connections)

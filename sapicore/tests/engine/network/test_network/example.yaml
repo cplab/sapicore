@@ -5,8 +5,8 @@
 # Name of experiment/model.
 identifier: Synth
 
-# Full path to project directory. If a relative path is provided, assumes the root is ../sapinet.
-root: tests/engine/network/test_network
+# Path to project directory. If relative, it will be appended to the directory containing this file.
+# root: .
 
 # Model architecture.
 model:
@@ -34,14 +34,8 @@ model:
 
 # Simulation settings.
 simulation:
-  # Number of simulation steps.
+  # Number of simulation steps, if ran without input data (e.g., when using an oscillator layer to generate data).
   steps: 2000
-
-  # Input current signatures. Current values within each internal list will be smeared to fit the number of simulation steps.
-  # The i-th current time series will go into the i-th neuron of the ensemble specified as a key.
-  # Here, a constant current of 0.0 is added to each of the membrane voltages of the oscillator units in I1.
-  current:
-    I1: [[0.0], [0.0]]
 
   # `True` for default data directory structure under `root`, `False` if not interested in loggable simulation data to disk at all--overrides individual network component YAML `disk` setting.
   disk: True

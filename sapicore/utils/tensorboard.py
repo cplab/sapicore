@@ -1,5 +1,6 @@
 """ Writes scalar and image data to tensorboard. """
 import os
+
 import numpy as np
 import h5py as hdf
 

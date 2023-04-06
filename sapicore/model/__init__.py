@@ -58,7 +58,7 @@ class Model(BaseEstimator):
         Warning
         -------
         :meth:`~model.Model.fit` does not return intermediate output. Users should register forward hooks to
-        efficiently stream data to disk throughout the simulation (see :meth:`~engine.network.Network.data_hook`).
+        efficiently stream data to disk throughout the simulation (see :meth:`~engine.network.Network.add_data_hook`).
 
         """
         # wrap 2D tensor data in a list if need be, to make subsequent single- and multi-root operations uniform.
@@ -150,7 +150,7 @@ class Model(BaseEstimator):
 
         return self.network
 
-    def draw(self, path: str):
+    def draw(self, path: str, node_size: int = 750):
         """Saves an SVG networkx graph plot showing ensembles and their general connectivity patterns.
 
         Parameters
@@ -158,13 +158,18 @@ class Model(BaseEstimator):
         path: str
             Destination path for network figure.
 
+        node_size: int, optional
+            Node size in network graph plot.
+
         Note
         ----
         May be extended and/or moved to a dedicated visualization package in future versions.
 
         """
         plt.figure()
-        nx.draw(self.network.graph, node_size=500, with_labels=True, pos=nx.kamada_kawai_layout(self.network.graph))
+        nx.draw(
+            self.network.graph, node_size=node_size, with_labels=True, pos=nx.kamada_kawai_layout(self.network.graph)
+        )
 
         plt.savefig(fname=os.path.join(path, self.network.identifier + ".svg"))
         plt.clf()

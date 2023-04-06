@@ -29,6 +29,9 @@ class Wave:
     phase_amplitude_coupling: Tensor, optional
         Frequency of variations in amplitude of each component, if such coupling is desired. Defaults to `None`.
 
+    baseline_shift: Tensor, optional
+        Value by which to shift the entire signal (on the y-axis).
+
     sampling_rate: int, optional
         Sampling rate in Hz. Defaults to 1000.0 / :attr:`~utils.constants.DT` (simulation time step).
 
@@ -70,6 +73,7 @@ class Wave:
         frequencies: Tensor,
         phase_shifts: Tensor,
         phase_amplitude_coupling: Tensor = None,
+        baseline_shift: Tensor = None,
         sampling_rate: float = 1000.0 / DT,
         device: str = "cpu",
     ):
@@ -78,6 +82,7 @@ class Wave:
         self.frequencies = frequencies
         self.phase_shifts = phase_shifts
         self.phase_amplitude_coupling = phase_amplitude_coupling
+        self.baseline_shift = baseline_shift
         self.sampling_rate = sampling_rate
 
         # hardware device on which to store this instance's tensors.
@@ -115,7 +120,7 @@ class Wave:
                 )
 
         self.index += 1
-        return value
+        return value + self.baseline_shift
 
     def _validate(self) -> bool:
         """Validates wave parameters, setting :attr:`valid` to False if configuration is faulty.
@@ -184,8 +189,8 @@ def extend_input_current(
     Warning
     -------
     The present implementation supports duplication of the current time series to accommodate multiple units.
-    :class:`~pipeline.simulation.Simulator` uses this function to support sending varying dummy currents to different
-    ensemble elements.
+    :class:`~pipeline.simulation.GenericSimulator` uses this function to support sending varying dummy currents
+    to different ensemble elements.
 
     Note, however, that these mechanisms are better suited for :mod:`data.synthesis`
     and will be implemented there in a principled manner. This utility function may be deprecated or moved.

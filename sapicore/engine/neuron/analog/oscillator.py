@@ -48,6 +48,9 @@ class OscillatorNeuron(AnalogNeuron):
         Frequencies for amplitude modulation of Nth item, e.g. if frequencies[0] = 40.0
         and amp_freq[0] = 5.0, the amplitude of the 40 Hz component will oscillate at 5 Hz.
 
+    baseline_shift: Tensor or list of float, optional
+        Value by which to shift the entire signal (on the y-axis).
+
     **kwargs:
         Accepts and applies any keyword argument by invoking the parent class :class:`~engine.neuron.Neuron`
         constructor.
@@ -55,7 +58,7 @@ class OscillatorNeuron(AnalogNeuron):
     """
 
     # loggable properties are the same as those of the parent class AnalogNeuron.
-    _config_props_: tuple[str] = ("amplitudes", "frequencies", "phases", "amp_freq")
+    _config_props_: tuple[str] = ("amplitudes", "frequencies", "phases", "amp_freq", "baseline_shift")
 
     def __init__(
         self,
@@ -63,6 +66,7 @@ class OscillatorNeuron(AnalogNeuron):
         frequencies: Tensor | list[float] = None,
         phases: Tensor | list[float] = None,
         amp_freq: Tensor | list[float] = None,
+        baseline_shift: Tensor | list[float] = None,
         **kwargs
     ):
         """Constructs an iterator-based oscillator."""
@@ -72,6 +76,7 @@ class OscillatorNeuron(AnalogNeuron):
         self.frequencies = as_tensor(frequencies if frequencies else [40.0], device=self.device)
         self.phases = as_tensor(phases if phases else [0.0], device=self.device)
         self.amp_freq = as_tensor(amp_freq if amp_freq else [0.0], device=self.device)
+        self.baseline_shift = as_tensor(baseline_shift if baseline_shift else [0.0], device=self.device)
 
         # placeholder for wave iterator.
         self.iter = []
@@ -89,7 +94,14 @@ class OscillatorNeuron(AnalogNeuron):
                 "phase_shifts": self.phases[i] * pi,
                 "phase_amplitude_coupling": self.amp_freq[i],
             }
-            self.iter.append(Wave(**specification, sampling_rate=self.dt * 1000.0, device=self.device))
+            self.iter.append(
+                Wave(
+                    **specification,
+                    sampling_rate=self.dt * 1000.0,
+                    device=self.device,
+                    baseline_shift=self.baseline_shift
+                )
+            )
 
     def forward(self, data: Tensor) -> dict:
         """Oscillator forward method.

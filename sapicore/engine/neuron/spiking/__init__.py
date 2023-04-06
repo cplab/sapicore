@@ -36,6 +36,9 @@ class SpikingNeuron(Neuron):
         # state-related attributes unique to spiking neurons, over and above base components and neurons.
         self.register_buffer("spiked", torch.zeros(1, dtype=torch.int8, device=self.device))
 
+        # update preferred output field to spiked.
+        self.output_field = "spiked"
+
     def forward(self, data: Tensor) -> dict:
         """Processes an input, updates the state of this component, and advances the simulation by one step.
 
@@ -48,8 +51,8 @@ class SpikingNeuron(Neuron):
         -------
         dict
             A dictionary whose keys are loggable attributes and whose values are their states as of this time step.
-            For potential use by a :class:`~pipeline.simulation.Simulator` or any other :class:`~pipeline.Pipeline`
-            script handling runtime operations.
+            For potential use by a :class:`~pipeline.simulation.GenericSimulator` or any other
+            :class:`~pipeline.Pipeline` script handling runtime operations.
 
         Raises
         ------

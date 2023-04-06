@@ -56,6 +56,8 @@ class OscillatorEnsemble(Ensemble, OscillatorNeuron):
 
     """
 
+    _extensible_props_: tuple[str] = ("amplitudes", "frequencies", "phases", "amp_freq")
+
     def __init__(self, num_wave_comps: int = 1, **kwargs):
         """Constructs an oscillator ensemble instance, inheriting attributes from
         :class:`~engine.ensemble.Ensemble` and :class:`~engine.neuron.analog.oscillator.OscillatorNeuron`."""
@@ -65,8 +67,8 @@ class OscillatorEnsemble(Ensemble, OscillatorNeuron):
         # number of frequency components each oscillator consists of (use max if variable).
         self.num_wave_comps = num_wave_comps
 
-        # expand configurable tensors to accommodate 2D specification format of multi-component sine waves.
-        for prop in self._config_props:
+        # expand extensible tensors to accommodate 2D specification format of multi-component sine waves.
+        for prop in self.extensible_props:
             temp = getattr(self, prop)
             zeros = torch.zeros(size=(self.num_units, self.num_wave_comps), dtype=torch.float, device=self.device)
 

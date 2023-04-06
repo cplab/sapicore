@@ -66,8 +66,8 @@ class PING(Pipeline):
         )
 
         # initialize a default excitatory STDP synapse.
-        l1_l2 = STDPSynapse(src_ensemble=l1, dst_ensemble=l2, delay_ms=DELAY_FORWARD)
-        l2_l1 = STDPSynapse(src_ensemble=l2, dst_ensemble=l1, delay_ms=DELAY_BACKWARD)
+        l1_l2 = STDPSynapse(identifier="L1->L2", src_ensemble=l1, dst_ensemble=l2, delay_ms=DELAY_FORWARD)
+        l2_l1 = STDPSynapse(identifier="L2->L1", src_ensemble=l2, dst_ensemble=l1, delay_ms=DELAY_BACKWARD)
 
         l1_l2.weights = torch.ones_like(l1_l2.weights) * EXC_WEIGHT
         l2_l1.weights = torch.ones_like(l2_l1.weights) * INH_WEIGHT

@@ -32,7 +32,9 @@ class Pipeline(Configurable):
         if isinstance(configuration, str):
             configuration = load_apply_config(configuration, apply_to=self)
 
-        self.configuration = configuration
+        if isinstance(configuration, dict):
+            # reached whether it was transformed to a dictionary in the conditional above or provided as such.
+            self.configuration = configuration
 
     def run(self) -> None:
         """Pipeline implementation, to be overridden by the user."""

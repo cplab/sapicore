@@ -77,6 +77,9 @@ class Neuron(Component):
         self.input = torch.zeros(1, dtype=torch.float, device=self.device)
         self.voltage = torch.zeros(1, dtype=torch.float, device=self.device)
 
+        # specifies which loggable attribute should be considered this unit's output (e.g., voltage or spikes).
+        self.output_field = "voltage"
+
     @property
     def num_units(self):
         """Number of functional units represented by this object.
@@ -99,8 +102,8 @@ class Neuron(Component):
         -------
         dict
             A dictionary whose keys are loggable attributes and whose values are their states as of this time step.
-            For potential use by a :class:`~pipeline.simulation.Simulator` or any other :class:`~pipeline.Pipeline`
-            script handling runtime operations.
+            For potential use by a :class:`~pipeline.simulation.GenericSimulator` or any other
+            :class:`~pipeline.Pipeline` script handling runtime operations.
 
         Raises
         ------

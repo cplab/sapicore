@@ -20,7 +20,7 @@ from sapicore.utils.io import log_settings
 from sapicore.utils.seed import fix_random_seed
 from sapicore.tests import ROOT
 
-GAIN = 200.0
+GAIN = 1250.0
 TEST_ROOT = os.path.join(ROOT, "tests", "data", "test_data")
 
 
@@ -70,6 +70,9 @@ class DriftExperiment(Pipeline):
         fix_random_seed(9846)
 
     def run(self):
+        # set project root key.
+        self.configuration["root"] = os.path.realpath(os.path.join(os.path.dirname(__file__), "EPL"))
+
         logging.info("Loading UCSD drift dataset.")
         drift = DriftDataset(root=os.path.join(TEST_ROOT, "drift"))()
 
@@ -98,6 +101,7 @@ class DriftExperiment(Pipeline):
             logging.info("Instantiating a new copy of the EPL network.")
             model = EPL(network=Network(configuration=self.configuration, device=self.device))
 
+            logging.info(model.network)
             logging.info(
                 f"CV fold {i+1} with {len(train)} samples, "
                 f"each sustained for {self.stim_duration} simulation steps (ms)."

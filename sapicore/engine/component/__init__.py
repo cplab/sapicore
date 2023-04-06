@@ -58,7 +58,7 @@ class Component(Module, Configurable, Loggable):
         self.simulation_step = 0
         self.dt = DT
 
-    def configure(self, configuration: dict[str, Any] = None, log_destination: str = None):
+    def configure(self, configuration: dict[str, Any] = None, log_destination: str = ""):
         """Applies a configuration to this object by adding the keys of `configuration` as instance attributes,
         initializing their values, and updating the `_config_props_` tuple to reflect the new keys.
 
@@ -96,7 +96,7 @@ class Component(Module, Configurable, Loggable):
                 _ = self.loggable_props
 
         # if `log_destination` was passed, save the configuration dictionary to that location.
-        if os.path.exists(log_destination):
+        if log_destination and os.path.exists(log_destination):
             save_yaml(self.configuration, log_destination)
 
     def forward(self, data: Tensor) -> dict:
@@ -111,8 +111,8 @@ class Component(Module, Configurable, Loggable):
         -------
         dict
             A dictionary whose keys are loggable attributes and whose values are their states as of this time step.
-            For potential use by a :class:`~pipeline.simulation.Simulator` or any other :class:`~pipeline.Pipeline`
-            script handling runtime operations.
+            For potential use by a :class:`~pipeline.simulation.GenericSimulator` or any other
+            :class:`~pipeline.Pipeline` script handling runtime operations.
 
         Raises
         ------
@@ -171,11 +171,3 @@ class Component(Module, Configurable, Loggable):
 
         """
         return {prop: getattr(self, prop) for prop in self.loggable_props}
-
-    def get_loggable(self):
-        """Returns this component's loggable property tuple."""
-        return self.loggable_props
-
-    def get_configurable(self):
-        """Returns this component's configurable property tuple."""
-        return self._config_props

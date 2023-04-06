@@ -4,7 +4,7 @@
 identifier: EPL
 
 # Full path to project directory. If a relative path is provided, assumes the root is ../sapicore.
-root: ../tutorials/EPL
+# root: .
 
 # Model architecture.
 model:
@@ -22,7 +22,13 @@ model:
 
 # Simulation settings.
 simulation:
+  # simulation duration in steps (by default, 1 ms).
   steps: 2000
+
+  # optional constant current to be added to the data.
+  current: 1000.0
+
+  # whether to stream intermediate output to disk.
   disk: True
 
   # How data should be written to tensorboard for visualization (can be `False` or omitted).

@@ -9,6 +9,10 @@ model:
   num_wave_comps: 3
 
   sweep:
+    fixed:
+      # shifts the signal in the positive direction.
+      baseline_shift: 10.0
+
     # our network is listening to two alternating pure sine chords, C#m and B.
     zipped:
       # in this example, single note amplitudes are equal.

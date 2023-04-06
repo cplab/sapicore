@@ -64,20 +64,12 @@ class Ensemble(Neuron):
     def num_units(self):
         return self._num_units
 
-    @num_units.setter
-    def num_units(self, value: int):
-        self._num_units = value
-
     @property
     def extensible_props(self):
         if self._extensible_props_ is None:
             return self._config_props
         else:
             return self._extensible_props_
-
-    @extensible_props.setter
-    def extensible_props(self, value: tuple[str]):
-        self._extensible_props_ = value
 
     def forward(self, data: Tensor) -> dict:
         """Processes the ensemble using the size-agnostic forward method of its neuron parent class.

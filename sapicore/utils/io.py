@@ -15,7 +15,10 @@ import torch
 from torch import Tensor
 from torch.nn import Module
 
+from alive_progress import alive_bar
 from tree_config import apply_config, load_config
+
+from sapicore.utils.tensorboard import TensorboardWriter, HDFData
 
 __all__ = (
     "DataAccumulatorHook",
@@ -25,6 +28,7 @@ __all__ = (
     "save_yaml",
     "log_settings",
     "load_apply_config",
+    "plot_tensorboard",
 )
 
 CHUNK_SIZE = 50.0
@@ -242,3 +246,25 @@ def save_yaml(data: dict, path: str):
     """Saves a dictionary `data` to the YAML file specified by `path`."""
     with open(path, "w") as f:
         yaml.dump(data, f, default_flow_style=False)
+
+
+def plot_tensorboard(configuration: dict, data_dir: str, tb_dir: str):
+    """Loads simulation output data from disk and writes it to tensorboard for visual inspection."""
+    writer = TensorboardWriter(log_dir=tb_dir)
+    with alive_bar(total=len(os.listdir(data_dir)), force_tty=True) as bar:
+        logging.info("Writing tensorboard data for visualization.")
+        for file in os.listdir(data_dir):
+            if not file.endswith(".h5"):
+                continue
+
+            # write what was asked.
+            tensorboard_settings = configuration.get("simulation", {}).get("tensorboard", 0)
+            if isinstance(tensorboard_settings, list):
+                for task in tensorboard_settings:
+                    for attr, settings in task.items():
+                        # read only requested key from file.
+                        data = HDFData(path=os.path.join(data_dir, file), key=attr)
+
+                        # write the loggable or configurable attribute corresponding to this task.
+                        writer.write(data, attr, **settings)
+            bar()
