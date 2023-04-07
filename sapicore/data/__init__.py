@@ -198,7 +198,7 @@ class Data(Dataset):
         """
         pass
 
-    def access_data(self, index: int | tuple[int], axis: int = None):
+    def access_data(self, index: int | list[int] | tuple[int] | Tensor, axis: int = None):
         """Specifies how to access data by mapping indices to actual samples (e.g., from file(s) in `root`).
 
         The default implementation slices into `self.samples` to accommodate the trivial cases where the user has
@@ -210,7 +210,7 @@ class Data(Dataset):
 
         Parameters
         ----------
-        index: int or tuple of int
+        index: int or tuple of int or list of int or Tensor
             Index(es) to slice into.
 
         axis: int, optional
@@ -223,7 +223,7 @@ class Data(Dataset):
 
         """
         if axis:
-            return self.samples.index_select(axis, index)
+            return self.samples.index_select(axis, torch.as_tensor(index))
         else:
             return self.samples[index]
 
@@ -444,12 +444,19 @@ class Data(Dataset):
             # in all other cases, directly apply the method provided.
             subset = method(**kwargs)
 
+        # trim samples and labels, returning a new partial dataset without mutating the original.
+        return self.trim(index=subset, axis=axis)
+
+    def trim(self, index: int | list[int] | tuple[int] | Tensor, axis: int = 0):
+        """Trims this set based on `index` and `axis`, returning a subset thereof in terms of both data and
+        labels/descriptors. Does not mutate the underlying object."""
+
         # create a deep copy of this data object and mutate it.
         partial_data = deepcopy(self)
-        partial_data.samples = self.access_data(subset, axis=axis)
+        partial_data.samples = self.access_data(index, axis=axis)
 
         for k in partial_data.descriptors.keys():
             if partial_data.descriptors[k].axis == axis:
-                partial_data.descriptors[k].labels = np.array(partial_data.descriptors[k].labels)[subset].tolist()
+                partial_data.descriptors[k].labels = np.array(partial_data.descriptors[k].labels)[index].tolist()
 
         return partial_data
