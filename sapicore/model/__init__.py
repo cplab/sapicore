@@ -18,6 +18,7 @@ import torch
 from torch import Tensor
 from sklearn.base import BaseEstimator
 
+from sapicore.data import Data
 from sapicore.engine.network import Network
 from sapicore.utils.io import ensure_dir
 
@@ -40,9 +41,10 @@ class Model(BaseEstimator):
         self.network = network
 
     def fit(self, data: Tensor | list[Tensor], repetitions: int | list[int] | Tensor = 1):
-        """Applies :meth:`engine.network.Network.forward` sequentially on a block of samples `data`.
+        """Applies :meth:`engine.network.Network.forward` sequentially on a block of samples `data`,
+        then turns off learning for the network.
 
-        The given samples may be obtained, e.g., from a :class:`~data.sampling.CV` cross validator object.
+        The training samples may be obtained, e.g., from a :class:`~data.sampling.CV` cross validator object.
 
         Parameters
         ----------
@@ -74,19 +76,23 @@ class Model(BaseEstimator):
                     self.network([data[j][i, :] for j in range(len(data))])
                 bar()
 
-    def predict(self, data: Tensor) -> Tensor:
+        # learning is turned off after fitting by default.
+        for synapse in self.network.get_synapses():
+            synapse.set_learning(False)
+
+    def predict(self, data: Data | Tensor) -> Tensor:
         """Predicts the labels of `data` by feeding the samples to a trained network and applying
         some procedure to the resulting population/readout layer response.
 
         Parameters
         ----------
-        data: Tensor
-            2D tensor of data samples, formatted sample X feature.
+        data: Data or Tensor
+            Sapicore dataset or a standalone 2D tensor of data samples, formatted sample X feature.
 
         Returns
         -------
         Tensor
-            1D tensor of predicted labels.
+            Vector (1D tensor) of predicted labels.
 
         """
         pass

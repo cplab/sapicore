@@ -140,7 +140,7 @@ class Data(Dataset):
         self.load()
         return self
 
-    def __getitem__(self, index: int | tuple[int]):
+    def __getitem__(self, index: int | list[int] | tuple[int]):
         """Utilizes the user-specified :meth:`access_data` to slice into the data or access specific file(s),
         returning the value(s) at `index`."""
         return self.access_data(index)
@@ -227,7 +227,9 @@ class Data(Dataset):
         else:
             return self.samples[index]
 
-    def add_descriptors(self, file: str = None, include: list[str] = None, **kwargs: AxisDescriptor):
+    def add_descriptors(
+        self, file: str = None, include: list[str] = None, *args: AxisDescriptor, **kwargs: AxisDescriptor
+    ):
         """Extracts labels from file(s) in the data `root` directory, if given, and adds named
         :class:`AxisDescriptor` objects to this :class:`Data` set.
 
@@ -254,6 +256,10 @@ class Data(Dataset):
                 for c in table.columns:
                     if not bool(include) or c in include:
                         self.descriptors[c] = AxisDescriptor(name=c, labels=table[c].tolist())
+
+        # add descriptors from extra unnamed arguments.
+        for arg in args:
+            self.descriptors[arg.name] = arg
 
         # add descriptors from extra AxisDescriptor arguments.
         for key, value in kwargs.items():
@@ -373,7 +379,13 @@ class Data(Dataset):
 
         # evaluate the expressions and filter the dataframe.
         for expression in conditions:
-            df = df[pd.eval("df." + expression, target=df).to_list()]
+            parsed = "& ".join([("df." + expr).replace(". ", ".") for expr in expression.split("&")])
+            parsed = "| ".join([("df." + expr).replace(". ", ".") for expr in parsed.split("|")])
+
+            parsed = parsed.replace("df.df.", "df.")
+            parsed = parsed.replace("df.(", "(df.")
+
+            df = df[pd.eval(parsed, target=df).to_list()]
 
         # return indices where expressions evaluated to true.
         return df.index.to_list()

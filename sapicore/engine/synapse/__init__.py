@@ -84,6 +84,8 @@ class Synapse(Component):
         super().__init__(**kwargs)
 
         # model-related common instance attributes.
+        self.learning = False
+
         self.src_ensemble = src_ensemble
         self.dst_ensemble = dst_ensemble
 
@@ -221,6 +223,23 @@ class Synapse(Component):
                 deque(torch.zeros(delay.int(), device=self.device))
                 for delay in (self.delay_ms / self.dt).flatten().int()
             ]
+
+    def set_learning(self, state: bool = False) -> None:
+        """Switch weight updates on or off, e.g. before a training/testing round commences.
+
+        Parameters
+        ----------
+        state: bool
+            Toggle learning on if True, off if False.
+
+        Note
+        ----
+        Fine-grained control over which synapse elements are toggled on will be added in the future, to support
+        more sophisticated algorithms. Currently, the global learning switch is meant to be used, e.g.,
+        when feeding test samples to a trained network with STDP synapses.
+
+        """
+        self.learning = state
 
     def set_weights(self, weight_initializer: Callable, *args, **kwargs) -> None:
         """Initializes 2D weight matrix for this synapse instance.

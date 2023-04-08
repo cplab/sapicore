@@ -125,23 +125,6 @@ class STDPSynapse(Synapse):
         self.weights = self.weights.add(delta_weight)
         return delta_weight
 
-    def set_learning(self, state: bool = False) -> None:
-        """Switch weight updates on or off, e.g. before a training/testing round commences.
-
-        Parameters
-        ----------
-        state: bool
-            Toggle learning on if True, off if False.
-
-        Note
-        ----
-        Fine-grained control over which synapse elements are toggled on will be added in the future, to support
-        more sophisticated algorithms. Currently, the global learning switch is meant to be used, e.g.,
-        when feeding test samples to a trained network with STDP synapses.
-
-        """
-        self.learning = state
-
     def forward(self, data: Tensor) -> dict:
         """Updates weights if need be, then calls the parent :class:`~engine.synapse.Synapse` :meth:`forward` method.
 
