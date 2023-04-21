@@ -157,7 +157,9 @@ class TensorboardWriter:
 
         for j in range(0, num_steps, settings.get("step", 100)):
             plt.grid(False)
-            p = plt.imshow(array[j, :], cmap=plt.cm.viridis, aspect="auto")
+
+            time_slice = array.take(indices=j, axis=settings.get("time_axis", 0))
+            p = plt.imshow(time_slice, cmap=plt.cm.viridis, aspect="auto")
 
             limit = np.max(np.abs(array))
             plt.clim(-limit, limit)
