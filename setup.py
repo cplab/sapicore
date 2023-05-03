@@ -41,6 +41,6 @@ setup(
         "pytest",
     ],
     extras_require={
-        "dev": ["coverage", "flake8", "sphinx", "sphinx-rtd-theme", "m2r2"],
+        "dev": ["coverage", "flake8", "sphinx<7.0.0", "sphinx-rtd-theme", "m2r2"],
     },
 )
