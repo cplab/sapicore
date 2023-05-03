@@ -29,6 +29,7 @@ class DriftDataset(Data):
     def __init__(self, root: str, **kwargs):
         super().__init__(
             root=root,
+            download=True,
             remote_urls="https://archive.ics.uci.edu/ml/machine-learning-databases/00224/Dataset.zip",
             **kwargs
         )
@@ -108,7 +109,7 @@ class DriftDataset(Data):
         torch.save(self.buffer, os.path.join(ensure_dir(self.root), "data.pt"))
         torch.save(self.metadata.to_dataframe(), os.path.join(ensure_dir(self.root), "labels.pt"))
 
-    def select(self, conditions: str | list[str], axis: int = 0) -> list[int]:
+    def select(self, conditions: str | list[str], axis: int = 0) -> slice:
         """Selects sample indices by descriptor values based on a pandas logical statement applied to one or more
         :class:`AxisDescriptor` objects, aggregated into a dataframe using :meth:`aggregate_descriptors`.
 

@@ -228,7 +228,7 @@ class Data(Dataset):
         e.g. to include checksum verification.
 
         """
-        return bool(self.root) and len(os.listdir(self.root)) > 0
+        return os.path.exists(self.root) and len(os.listdir(self.root)) > 0
 
     def _download(self):
         """Downloads one or more files to the `root` directory from `remote_urls`.
