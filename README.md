@@ -122,7 +122,7 @@ Authors
 [Matthew Einhorn](https://matham.dev/about/), [Jeremy Forest](https://jeremyforest.netlify.app/),
 [Ayon Borthakur](https://borthakurayon.github.io/), [Thomas Cleland](https://cplab.net/people/thomas-cleland/).
 
+- Engine, simulator, pipelines, data classes, and visualization tools by Roy Moyal.
 - Framework architecture by Matthew Einhorn and Roy Moyal.
-- Engine, simulator, data classes, and visualization tools by Roy Moyal.
 - Algorithms by Roy Moyal, Ayon Borthakur, and Thomas Cleland.
 - Tutorials, utilities, and examples by Roy Moyal and Jeremy Forest.

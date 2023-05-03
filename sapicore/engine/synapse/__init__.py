@@ -184,7 +184,7 @@ class Synapse(Component):
         """
         match mode:
             case "all":
-                self.connections = torch.ones_like(self.connections)
+                self.connections = torch.ones_like(self.connections, device=self.device)
 
             case "one":
                 self.connections = torch.eye(*self.connections.size(), device=self.device)
@@ -193,7 +193,7 @@ class Synapse(Component):
                 selection_size = int(np.round(prop * self.matrix_shape[0]))
                 torch.randperm(self.matrix_shape[0])
 
-                self.connections = torch.zeros_like(self.connections)
+                self.connections = torch.zeros_like(self.connections, device=self.device)
                 for i in range(self.matrix_shape[1]):
                     self.connections[torch.randperm(self.matrix_shape[0])[:selection_size], i] = 1
 
@@ -201,7 +201,7 @@ class Synapse(Component):
                 num_enabled = int(np.round(prop * self.weights.numel()))
                 ids_enabled = np.random.choice(np.arange(self.weights.numel()), size=num_enabled, replace=False)
 
-                self.connections = torch.zeros_like(self.connections)
+                self.connections = torch.zeros_like(self.connections, device=self.device)
                 self.connections[np.unravel_index(ids_enabled, shape=self.matrix_shape)] = 1.0
 
             case _:
@@ -236,7 +236,7 @@ class Synapse(Component):
         ----
         Fine-grained control over which synapse elements are toggled on will be added in the future, to support
         more sophisticated algorithms. Currently, the global learning switch is meant to be used, e.g.,
-        when feeding test samples to a trained network with STDP synapses.
+        when feeding test buffer to a trained network with STDP synapses.
 
         """
         self.learning = state

@@ -38,7 +38,7 @@ class GenericSimulator(Pipeline):
     ----
     For a more complex demonstration involving data processing, selection, sampling, and cross-validation,
     see `tutorials/basic_training.py`. If using this script with data (be it Data or Tensor),
-    it should be curated and coerced to the shape samples X labels ahead of time.
+    it should be curated and coerced to the shape buffer X labels ahead of time.
 
     """
 
@@ -48,7 +48,7 @@ class GenericSimulator(Pipeline):
         # set hardware device from configuration, default to GPU if available or CPU otherwise.
         self.device = self.configuration.get("device", "cpu" if not torch.cuda.is_available() else "cuda:0")
 
-        # reference to data object containing samples to be streamed to the network.
+        # reference to data object containing buffer to be streamed to the network.
         self.data = data
 
         # project root directory, defaults to configuration YAML directory if given or empty otherwise.
@@ -154,7 +154,7 @@ class GenericSimulator(Pipeline):
             # if constant current value provided, add it to the dummy data tensor (useful for rudimentary testing).
             self.data = self.data + self.configuration.get("simulation", {}).get("current", 0.0)
 
-        # fit the model by passing `data` samples to the network (`duration` controls exposure time to each sample).
+        # fit the model by passing `data` buffer to the network (`duration` controls exposure time to each sample).
         logging.info(f"Simulating {steps} steps at a resolution of {DT} ms.")
         model.fit(data=self.data, repetitions=self.configuration.get("duration", 1))
 

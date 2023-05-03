@@ -12,10 +12,12 @@ import os
 
 import networkx as nx
 import matplotlib.pyplot as plt
+
 from alive_progress import alive_bar
 
 import torch
 from torch import Tensor
+
 from sklearn.base import BaseEstimator
 
 from sapicore.data import Data
@@ -41,15 +43,15 @@ class Model(BaseEstimator):
         self.network = network
 
     def fit(self, data: Tensor | list[Tensor], repetitions: int | list[int] | Tensor = 1):
-        """Applies :meth:`engine.network.Network.forward` sequentially on a block of samples `data`,
+        """Applies :meth:`engine.network.Network.forward` sequentially on a block of buffer `data`,
         then turns off learning for the network.
 
-        The training samples may be obtained, e.g., from a :class:`~data.sampling.CV` cross validator object.
+        The training buffer may be obtained, e.g., from a :class:`~data.sampling.CV` cross validator object.
 
         Parameters
         ----------
         data: Tensor or list of Tensor
-            2D tensor(s) of data samples to be fed to the root ensembles of this object's `network`,
+            2D tensor(s) of data buffer to be fed to the root ensembles of this object's `network`,
             formatted sample X feature.
 
         repetitions: int or list of int or Tensor
@@ -69,7 +71,7 @@ class Model(BaseEstimator):
 
         num_samples = data[0].shape[0]
         with alive_bar(total=num_samples, force_tty=True) as bar:
-            # iterate over samples.
+            # iterate over buffer.
             for i in range(num_samples):
                 # repeat each sample for as many time steps as instructed.
                 for _ in range(repetitions if isinstance(repetitions, int) else repetitions[i]):
@@ -81,13 +83,13 @@ class Model(BaseEstimator):
             synapse.set_learning(False)
 
     def predict(self, data: Data | Tensor) -> Tensor:
-        """Predicts the labels of `data` by feeding the samples to a trained network and applying
+        """Predicts the labels of `data` by feeding the buffer to a trained network and applying
         some procedure to the resulting population/readout layer response.
 
         Parameters
         ----------
         data: Data or Tensor
-            Sapicore dataset or a standalone 2D tensor of data samples, formatted sample X feature.
+            Sapicore dataset or a standalone 2D tensor of data buffer, formatted sample X feature.
 
         Returns
         -------
@@ -104,7 +106,7 @@ class Model(BaseEstimator):
         Parameters
         ----------
         data: Tensor
-            2D tensor of data samples, formatted sample X feature.
+            2D tensor of data buffer, formatted sample X feature.
 
         metric: str or Callable
             Distance metric to be used. If a string value is provided, it should correspond to one of the available

@@ -44,8 +44,6 @@ class Integrator:
         NotImplementedError
             The __call__ method must be implemented by each derived :class:`~utils.integration.Integrator`.
 
-
-
         """
         raise NotImplementedError
 
@@ -77,7 +75,7 @@ class RungeKutta(Integrator):
     """
 
     def __init__(self, identifier: str = "RK", order: int = 1, **kwargs):
-        super().__init__(identifier, **kwargs)
+        super().__init__(identifier=identifier, **kwargs)
         self.order = order
 
     def __call__(self, x: Tensor, equation: Callable, **kwargs) -> Tensor:

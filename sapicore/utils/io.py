@@ -6,6 +6,7 @@ import sys
 import logging
 
 from pathlib import Path
+from itertools import chain
 from typing import Callable
 
 import yaml
@@ -234,7 +235,7 @@ def ensure_dir(path: str = None) -> str:
 
 def flatten(lst: list[list]) -> list:
     """Flattens a list."""
-    return [item for sublist in lst for item in sublist]
+    return list(chain(*lst))
 
 
 def load_yaml(path: str) -> dict:

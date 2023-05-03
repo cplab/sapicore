@@ -7,9 +7,6 @@ import scipy
 import numpy as np
 import pandas as pd
 
-from sapicore.utils.constants import SEED
-from sapicore.utils.seed import fix_random_seed
-
 from sklearn.model_selection import ParameterGrid
 
 
@@ -64,9 +61,6 @@ class Sweep:
     """
 
     def __init__(self, search_space: dict, num_combinations: int = None):
-        # set random seed for consistency across runs.
-        fix_random_seed(SEED)
-
         self.search_space = search_space
         self.num_combinations = num_combinations
 

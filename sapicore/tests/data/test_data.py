@@ -20,7 +20,7 @@ class TestData:
     @pytest.mark.unit
     def test_data_pipeline(self):
         # initialize a dummy dataset with balanced labels.
-        data = Data(samples=torch.rand(8, 4))
+        data = Data(buffer=torch.rand(8, 4))
         params = Sweep({"grid": {"study": [1, 2], "animal": ["A", "B", "C", "D"]}}, 8)(dataframe=True)
 
         study = AxisDescriptor(name="study", labels=params["study"].tolist(), axis=0)
@@ -28,19 +28,20 @@ class TestData:
         sensor = AxisDescriptor(name="sensor", labels=["Occipital", "Parietal", "Temporal", "Frontal"], axis=1)
 
         # register the above axis descriptors (label vectors) with our Data object.
-        data.add_descriptors(study=study, animal=animal, sensor=sensor)
+        data.metadata.add_descriptors(study, animal, sensor)
 
-        # get the descriptors in tabular form.
-        data.aggregate_descriptors()
+        # print the row descriptors in tabular form.
+        data.metadata.to_dataframe(axis=0)
+
+        # different ways of accessing label vectors and data with slicing.
+        _ = data["sensor"][:]
+        _ = data[:]
 
         # demonstrate stratified sampling w.r.t. one descriptor using a base cross validator.
         data.sample(method=StratifiedKFold, shuffle=True, retain=4, label_keys="animal")
 
         # demonstrate balanced sampling w.r.t. two descriptors using a BalancedSampler (1 for each crossing).
         data.sample(method=BalancedSampler(replace=False, stratified=False), group_keys=["animal", "study"], n=1)
-
-        # demonstrate logical selection of sample indices based on label values.
-        data.select(["study.isin([1])", "animal=='A'"])
 
         # set up a cross validation object, leveraging scikit-learn.
         cv = CV(

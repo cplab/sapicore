@@ -1,4 +1,4 @@
-""" Data sampling.
+""" Data sampling utility classes.
 
 Leverages scikit-learn and pandas to implement versatile cross validation and sampling schemes.
 
@@ -10,13 +10,15 @@ __all__ = ("BalancedSampler", "CV")
 
 
 class BalancedSampler:
-    """Leverages pandas' group-by operation to parsimoniously perform (dis)proportionate random sampling,
+    """Sampler base class.
+
+    Leverages pandas' group-by operation to parsimoniously perform (dis)proportionate random sampling,
     with or without replacement.
 
     Parameters
     ----------
     stratified: bool
-        By default (`False`), attempts to draw the same number of samples from each group regardless of imbalances.
+        By default (`False`), attempts to draw the same number of buffer from each group regardless of imbalances.
         If `True`, uses stratified sampling (proportionate, preserving class imbalances).
 
     replace: bool
@@ -34,7 +36,7 @@ class BalancedSampler:
         self.replace = replace
 
     def __call__(self, frame: DataFrame, group_keys: str | list[str], n: int | float):
-        """Draws samples from `frame` after grouping it by `columns`.
+        """Draws buffer from `frame` after grouping it by `columns`.
 
         Parameters
         ----------
@@ -45,7 +47,7 @@ class BalancedSampler:
             Names of descriptors (column headers) to group the dataframe by.
 
         n: int or float
-            Specifies the number or fraction of samples to draw from each group.
+            Specifies the number or fraction of buffer to draw from each group.
             While the former is more convenient for equal (disproportionate) sampling and the latter
             for stratified (proportionate) sampling, integer or float values can be used with either one.
 
@@ -111,12 +113,13 @@ class CV:
         self.cross_validator = cross_validator
 
         if isinstance(label_keys, str):
-            self.labels = self.data.descriptors[label_keys].labels
-        else:
-            # if multiple stratification labels were provided,
-            self.labels = list(zip(*[self.data.descriptors[i].labels for i in label_keys]))
+            self.labels = self.data[label_keys][:]
 
-        self.groups = self.data.descriptors[group_key].labels if group_key else None
+        else:
+            # if multiple stratification labels were provided.
+            self.labels = list(zip(*[self.data[i][:] for i in label_keys]))
+
+        self.groups = self.data[group_key][:] if group_key else None
 
     def __iter__(self):
         self.index = 0

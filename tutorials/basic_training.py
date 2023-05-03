@@ -20,17 +20,19 @@ from sapicore.utils.io import log_settings
 from sapicore.utils.seed import fix_random_seed
 from sapicore.tests import ROOT
 
-GAIN = 1250.0
+GAIN = 750.0
 TEST_ROOT = os.path.join(ROOT, "tests", "data", "test_data")
 
 
 class EPL(Model):
+    """Dummy model class."""
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def predict(self, data: Tensor) -> Tensor:
-        """Predicts the labels of `data` by feeding the samples to a trained network and applying
-        some procedure to the resulting population/readout layer response.
+        """Predicts the labels of given `data` samples by feeding them to a trained network and applying
+        a user-specified procedure to the resulting responses in the readout layer/population.
 
         Note
         ----
@@ -44,12 +46,12 @@ class EPL(Model):
 
 
 class DriftExperiment(Pipeline):
-    """Instantiates a minimal EPL network using the dictionary API and trains it on UCSD drift data."""
+    """Instantiates a dummy EPL network and trains it on UCSD drift data."""
 
     def __init__(
         self,
         configuration: str | dict,
-        stim_duration: int = 500,
+        stim_duration: int = 50,
         cv_folds: int = 2,
         log_dir: str = None,
         device: str = None,
@@ -74,7 +76,7 @@ class DriftExperiment(Pipeline):
         self.configuration["root"] = os.path.realpath(os.path.join(os.path.dirname(__file__), "EPL"))
 
         logging.info("Loading UCSD drift dataset.")
-        drift = DriftDataset(root=os.path.join(TEST_ROOT, "drift"))()
+        drift = DriftDataset(root=os.path.join(TEST_ROOT, "drift")).load()
 
         # since the full drift set has 13910 entries, sample 3 of each batch X chemical combination (171).
         # alternatively, sampling can be stratified with `n` representing a fraction of the total dataset.
@@ -85,14 +87,14 @@ class DriftExperiment(Pipeline):
         )
 
         # take only the first feature (`DR`) from each sensor (there are 8 features X 16 sensors).
-        total_features = drift_subset.samples.shape[1]
+        total_features = drift_subset.buffer.shape[1]
         drift_subset = drift_subset.sample(lambda: torch.arange(0, total_features, 8), axis=1)
 
         # move data tensor to GPU if necessary.
-        drift_subset.samples = drift_subset.samples.to(self.device)
+        drift_subset.buffer = drift_subset.buffer.to(self.device)
 
         # L1-normalize features and multiply by desired gain factor.
-        drift_subset.samples = GAIN * normalize(drift_subset.samples, p=1.0)
+        drift_subset.buffer = GAIN * normalize(drift_subset.buffer, p=1.0)
 
         # set up a cross validation object for our experiment.
         cv = CV(data=drift_subset, cross_validator=StratifiedKFold(self.cv_folds, shuffle=True), label_keys="chemical")
@@ -103,7 +105,7 @@ class DriftExperiment(Pipeline):
 
             logging.info(model.network)
             logging.info(
-                f"CV fold {i+1} with {len(train)} samples, "
+                f"CV fold {i+1} with {len(train)} buffer, "
                 f"each sustained for {self.stim_duration} simulation steps (ms)."
             )
 
@@ -143,7 +145,7 @@ if __name__ == "__main__":
     DriftExperiment(
         configuration=args.config,
         log_dir=args.output,
-        stim_duration=25,
+        stim_duration=50,
         cv_folds=2,
         device="cuda:0" if torch.cuda.is_available() else "cpu",
     ).run()
