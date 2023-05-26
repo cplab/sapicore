@@ -1,5 +1,5 @@
 """ Data operations. """
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 from numpy.typing import NDArray
 
 import os
@@ -55,7 +55,7 @@ class AxisDescriptor:
 
     """
 
-    def __init__(self, name: str = None, labels: list | NDArray | Tensor = None, axis: int = 0):
+    def __init__(self, name: str = "", labels: list | NDArray | Tensor = None, axis: int = 0):
         self.name = name
         self.axis = axis
         self.labels = np.array(labels)
@@ -71,19 +71,19 @@ class Metadata:
     """Collection of :class:`AxisDescriptor` objects indexed in a table."""
 
     def __init__(self, *args: AxisDescriptor):
+        # verify that no duplicate descriptors exist in args.
+        self._validate_names(*args)
+
         # dictionary containing descriptor names as keys and their references as values.
         self.table = {descriptor.name: descriptor for descriptor in args}
 
-    def __getitem__(self, key: str | int) -> NDArray | pd.DataFrame:
-        """Fetch label vector by `key` if exists or return a dataframe with all descriptors for a particular axis."""
+    def __getitem__(self, key: str) -> AxisDescriptor:
+        """Return the label vector `key` if exists."""
         if key in self.table.keys():
             return self.table[key]
 
-        elif isinstance(key, int):
-            return self.to_dataframe(axis=key)
-
         else:
-            raise KeyError(f"Metadata does not contain the key {key}, and it cannot be used as an integer axis.")
+            raise KeyError(f"Metadata does not contain the key {key}.")
 
     def __setitem__(self, key: str, value: list | NDArray | Tensor | AxisDescriptor):
         """Creates an :class:`AxisDescriptor` from the `value` vector and adds it to this instance as
@@ -95,12 +95,18 @@ class Metadata:
 
         """
         if isinstance(value, AxisDescriptor):
-            self.table[value.name] = value
+            if value.name != key:
+                raise ValueError(f"Key does not match ({key} != {value.name})")
+
+            self.table[key] = value
+
         else:
             self.table[key] = AxisDescriptor(name=key, labels=np.array(value), axis=0)
 
     def add_descriptors(self, *args: AxisDescriptor):
         """Adds one or more :class:`AxisDescriptor` objects to this metadata instance."""
+        self._validate_names(*args)
+
         for descriptor in args:
             self.table[descriptor.name] = descriptor
 
@@ -122,6 +128,11 @@ class Metadata:
                 df[key] = pd.Series(values.labels)
 
         return df
+
+    @staticmethod
+    def _validate_names(*args: AxisDescriptor):
+        if len(args) != len(set(descriptor.name for descriptor in args)):
+            raise ValueError(f"Got multiple descriptors with the same name in {args}")
 
 
 class Data(Dataset):
@@ -164,10 +175,10 @@ class Data(Dataset):
 
     def __init__(
         self,
-        identifier: str = None,
+        identifier: str = "",
         buffer: Tensor = None,
         metadata: Metadata = None,
-        root: str = "",
+        root: Optional[str] = None,
         remote_urls: str | list[str] = "",
         download: bool = False,
         overwrite: bool = False,
@@ -193,14 +204,13 @@ class Data(Dataset):
             # passes silently if not implemented by the user.
             self._standardize()
 
-    def __getitem__(self, index: slice | str):
-        """Calls :meth:`access` to slice into the data or access specific file(s), returning the value(s)
-        at `index`. If `index` is a string, calls __getitem__ of the metadata attribute."""
-        return self.metadata[index] if isinstance(index, str) else self.access(index)
+    def __getitem__(self, index: slice):
+        """Calls :meth:`access` to slice into the data or access specific file(s), returning the value(s) at `index`."""
+        return self.access(index)
 
     def __setitem__(self, index: slice, values: Tensor):
-        """Sets buffer values at the given indices (slice) to `values`."""
-        self.buffer[index] = values
+        """Sets buffer values at the given indices to `values`."""
+        self.modify(index, values)
 
     def __len__(self):
         """The default implementation addresses trivial cases where the set is loaded to memory (in `self.buffer`).
@@ -320,6 +330,23 @@ class Data(Dataset):
 
         """
         pass
+
+    def modify(self, index: slice, values: Tensor):
+        """Set or modify data values at the given indices to `values`.
+
+        The default implementation edits the `buffer` field of this :class:`Data` object.
+        Users may wish to override it in cases where the buffer is not used directly.
+
+        Parameters
+        ----------
+        index: slice
+            Indices to modify.
+
+        values: Tensor
+            Values to set data at indices to.
+
+        """
+        self.buffer[index] = values
 
     def save(self):
         """Dump the buffer contents and metadata to disk at `root`.

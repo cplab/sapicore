@@ -111,7 +111,7 @@ class Component(Module, Configurable, Loggable):
         -------
         dict
             A dictionary whose keys are loggable attributes and whose values are their states as of this time step.
-            For potential use by a :class:`~pipeline.simulation.GenericSimulator` or any other
+            For potential use by a :class:`~pipeline.simulation.SimpleSimulator` or any other
             :class:`~pipeline.Pipeline` script handling runtime operations.
 
         Raises

@@ -1,9 +1,11 @@
-""" Generic simulation pipeline. """
+""" Simple simulation pipeline. """
 import logging
 import os
 
 from argparse import ArgumentParser
 from datetime import datetime
+
+import matplotlib
 
 import torch
 from torch import Tensor
@@ -13,14 +15,14 @@ from sapicore.model import Model
 from sapicore.pipeline import Pipeline
 from sapicore.engine.network import Network
 
-from sapicore.utils.constants import DT, SEED, TIME_FORMAT
+from sapicore.utils.constants import DT, SEED, TIME_FORMAT, PLOT_BACKEND
 from sapicore.utils.seed import fix_random_seed
 from sapicore.utils.io import ensure_dir, log_settings, save_yaml, plot_tensorboard
 
-__all__ = ("GenericSimulator",)
+__all__ = ("SimpleSimulator",)
 
 
-class GenericSimulator(Pipeline):
+class SimpleSimulator(Pipeline):
     """A prototypical simulation pipeline, bringing together data loading, network construction,
     model specification, disk I/O, and visualization.
 
@@ -43,7 +45,8 @@ class GenericSimulator(Pipeline):
     """
 
     def __init__(self, configuration: dict | str, data: Data | Tensor = None, **kwargs):
-        super().__init__(configuration=configuration)
+        super().__init__(config_or_path=configuration)
+        matplotlib.use(PLOT_BACKEND)
 
         # set hardware device from configuration, default to GPU if available or CPU otherwise.
         self.device = self.configuration.get("device", "cpu" if not torch.cuda.is_available() else "cuda:0")
@@ -72,7 +75,7 @@ class GenericSimulator(Pipeline):
         -------
         Deterministic behavior is vital when conducting reproducible experiments. This is one of many safeguards
         included in Sapicore. Users who wish to modify this default behavior will have to consciously override
-        :meth:`~GenericSimulator.initialize`.
+        :meth:`~SimpleSimulator.initialize`.
 
         """
         # update project root path from YAML configuration file if given.
@@ -96,10 +99,10 @@ class GenericSimulator(Pipeline):
                 raise TypeError(f"Data object provided is of the unsupported type {type(self.data)}")
 
             if isinstance(self.data, Data):
-                self.data = self.data()
+                self.data = self.data.load()
 
             # moves data to the correct device (syntax is supported as it inherits from torch's Dataset).
-            self.data = self.data.to(self.device)
+            self.data = self.data[:].to(self.device)
 
         # set random seed for entire simulation based on config, kwarg, or default (in this order of preference).
         random_seed = seed if seed is not None else self.configuration.get("seed", SEED)
@@ -123,7 +126,7 @@ class GenericSimulator(Pipeline):
         tb_dir = ensure_dir(os.path.join(run_dir, "tb"))
         data_dir = ensure_dir(os.path.join(run_dir, "data"))
 
-        # save a copy of the configuration to this run's directory for future reference.
+        # save a copy of the master configuration file to this run's directory for future reference.
         save_yaml(self.configuration, os.path.join(run_dir, self.configuration.get("identifier", "config") + ".yaml"))
 
         # initialize a network using the given configuration and attach it to a model instance.
@@ -176,4 +179,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # run the simulation with the given configuration file.
-    GenericSimulator(configuration=args.config).run()
+    SimpleSimulator(configuration=args.config).run()

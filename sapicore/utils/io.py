@@ -19,6 +19,7 @@ from torch.nn import Module
 from alive_progress import alive_bar
 from tree_config import apply_config, load_config
 
+from sapicore import __version__
 from sapicore.utils.tensorboard import TensorboardWriter, HDFData
 
 __all__ = (
@@ -89,6 +90,7 @@ class DataAccumulatorHook(Module):
                 # write metadata to be able to identify this HDF with its object.
                 hf.attrs["identifier"] = self.component.identifier
                 hf.attrs["class"] = type(self.component).__name__
+                hf.attrs["version"] = __version__
 
                 # create datasets for loggable properties.
                 # max shape unlimited in first axis, so that it can be expanded on every simulation step.
@@ -107,22 +109,11 @@ class DataAccumulatorHook(Module):
 
                 # write configurable properties ONCE for future reference, e.g. during tensorboard loggable.
                 if hasattr(self.component, "_config_props"):
+                    hf.create_group(name="configuration")
                     for prop in getattr(self.component, "_config_props"):
-                        # create a dataset for this configurable property.
-                        hf.create_dataset(name=prop, shape=attr_tensor.shape, compression="lzf")
-
-                        # extract value to be logged and move to CPU if applicable.
+                        # log configurable attribute values as metadata in the "configuration" group.
                         value = getattr(self.component, prop)
-                        if type(value) is Tensor:
-                            # if tensor, move to cpu.
-                            value = value.cpu()
-
-                        try:
-                            # store the configurable value or tensor in the dataset.
-                            hf[prop][:] = value
-                        except TypeError:
-                            # skip field if not compatible with HDF5 (e.g., a method reference).
-                            pass
+                        hf["/configuration"].attrs[prop] = repr(value)
 
     def save_outputs_hook(self) -> Callable:
         def fn(_, __, output):
@@ -143,7 +134,7 @@ class DataAccumulatorHook(Module):
             cache_size = sum([v.element_size() * v.nelement() for _, v in self.cache.items()]) / 1000000.0
 
             # if memory usage exceeds the limit given or reached the end of the run, append cached content to HDF5.
-            if cache_size > CHUNK_SIZE or self.iterations == self.entries:
+            if cache_size > CHUNK_SIZE or self.iterations >= self.entries:
                 with hdf.File(os.path.join(self.log_dir, self.component.identifier + ".h5"), "a") as hf:
                     for attr in self.attributes:
                         # increase data chunk size by number of rows in the cache tensor.
@@ -197,12 +188,12 @@ def log_settings(
     )
 
 
-def load_apply_config(configuration: str, apply_to: object = None) -> dict:
+def load_apply_config(path: str, apply_to: object = None) -> dict:
     # parse configuration from YAML if given and use resulting dictionary to initialize attributes.
-    content = load_config(None, configuration) if os.path.exists(configuration) else None
+    content = load_config(None, path) if os.path.exists(path) else None
 
     if not content:
-        raise FileNotFoundError(f"Could not find a configuration YAML at {os.path.realpath(configuration)}")
+        raise FileNotFoundError(f"Could not find a configuration YAML at {os.path.realpath(path)}")
 
     else:
         # apply the configuration to this pipeline object.

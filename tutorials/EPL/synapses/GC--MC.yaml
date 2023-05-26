@@ -2,26 +2,26 @@ package: sapicore.engine.synapse.STDP
 class: STDPSynapse
 
 model:
-  identifier: L1->L2
+  identifier: GC--MC
 
-  source: L1
-  target: L2
+  source: GC
+  target: MC
 
   sweep:
     fixed:
-      weight_max: 150.0
-      weight_min: 0.0
+      weight_max: 0.0
+      weight_min: -100.0
       alpha_plus: 0.1
       alpha_minus: 0.1
 
     random:
       weights:
         method: uniform
-        args: [50.0, 50.0]
+        args: [-75.0, 50.0]
 
       delay_ms:
         method: uniform
-        args: [1.0, 3.0]
+        args: [2.0, 3.0]
 
 loggable:
   - weights

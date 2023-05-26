@@ -18,7 +18,7 @@ class Pipeline(Configurable):
 
     Parameters
     ----------
-    configuration: dict or str, optional
+    config_or_path: dict or str, optional
         Dictionary or path to YAML to use with :meth:`apply_config`.
 
     Raises
@@ -28,13 +28,13 @@ class Pipeline(Configurable):
 
     """
 
-    def __init__(self, configuration: dict | str = None, **kwargs):
-        if isinstance(configuration, str):
-            configuration = load_apply_config(configuration, apply_to=self)
+    def __init__(self, config_or_path: dict | str = None, **kwargs):
+        if isinstance(config_or_path, str):
+            config_or_path = load_apply_config(config_or_path, apply_to=self)
 
-        if isinstance(configuration, dict):
+        if isinstance(config_or_path, dict):
             # reached whether it was transformed to a dictionary in the conditional above or provided as such.
-            self.configuration = configuration
+            self.configuration = config_or_path
 
     def run(self) -> None:
         """Pipeline implementation, to be overridden by the user."""

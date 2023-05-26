@@ -1,5 +1,6 @@
 """ Networks are graph representations of neuron ensembles connected by synapses. """
 import os
+from itertools import compress
 
 import networkx as nx
 from networkx import DiGraph
@@ -11,6 +12,7 @@ from sapicore.engine.component import Component
 from sapicore.engine.neuron import Neuron
 from sapicore.engine.synapse import Synapse
 
+from sapicore.utils.constants import SYNAPSE_SPLITTERS
 from sapicore.utils.io import DataAccumulatorHook, flatten, load_yaml
 
 __all__ = ("Network",)
@@ -95,11 +97,24 @@ class Network(Module):
         if self.graph.nodes.get(item):
             return self.graph.nodes.get(item)["reference"]
 
-        elif self.graph.edges.get(item.split("->")):
-            return self.graph.edges.get(item.split("->"))["reference"]
-
         else:
-            raise KeyError(f"Component {item} does not exist in this network.")
+            syn_splitter = list(compress(SYNAPSE_SPLITTERS, [syn_char in item for syn_char in SYNAPSE_SPLITTERS]))
+            if len(syn_splitter) == 1:
+                # the component name is guaranteed to contain one valid synapse splitter ("--" or "->").
+                syn_splitter = syn_splitter[0]
+
+            elif len(syn_splitter) > 1:
+                # the component name is ambiguous because it contains more than one valid synapse splitter string.
+                raise KeyError(
+                    f"Invalid synapse identifier format {item}. Must only contain one of the following"
+                    f"patterns: {SYNAPSE_SPLITTERS}"
+                )
+
+            else:
+                # if the component referenced by 'item' is not a node or a valid synapse.
+                raise KeyError(f"Component {item} does not exist in this network.")
+
+            return self.graph.edges.get(item.split(syn_splitter))["reference"]
 
     def __str__(self):
         """Describe the network to the user."""
@@ -346,7 +361,7 @@ class Network(Module):
 
         See Also
         --------
-        :meth:`simulation.GenericSimulator.run`
+        :meth:`simulation.SimpleSimulator.run`
             For a demonstration of how to programmatically feed heterogeneous external current to multiple nodes.
             Note that this functionality will eventually be relegated to the data loader, with arbitrary current
             injections during the simulation being implemented by biases.

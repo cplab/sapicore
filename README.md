@@ -39,7 +39,7 @@ Sapicore 0.3.0 is in beta. The current version includes the following features:
 
 To simulate a network from a YAML configuration using the default simulation pipeline:
 
-    python generic.py -config /path/to/config_file.yaml
+    python simple.py -config /path/to/config_file.yaml
 
 See `tutorials` and `tests/engine/network/test_network` for instructive scripts and YAML files.
 

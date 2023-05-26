@@ -113,27 +113,19 @@ class CV:
         self.cross_validator = cross_validator
 
         if isinstance(label_keys, str):
-            self.labels = self.data[label_keys][:]
+            self.labels = self.data.metadata[label_keys][:]
 
         else:
             # if multiple stratification labels were provided.
-            self.labels = list(zip(*[self.data[i][:] for i in label_keys]))
+            self.labels = list(zip(*[self.data.metadata[i][:] for i in label_keys]))
 
-        self.groups = self.data[group_key][:] if group_key else None
+        self.groups = self.data.metadata[group_key][:] if group_key else None
 
     def __iter__(self):
         self.index = 0
         self.splitter = self.cross_validator.split(X=self.labels, y=self.labels, groups=self.groups)
 
         return self.splitter
-
-    def __next__(self):
-        self.index += 1
-        if self.index < len(self.labels):
-            tr, te = next(self.splitter)
-            return tr, te
-        else:
-            raise StopIteration
 
     def __len__(self) -> int:
         return len(self.labels)

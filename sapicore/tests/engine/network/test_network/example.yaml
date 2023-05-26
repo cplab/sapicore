@@ -24,13 +24,13 @@ model:
 
   # Paths to synapse configuration files. Can be absolute or relative to `root`.
   synapses:
-    - synapses/I1->L1.yaml
-    - synapses/L1->L2.yaml
-    - synapses/L2->L2.yaml
-    - synapses/L2->L3.yaml
-    - synapses/L3->L2.yaml
-    - synapses/L3->L3.yaml
-    - synapses/L2->L4.yaml
+    - synapses/I1--L1.yaml
+    - synapses/L1--L2.yaml
+    - synapses/L2--L2.yaml
+    - synapses/L2--L3.yaml
+    - synapses/L3--L2.yaml
+    - synapses/L3--L3.yaml
+    - synapses/L2--L4.yaml
 
 # Simulation settings.
 simulation:

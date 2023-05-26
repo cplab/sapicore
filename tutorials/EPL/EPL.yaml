@@ -17,8 +17,8 @@ model:
 
   # Paths to synapse configuration files. Can be absolute or relative to `root`.
   synapses:
-    - synapses/MC->GC.yaml
-    - synapses/GC->MC.yaml
+    - synapses/MC--GC.yaml
+    - synapses/GC--MC.yaml
 
 # Simulation settings.
 simulation:

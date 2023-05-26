@@ -34,7 +34,7 @@ class TestData:
         data.metadata.to_dataframe(axis=0)
 
         # different ways of accessing label vectors and data with slicing.
-        _ = data["sensor"][:]
+        _ = data.metadata["sensor"][:]
         _ = data[:]
 
         # demonstrate stratified sampling w.r.t. one descriptor using a base cross validator.

@@ -189,7 +189,7 @@ def extend_input_current(
     Warning
     -------
     The present implementation supports duplication of the current time series to accommodate multiple units.
-    :class:`~pipeline.simulation.GenericSimulator` uses this function to support sending varying dummy currents
+    :class:`~pipeline.simulation.SimpleSimulator` uses this function to support sending varying dummy currents
     to different ensemble elements.
 
     Note, however, that these mechanisms are better suited for :mod:`data.synthesis`

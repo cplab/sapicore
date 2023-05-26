@@ -2,7 +2,7 @@ package: sapicore.engine.synapse
 class: Synapse
 
 model:
-  identifier: I1->L1
+  identifier: I1--L1
 
   source: I1
   target: L1

@@ -4,7 +4,7 @@ Network objects own a graph representation containing ensembles as vertices and 
 identifier and an object `reference` included in each element's metadata.
 
 Synapses in the network configuration YAML are given in the format "E1->E2", where Ei is an ensemble identifier and
-"->" is treated as a special splitting string throughout the code base.
+"->" or "--" are treated as a special splitting string throughout the code base.
 
 Self-connections ("E2->E2") are perfectly
 valid and are treated the same way, except for zeroing out the diagonal in the connection mask matrix to disable

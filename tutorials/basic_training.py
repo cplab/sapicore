@@ -58,7 +58,7 @@ class DriftExperiment(Pipeline):
         **kwargs,
     ):
 
-        super().__init__(configuration=configuration, cv_folds=cv_folds, **kwargs)
+        super().__init__(config_or_path=configuration, cv_folds=cv_folds, **kwargs)
 
         self.device = device
         self.log_dir = log_dir
@@ -105,7 +105,7 @@ class DriftExperiment(Pipeline):
 
             logging.info(model.network)
             logging.info(
-                f"CV fold {i+1} with {len(train)} buffer, "
+                f"CV fold {i+1} with {len(train)} samples, "
                 f"each sustained for {self.stim_duration} simulation steps (ms)."
             )
 
