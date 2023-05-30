@@ -175,7 +175,13 @@ class TensorboardWriter:
         # add a raster plot for the quantity (always an image).
         fig = plt.figure()
         ax = fig.add_subplot()
-        collections = spike_raster(array)
+
+        collections = spike_raster(
+            data=array,
+            line_size=settings.get("line_size", 0.25),
+            events=settings.get("events"),
+            event_colors=settings.get("event_colors"),
+        )
 
         if collections is not None:
             _ = [ax.add_collection(collection) for collection in collections]

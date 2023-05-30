@@ -242,6 +242,8 @@ def save_yaml(data: dict, path: str):
 
 def plot_tensorboard(configuration: dict, data_dir: str, tb_dir: str):
     """Loads simulation output data from disk and writes it to tensorboard for visual inspection."""
+    # REFACTOR when rewriting this more formally, need a way to pass arbitrary plot settings that can't
+    #  necessarily go through YAML, e.g. experiment event timestamps and label colors.
     writer = TensorboardWriter(log_dir=tb_dir)
     with alive_bar(total=len(os.listdir(data_dir)), force_tty=True) as bar:
         logging.info("Writing tensorboard data for visualization.")

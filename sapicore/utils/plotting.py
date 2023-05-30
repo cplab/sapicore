@@ -1,6 +1,9 @@
 """ Utility methods for generating diagnostic plots from loggable variables. """
-import torch
+from torch import Tensor
+
 import numpy as np
+from numpy.typing import ArrayLike
+
 import pandas as pd
 
 import matplotlib.pyplot as plt
@@ -9,16 +12,25 @@ import matplotlib.pyplot as plt
 __all__ = ("spike_raster",)
 
 
-def spike_raster(data: torch.Tensor, line_size: float = 0.25) -> plt.eventplot:
+def spike_raster(
+    data: Tensor, line_size: float = 0.25, events: ArrayLike | Tensor = None, event_colors: ArrayLike | Tensor = None
+) -> plt.eventplot:
     """Generates a spike raster event plot from `data`.
 
     Parameters
     ----------
-    data: torch.Tensor
+    data: Tensor
         2D binary integer tensor containing spike time series in the format units X steps.
 
     line_size: float
         Controls spike event line size.
+
+    events: ArrayLike or Tensor
+        Event timestamps w.r.t. X-axis. The raster will contain semi-transparent vertical bars at those locations.
+
+    event_colors: ArrayLike or Tensor
+        Colors to use with vertical lines corresponding to event timestamps, given as a list where
+        the i-th element is the color of the i-th vertical line.
 
     """
     if data.max() <= 1:
@@ -44,6 +56,13 @@ def spike_raster(data: torch.Tensor, line_size: float = 0.25) -> plt.eventplot:
         plot = plt.eventplot(np.transpose(np.array(positions)[:]), linelengths=line_size, colors="black")
         # plt.yticks(range(data.shape[1]))
         plt.yticks([])
+
+        # create vertical bars to represent events, if applicable.
+        if events is not None:
+            colors = [0] * len(events) if event_colors is None else event_colors
+            for i, event in enumerate(events):
+                plt.axvline(x=event, color=colors[i], alpha=0.5)
+
         plt.gca().invert_yaxis()
 
     else:
