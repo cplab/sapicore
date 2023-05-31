@@ -1,0 +1,28 @@
+package: sapicore.engine.synapse.STDP
+class: STDPSynapse
+
+model:
+  identifier: L3--L2
+
+  source: L3
+  target: L2
+
+  sweep:
+    fixed:
+      weight_max: 0.0
+      weight_min: -100.0
+      alpha_plus: 0.1
+      alpha_minus: 0.1
+
+    random:
+      weights:
+        method: uniform
+        args: [-25.0, 10.0]
+
+      delay_ms:
+        method: uniform
+        args: [2, 5.0]
+
+loggable:
+  - weights
+  - output

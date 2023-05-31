@@ -1,38 +1,46 @@
 from setuptools import setup, find_packages
 from sapicore import __version__
 
-with open("README.rst") as f:
+with open("README.md") as f:
     long_description = f.read()
 
 setup(
     name="sapicore",
     version=__version__,
-    description="A PyTorch-based framework for neuromorphic modeling",
+    description="A framework for spiking neural network modeling. ",
     long_description=long_description,
     url="https://github.com/cplab/sapicore",
-    author="Neuromorphic algorithms by Ayon Borthakur and Thomas Cleland, "
-           "Framework architecture by Matthew Einhorn. Project of the "
-           "Computational Physiology Laboratory at Cornell University",
-    author_email="ab2535@cornell.edu",
+    author="Roy Moyal, Matthew Einhorn, Jeremy Forest, Ayon Borthakur, Thomas Cleland",
+    author_email="rm875@cornell.edu, me263@cornell.edu, jerem.forest@gmail.com, ayon.borthakur@ai.iith.ac.in, "
+    "tac29@cornell.edu",
     classifiers=[
-        'Development Status :: 4 - Beta',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
+        "Development Status :: 4 - Beta",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     packages=find_packages(),
     install_requires=[
+        "h5py",
         "numpy",
-        "tqdm",
+        "scipy",
         "pandas",
-        'ruamel.yaml',
-        'nixio',
-        'tree-config',
+        "torch",
+        "tensorboard",
+        "networkx",
+        "scikit-learn",
+        "matplotlib",
+        "PyYAML",
+        "nixio",
+        "dill",
+        "natsort",
+        "alive_progress",
+        "tree-config",
+        "pytest",
     ],
     extras_require={
-        'dev': [
-            'pytest>=3.6', 'pytest-cov', 'flake8', 'sphinx-rtd-theme',
-            'coveralls', 'sphinx'],
+        "dev": ["coverage", "flake8", "sphinx<7.0.0", "sphinx-rtd-theme", "m2r2"],
     },
 )

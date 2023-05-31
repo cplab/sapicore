@@ -1,0 +1,62 @@
+# This is a model-simulation configuration file, with an identifier and two sections: `model` architecture and
+# `simulation` logic. It describes a Leaky Integrate-and-Fire (LIF) network consisting of four ensembles and an
+# analog oscillator input layer.
+
+# Name of experiment/model.
+identifier: Synth
+
+# Path to project directory. If relative, it will be appended to the directory containing this file.
+# root: .
+
+# Model architecture.
+model:
+  # Paths to ensemble configuration files. Can be absolute or relative to `root`.
+  ensembles:
+    # Analog oscillator layer, generates input.
+    - ensembles/I1.yaml
+    # First LIF spiking neuron layer.
+    - ensembles/L1.yaml
+    # E/I-coupled LIF spiking neuron layers.
+    - ensembles/L2.yaml
+    - ensembles/L3.yaml
+    # Readout LIF spiking neuron layer.
+    - ensembles/L4.yaml
+
+  # Paths to synapse configuration files. Can be absolute or relative to `root`.
+  synapses:
+    - synapses/I1--L1.yaml
+    - synapses/L1--L2.yaml
+    - synapses/L2--L2.yaml
+    - synapses/L2--L3.yaml
+    - synapses/L3--L2.yaml
+    - synapses/L3--L3.yaml
+    - synapses/L2--L4.yaml
+
+# Simulation settings.
+simulation:
+  # Number of simulation steps, if ran without input data (e.g., when using an oscillator layer to generate data).
+  steps: 2000
+
+  # `True` for default data directory structure under `root`, `False` if not interested in loggable simulation data to disk at all--overrides individual network component YAML `disk` setting.
+  disk: True
+
+  # How data should be written to tensorboard for visualization (can be `False` or omitted).
+  # By default, all files in the output directory are scanned. If you would like to disable loggable
+  # for a specific network component, you can do that by editing the `disk` field in its YAML.
+  tensorboard:
+    - spiked:
+        kind: raster
+        format: image
+
+    - voltage:
+        kind: trace
+        format: scalar
+
+    - output:
+        kind: trace
+        format: scalar
+
+    - weights:
+        kind: heatmap
+        format: image
+        step: 100

@@ -1,0 +1,24 @@
+package: sapicore.engine.ensemble.spiking
+class: LIFEnsemble
+
+model:
+  identifier: MC
+  num_units: 16
+
+  sweep:
+    fixed:
+      volt_rest: -60.0
+      volt_thresh: -40.0
+      tau_ref: 2.0
+
+    random:
+      leak_gl:
+        method: uniform
+        args: [2.0, 4.0]
+      tau_mem:
+        method: uniform
+        args: [2.0, 4.0]
+
+loggable:
+  - voltage
+  - spiked

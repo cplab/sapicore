@@ -1,120 +1,183 @@
-"""Model
-========
+"""Train and test neuromorphic models.
 
-A :class:`SapicoreModel` is a higher level abstraction of a
-:class:`~sapicore.network.SapicoreNetwork` that can also contain
-sub-:attr:`~SapicoreModel.networks` that are connected to each other via
-neurons at the input/output boundaries of the sub-networks.
+Models are networks endowed with the methods :meth:`fit`, :meth:`predict`, :meth:`similarity`, :meth:`load`,
+and :meth:`save`. This class provides an ML-focused API for the training and usage of sapicore
+:class:`~engine.network.Network` output for practical purposes.
 
-A :class:`SapicoreModel` additionally contains a learning element that can be
-added and applied to the model.
 """
-from typing import Dict, List, Optional, Tuple
-from sapicore.network import SapicoreNetwork
-from sapicore.neuron import SapicoreNeuron
-from sapicore.learning import SapicoreLearning
+from typing import Callable
 
-__all__ = ('SapicoreModel', )
+import dill
+import os
+
+import networkx as nx
+import matplotlib.pyplot as plt
+
+from alive_progress import alive_bar
+
+import torch
+from torch import Tensor
+
+from sklearn.base import BaseEstimator
+
+from sapicore.data import Data
+from sapicore.engine.network import Network
+from sapicore.utils.io import ensure_dir
 
 
-class SapicoreModel(SapicoreNetwork):
-    """A Sapicore neuronal model instance.
+class Model(BaseEstimator):
+    """Model base class.
+
+    Implements and extends the scikit-learn :class:`sklearn.base.BaseEstimator` interface.
+
+    Note
+    ----
+    In a machine learning context, spiking networks can be used in diverse ways, e.g. as classifiers
+    or as generative models. While :mod:`engine` is mostly about form (network architecture and information flow),
+    :mod:`model` is all about function (how to fit the model to data and how to utilize it once trained).
+
     """
 
-    networks: Dict[
-        SapicoreNetwork,
-        List[Tuple[SapicoreNetwork, Dict[SapicoreNeuron, SapicoreNeuron]]]] = {}
-    """A dict mapping networks contained in the model to other networks
-    in the model.
+    def __init__(self, network: Network = None, **kwargs):
+        super().__init__()
+        self.network = network
 
-    Each value is a list of 2-tuples of ``(target_network, neurons)``.
-    ``target_network`` is the network to which the source network in the key is
-    connected. ``neurons`` is a dict whose keys and values are each a neuron
-    from the source and target networks, respectively that connects the
-    network.
+    def fit(self, data: Tensor | list[Tensor], repetitions: int | list[int] | Tensor = 1):
+        """Applies :meth:`engine.network.Network.forward` sequentially on a block of buffer `data`,
+        then turns off learning for the network.
 
-    E.g. given ``network1`` and ``network2``, and neurons ``n1``, ``n2`` in
-    ``network1`` that are respectively connected to neurons ``n3``, ``n4`` in
-    ``network2``. Then :attr:`networks` is
-    ``{network1: [(network2, {n1: n3, n2: n4})]}``.
-    """
+        The training buffer may be obtained, e.g., from a :class:`~data.sampling.CV` cross validator object.
 
-    def __init__(self, **kwargs):
-        self.network = {}
-        super(SapicoreModel, self).__init__(**kwargs)
+        Parameters
+        ----------
+        data: Tensor or list of Tensor
+            2D tensor(s) of data buffer to be fed to the root ensembles of this object's `network`,
+            formatted sample X feature.
 
-    def add_learning_rule(
-            self, name: str, learning_rule: SapicoreLearning) -> None:
-        """Registers a learning rule that can be used by the model.
-        You must implement :meth:`apply_learning` in order to concretely do
-        something with the learning rule(s).
+        repetitions: int or list of int or Tensor
+            How many times to repeat each sample before moving on to the next one.
+            Simulates duration of exposure to a particular input. If a list or a tensor is provided,
+            the i-th row in the batch is repeated `repetitions[i]` times.
 
-        The learning rule is also registered with pytroch as a "pytorch module"
-        using ``add_module``. This enables usage of pytroch buffers by the
-        learning rule instance.
+        Warning
+        -------
+        :meth:`~model.Model.fit` does not return intermediate output. Users should register forward hooks to
+        efficiently stream data to disk throughout the simulation (see :meth:`~engine.network.Network.add_data_hook`).
 
-        :param name: The name of the learning rule - required for pytorch.
-        :param learning_rule: The :class:`~sapicore.learning.SapicoreLearning`.
         """
-        if not isinstance(learning_rule, SapicoreLearning):
-            raise TypeError(
-                f'Only a SapicoreLearning can be added. '
-                f'Cannot add <{learning_rule.__class__}>')
+        # wrap 2D tensor data in a list if need be, to make subsequent single- and multi-root operations uniform.
+        if not isinstance(data, list):
+            data = [data]
 
-        self.add_module(name, learning_rule)
+        num_samples = data[0].shape[0]
+        with alive_bar(total=num_samples, force_tty=True) as bar:
+            # iterate over buffer.
+            for i in range(num_samples):
+                # repeat each sample for as many time steps as instructed.
+                for _ in range(repetitions if isinstance(repetitions, int) else repetitions[i]):
+                    self.network([data[j][i, :] for j in range(len(data))])
+                bar()
 
-    def add_network(
-        self, src_network: Optional[SapicoreNetwork], network_name: str,
-            network: SapicoreNetwork,
-            connected_neurons: Dict[SapicoreNeuron, SapicoreNeuron]) -> None:
-        """Adds a named network to the model, optionally with a source network
-        that connects to this network.
+        # learning is turned off after fitting by default.
+        for synapse in self.network.get_synapses():
+            synapse.set_learning(False)
 
-        The network is also registered with pytroch as a "pytorch module"
-        using ``add_module``. This enables usage of pytroch buffers by the
-        network instance.
+    def predict(self, data: Data | Tensor) -> Tensor:
+        """Predicts the labels of `data` by feeding the buffer to a trained network and applying
+        some procedure to the resulting population/readout layer response.
 
-        :param src_network: the optional source
-            :class:`~sapicore.network.SapicoreNetwork`. May be None.
-        :param network_name: The name of the network - required for pytorch.
-        :param network: The :class:`~sapicore.network.SapicoreNetwork`.
-        :param connected_neurons: A dict whose keys and values are
-            :class:`~sapicore.neuron.SapicoreNeuron` instances that each map a
-            neuron in the ``src_network`` to a neuron in the ``network``.
-        """
-        if not isinstance(network, SapicoreNetwork):
-            raise TypeError(
-                f'Only a SapicoreNetwork can be added. '
-                f'Cannot add <{network.__class__}>')
+        Parameters
+        ----------
+        data: Data or Tensor
+            Sapicore dataset or a standalone 2D tensor of data buffer, formatted sample X feature.
 
-        if src_network is not None:
-            if not isinstance(src_network, SapicoreNetwork):
-                raise TypeError(
-                    f'Only a SapicoreNetwork can be added. '
-                    f'Cannot add <{src_network.__class__}>')
+        Returns
+        -------
+        Tensor
+            Vector (1D tensor) of predicted labels.
 
-            networks = self.networks[src_network]
-            networks.append((network, connected_neurons))
-
-        if network not in self.networks:
-            self.networks[network] = []
-            self.add_module(network_name, network)
-
-    def initialize_state(self, **kwargs) -> None:
-        super(SapicoreModel, self).initialize_state(**kwargs)
-        for network in self.networks:
-            network.initialize_state(**kwargs)
-
-    def initialize_learning_state(self) -> None:
-        """Initializes the learning rule.
-
-        It must be overwritten to do any initialization.
         """
         pass
 
-    def apply_learning(self, **kwargs) -> None:
-        """Applies the learning rule to the model.
+    def similarity(self, data: Tensor, metric: str | Callable) -> Tensor:
+        """Performs rudimentary similarity analysis on the network population responses to `data`,
+        obtaining a pairwise distance matrix reflecting sample separation.
 
-        It must be overwritten in user code to apply learning.
+        Parameters
+        ----------
+        data: Tensor
+            2D tensor of data buffer, formatted sample X feature.
+
+        metric: str or Callable
+            Distance metric to be used. If a string value is provided, it should correspond to one of the available
+            :mod:`scipy.spatial.distance` metrics. If a custom function is provided, it should accept the
+            `data` tensor and return a scalar corresponding to their distance.
+
         """
         pass
+
+    def save(self, path: str):
+        """Saves the :class:`engine.network.Network` object owned by this model to `path`.
+
+        Parameters
+        ----------
+        path: str
+            Destination path, inclusive of the file to which the network should be saved.
+
+        Note
+        ----
+        The default implementation uses :meth:`torch.save`, for the common case where files are used.
+        Users may override this method when other formats are called for.
+
+        """
+        ensure_dir(os.path.dirname(path))
+        torch.save(self.network, path, pickle_module=dill)
+
+    def load(self, path: str) -> Network:
+        """Loads a :class:`engine.network.Network` from `path` and assigns it to this object's `network` attribute.
+
+        Parameters
+        ----------
+        path: str
+            Path to the file containing the model.
+
+        Returns
+        -------
+        Network
+            A reference to the loaded :class:`engine.network.Network` object in case it is
+            required by the calling function.
+
+        Note
+        ----
+        The default implementation uses :meth:`torch.load`, for the common case where files are used.
+        Users may override this method when other formats are called for.
+
+        """
+        if os.path.exists(path):
+            self.network = torch.load(path, pickle_module=dill)
+
+        return self.network
+
+    def draw(self, path: str, node_size: int = 750):
+        """Saves an SVG networkx graph plot showing ensembles and their general connectivity patterns.
+
+        Parameters
+        ----------
+        path: str
+            Destination path for network figure.
+
+        node_size: int, optional
+            Node size in network graph plot.
+
+        Note
+        ----
+        May be extended and/or moved to a dedicated visualization package in future versions.
+
+        """
+        plt.figure()
+        nx.draw(
+            self.network.graph, node_size=node_size, with_labels=True, pos=nx.kamada_kawai_layout(self.network.graph)
+        )
+
+        plt.savefig(fname=os.path.join(path, self.network.identifier + ".svg"))
+        plt.clf()

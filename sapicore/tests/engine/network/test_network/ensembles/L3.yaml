@@ -1,0 +1,18 @@
+package: sapicore.engine.ensemble.spiking
+class: LIFEnsemble
+
+model:
+  identifier: L3
+  num_units: 16
+
+  sweep:
+    fixed:
+      volt_rest: -60.0
+      volt_thresh: -40.0
+      leak_gl: 2.0
+      tau_mem: 2.0
+      tau_ref: 2.0
+
+loggable:
+  - voltage
+  - spiked

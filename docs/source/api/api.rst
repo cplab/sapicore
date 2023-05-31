@@ -1,20 +1,40 @@
-########################
-  The Sapicore API
-########################
+Data
+----
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :caption: Data
+   :recursive:
 
-.. toctree::
-   :maxdepth: 2
+   data
 
-   sapicore.rst
-   neuron.rst
-   synapse.rst
-   network.rst
-   model.rst
-   learning.rst
+Engine
+------
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :caption: Engine
+   :recursive:
 
-   pipeline.rst
-   logging.rst
-   dataset.rst
-   evaluation.rst
+   engine
 
-   utils.rst
+Workflow
+--------
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :caption: Workflow
+   :recursive:
+
+   model
+   pipeline
+
+Utilities
+---------
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :caption: Utilities
+   :recursive:
+
+   utils
