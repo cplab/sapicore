@@ -6,7 +6,29 @@ from torch import Tensor
 
 from sapicore.utils.constants import DT
 
-__all__ = ("Wave", "extend_input_current")
+__all__ = ("Wave", "WaveIterable", "extend_input_current")
+
+
+class WaveIterable:
+    """Implicit iterator returned by the :class:`Wave` iterable.
+
+    I.e. when you do ``iter(wave)`` or ``for x in wave:...`` it implicitly
+    creates an instance of this class and uses it to iterate over.
+
+    Parameters
+    ----------
+    wave: :class:`Wave:`
+        The wave class that will be iterated over.
+    """
+
+    def __init__(self, wave):
+        self.index = 0
+        self.wave = wave
+
+    def __next__(self):
+        value = self.wave._next(self.index)
+        self.index += 1
+        return value
 
 
 class Wave:
@@ -92,45 +114,43 @@ class Wave:
         self.index = 0
 
         # validate correctness of waveform configuration provided.
-        self.valid = self._validate()
+        self._validate()
 
     def __iter__(self):
-        self.index = 0
-        return self
+        # validate correctness in case params were manually changed
+        self._validate()
 
-    def __next__(self):
+        return WaveIterable(self)
+
+    def _next(self, index):
         # compute wave at current time point from given components.
         value = torch.zeros(1, dtype=torch.float, device=self.device)
 
-        if self.valid:
-            for i in range(len(self.frequencies)):
-                amp_series = self.amplitudes[i]
-                time = self.index * (1.0 / self.sampling_rate)
+        for i in range(len(self.frequencies)):
+            amp_series = self.amplitudes[i]
+            time = index * (1.0 / self.sampling_rate)
 
-                if self.phase_amplitude_coupling is not None:
-                    # add sine variation to base amplitude.
-                    temp = self.amplitudes[i] * torch.sin(
-                        2 * torch.pi * self.phase_amplitude_coupling[i] * time + self.phase_shifts[i]
-                    )
-                    amp_series = amp_series + temp
-
-                # add PAC oscillation to combined wave.
-                value = value + amp_series * torch.sin(
-                    2.0 * torch.pi * self.frequencies[i] * time + self.phase_shifts[i]
+            if self.phase_amplitude_coupling is not None:
+                # add sine variation to base amplitude.
+                temp = self.amplitudes[i] * torch.sin(
+                    2 * torch.pi * self.phase_amplitude_coupling[i] * time + self.phase_shifts[i]
                 )
+                amp_series = amp_series + temp
 
-        self.index += 1
+            # add PAC oscillation to combined wave.
+            value = value + amp_series * torch.sin(
+                2.0 * torch.pi * self.frequencies[i] * time + self.phase_shifts[i]
+            )
+
         return value + self.baseline_shift
 
-    def _validate(self) -> bool:
+    def _validate(self):
         """Validates wave parameters, setting :attr:`valid` to False if configuration is faulty.
         Specifically, checks that all sine components have an amplitude, a frequency, and a phase
         (i.e., that lengths are equal)."""
-        lengths = [len(v) for v in [self.amplitudes, self.frequencies, self.phase_shifts]]
+        lengths = list(map(len, (self.amplitudes, self.frequencies, self.phase_shifts)))
         if not all(x == lengths[0] for x in lengths):
-            return False
-
-        return True
+            raise ValueError("Not all parameters are the same length")
 
 
 def extend_input_current(
