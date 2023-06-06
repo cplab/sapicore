@@ -1,0 +1,25 @@
+# Table of contents
+
+format: jb-book
+#TODO there is probably a way to refer to the main README instead of symlink it to book/ in `refresh.sh`
+root: README
+
+parts:
+  - caption: Tutorials
+    chapters:
+    - file: tutorials/01-LIFNeuron
+    - file: tutorials/02-Other_neurons_models
+    - file: tutorials/03-LIFEnsemble
+    - file: tutorials/04-Heterogeneous_LIFEnsemble
+    - file: tutorials/05-LIFNetwork
+
+
+  # TODO this recapitulate what is in source/api.rst in the api doc format. There should be a way to use
+  # it directly instead of copying content over to those content/api/* files maybe with 'html_extra_path'
+  - caption: API
+    chapters:
+    - file: content/api/data
+    - file: content/api/engine
+    - file: content/api/workflow
+    - file: content/api/utilities
+    - file: content/api/links
