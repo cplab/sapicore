@@ -1,0 +1,66 @@
+name: conda
+
+on: [push, pull_request]
+
+jobs:
+  conda-packaging:
+    name: ${{ matrix.python-version }}, ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: ["ubuntu-latest"]
+        python-version: ["3.10"]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+      - name: Setup conda with mamba
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+            channels: conda-forge, default
+            miniconda-version: 'latest'
+            mamba-version: "*"
+            activate-environment: sapicore
+            auto-update-conda: false
+            python-version: ${{ matrix.python-version }}
+            environment-file: environment.yml
+      - name: Run tests
+        run: |
+          mamba install pytest hypothesis
+          pytest sapicore/
+
+
+  conda-packaging-dev:
+    name: ${{ matrix.python-version }}, ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: ["ubuntu-latest"]
+        python-version: ["3.10"]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+      - name: Setup conda with mamba
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+            channels: conda-forge, default
+            miniconda-version: 'latest'
+            mamba-version: "*"
+            activate-environment: sapicore
+            auto-update-conda: false
+            python-version: ${{ matrix.python-version }}
+            environment-file: environment-dev.yml
+      - name: Update environment
+        run: |
+          mamba env update -f environment.yml
+          mamba env update -f environment-dev.yml
+      - name: Run tests
+        run: |
+          pytest sapicore/
