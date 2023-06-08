@@ -123,9 +123,9 @@ class CV:
 
     def __iter__(self):
         self.index = 0
-        self.splitter = self.cross_validator.split(X=self.labels, y=self.labels, groups=self.groups)
+        splitter = self.cross_validator.split(X=self.labels, y=self.labels, groups=self.groups)
 
-        return self.splitter
+        return splitter
 
     def __len__(self) -> int:
         return len(self.labels)
