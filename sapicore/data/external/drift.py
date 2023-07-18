@@ -22,7 +22,7 @@ class DriftDataset(Data):
 
     See Also
     --------
-    `Drift dataset specification <https://archive.ics.uci.edu/ml/datasets/Gas%20Sensor%20Array%20Drift%20Dataset#>`_
+    `Drift dataset specification <https://archive.ics.uci.edu/dataset/224/gas+sensor+array+drift+dataset>`_
 
     """
 
@@ -30,17 +30,17 @@ class DriftDataset(Data):
         super().__init__(
             root=root,
             download=True,
-            remote_urls="https://archive.ics.uci.edu/ml/machine-learning-databases/00224/Dataset.zip",
+            remote_urls="https://archive.ics.uci.edu/static/public/224/gas+sensor+array+drift+dataset.zip",
             **kwargs
         )
 
     def _standardize(self):
         # the file retrieved from the UCSD repository needs to be unzipped.
-        with ZipFile(os.path.join(self.root, "Dataset.zip"), "r") as zf:
+        with ZipFile(os.path.join(self.root, "gas+sensor+array+drift+dataset.zip"), "r") as zf:
             zf.extractall(path=os.path.join(self.root))
 
         # remove zip archive and move extracted files to the dataset root directory "drift".
-        os.remove(os.path.join(self.root, "Dataset.zip"))
+        os.remove(os.path.join(self.root, "gas+sensor+array+drift+dataset.zip"))
         for file in os.listdir(os.path.join(self.root, "Dataset")):
             shutil.move(os.path.join(self.root, "Dataset", file), os.path.join(self.root, file))
         shutil.rmtree(os.path.join(self.root, "Dataset"))
