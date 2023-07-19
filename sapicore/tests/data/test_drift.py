@@ -16,7 +16,7 @@ class TestDrift:
 
         except ConnectionError:
             # package tests should NOT fail when a particular hardcoded archive server is down.
-            pass
+            pytest.mark.skip("Could not download drift dataset")
 
 
 if __name__ == "__main__":
