@@ -1,0 +1,8 @@
+engine.synapse.STDP
+===================
+
+.. automodule:: engine.synapse.STDP
+   :members:
+
+
+

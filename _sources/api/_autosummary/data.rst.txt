@@ -1,0 +1,18 @@
+﻿data
+====
+
+.. automodule:: data
+   :members:
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   data.external
+   data.sampling
+

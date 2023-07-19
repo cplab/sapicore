@@ -1,0 +1,8 @@
+data.sampling
+=============
+
+.. automodule:: data.sampling
+   :members:
+
+
+
