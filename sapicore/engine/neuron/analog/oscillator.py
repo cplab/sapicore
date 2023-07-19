@@ -98,10 +98,7 @@ class OscillatorNeuron(AnalogNeuron):
             }
 
             wave = Wave(
-                **specification,
-                sampling_rate=self.dt * 1000.0,
-                device=self.device,
-                baseline_shift=self.baseline_shift
+                **specification, sampling_rate=self.dt * 1000.0, device=self.device, baseline_shift=self.baseline_shift
             )
             self._waves.append(wave)
             self._iter.append(iter(wave))

@@ -138,9 +138,7 @@ class Wave:
                 amp_series = amp_series + temp
 
             # add PAC oscillation to combined wave.
-            value = value + amp_series * torch.sin(
-                2.0 * torch.pi * self.frequencies[i] * time + self.phase_shifts[i]
-            )
+            value = value + amp_series * torch.sin(2.0 * torch.pi * self.frequencies[i] * time + self.phase_shifts[i])
 
         return value + self.baseline_shift
 
