@@ -6,7 +6,7 @@ implementing a generic forward method that simply adds incoming input to their n
 Analog neurons may perform normalization or provide otherwise transformed input to downstream layers.
 
 """
-from torch import tensor, Tensor
+from torch import Tensor
 from sapicore.engine.neuron import Neuron
 
 __all__ = ("AnalogNeuron",)
@@ -31,7 +31,10 @@ class AnalogNeuron(Neuron):
         super().__init__(**kwargs)
 
     def forward(self, data: Tensor) -> dict:
-        """Adds input `data` to the numeric state stored in the instance attribute tensor `voltage`.
+        """Updates the numeric state stored in the instance attribute tensor `voltage` to `data`.
+
+        These default analog neurons integrate the total input impinging on them on every simulation step.
+
 
         Parameters
         ----------
@@ -50,9 +53,9 @@ class AnalogNeuron(Neuron):
 
         """
         # update internal representation of input current for tensorboard logging purposes.
-        self.input = tensor([data.detach().clone()]) if not data.size() else data.detach().clone()
+        self.input = data
+        self.voltage = data
 
-        self.voltage = self.voltage.add(data)
         self.simulation_step += 1
 
         # return current state(s) of loggable attributes as a dictionary.
