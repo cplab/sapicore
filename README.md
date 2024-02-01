@@ -92,6 +92,7 @@ To configure your local environment, install these development dependencies and 
 	pre-commit install
 
 Documentation can be compiled by installing Sphinx and RTD, then running `docs/refresh.sh`.
+JupyterBook can be compiled by running `docs/refresh_book.sh`.
 
 Citation
 --------
