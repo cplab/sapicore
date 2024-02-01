@@ -4,6 +4,7 @@ from numpy.typing import NDArray
 
 import os
 import urllib.request
+from urllib.error import HTTPError, URLError
 
 from copy import deepcopy
 from glob import glob
@@ -251,6 +252,9 @@ class Data(Dataset):
         ValueError
             If the URL provided is invalid.
 
+        ConnectionError
+            If remote URL is down.
+
         """
         # create the destination directory if it doesn't exist.
         ensure_dir(self.root)
@@ -261,8 +265,13 @@ class Data(Dataset):
 
         # download file(s).
         for url in self.remote_urls:
-            file = url.split("/")[-1]
-            urllib.request.urlretrieve(url, os.path.join(self.root, file))
+            try:
+                file = url.split("/")[-1]
+                urllib.request.urlretrieve(url, os.path.join(self.root, file))
+            except HTTPError as e:
+                raise ConnectionError(f"Download failed, server down: {url}") from e
+            except URLError as e:
+                raise ConnectionError(f"Download failed, URL invalid: {url}") from e
 
     def _standardize(self):
         """Standardizes an external data directory tree, e.g. a remote repository, possibly converting it to a

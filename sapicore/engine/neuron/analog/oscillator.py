@@ -78,14 +78,16 @@ class OscillatorNeuron(AnalogNeuron):
         self.amp_freq = as_tensor(amp_freq if amp_freq else [0.0], device=self.device)
         self.baseline_shift = as_tensor(baseline_shift if baseline_shift else [0.0], device=self.device)
 
-        # placeholder for wave iterator.
-        self.iter = []
+        # placeholder for waves and wave iterator.
+        self._iter = []
+        self._waves = []
 
     def register_waveforms(self) -> None:
         """Creates Wave iterators for each oscillator element."""
 
         # create an iterator for each oscillator in the ensemble and append it to `iter`.
-        self.iter = []
+        self._iter = []
+        self._waves = []
         for i in range(self.amplitudes.shape[0]):
             specification = {
                 "amplitudes": self.amplitudes[i],
@@ -94,14 +96,12 @@ class OscillatorNeuron(AnalogNeuron):
                 "phase_shifts": self.phases[i] * pi,
                 "phase_amplitude_coupling": self.amp_freq[i],
             }
-            self.iter.append(
-                Wave(
-                    **specification,
-                    sampling_rate=self.dt * 1000.0,
-                    device=self.device,
-                    baseline_shift=self.baseline_shift
-                )
+
+            wave = Wave(
+                **specification, sampling_rate=self.dt * 1000.0, device=self.device, baseline_shift=self.baseline_shift
             )
+            self._waves.append(wave)
+            self._iter.append(iter(wave))
 
     def forward(self, data: Tensor) -> dict:
         """Oscillator forward method.
@@ -121,7 +121,7 @@ class OscillatorNeuron(AnalogNeuron):
         """
         # compute the next value of the wave and store it in `voltage`, the state variable of the analog neuron.
         # if input current is provided (`data` tensor), it will be added to the oscillation.
-        self.voltage = tensor([next(wave_sample) for wave_sample in self.iter], device=self.device).add(data)
+        self.voltage = tensor([next(wave_sample) for wave_sample in self._iter], device=self.device).add(data)
         self.simulation_step += 1
 
         # return current state(s) of loggable attributes as a dictionary.
