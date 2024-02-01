@@ -48,50 +48,112 @@ See `tutorials` and `tests/engine/network/test_network` for instructive scripts 
 Installation
 ------------
 Basic requirements include Python 3.10+, PyTorch 1.12+, NetworkX, and the scientific stack (numpy, scipy, pandas).
-Developers should also install pytest and sphinx. See ``setup.py`` for more information.
+Developers should also install pytest and sphinx.
 
-To install the latest stable version of Sapicore:
+### Install Sapicore:
 
-	pip install sapicore
+* Via poetry (after installing [poetry](https://python-poetry.org/))
 
-To install the most recent development version:
+      git clone git@github.com:cplab/sapicore.git
+      cd sapicore/
+      poetry install
+      poetry shell
 
-	pip install https://github.com/cplab/sapicore/archive/refs/heads/main.zip
+**NOTE**: the command `poetry shell` should be used to spawn the virtual environment every time you use a new console. For reference see: https://python-poetry.org/docs/cli/#shell
 
-To run tests, change directory to the one containing `pytest.ini` (`sapicore`) and call:
 
-    pytest -v -s
+* Pip (current development)
 
-To run tests with a coverage report, run `sapicore/tests/scripts/run_tests.py`.
-The coverage report will be generated in a separate directory on the same level (open `index.html`).
+      pip install git+https://github.com/cplab/sapicore.git
 
+* Via pypi (latest release - not currently possible)
+
+      pip install sapicore
+
+* Via conda
+
+      git clone git@github.com:cplab/sapicore.git
+      cd sapinet2/
+      conda create -n sapinet python=3.10
+      conda activate sapicore
+      conda env update --file environment.yml
+
+
+### Verify your Sapinet 2 install by running the tests:
+* Via poetry:
+
+      poetry install -E 'test-only'
+      poetry run pytest sapinet/
+
+* Via pip:
+
+      pip install pytest hypothesis
+      pytest sapinet/
+
+* Via conda
+
+      conda install pytest hypothesis
+      pytest sapinet/
 ***
-
 Development
 -----------
+Dependency management and packaging is done using ``poetry`` or ``conda`` (optional). Please install your prefered packaging manager as recommended in their respective documentation.
+
 If you would like to modify or extend this library:
 
-* Clone the repository:
+1. Clone the repository:
 
+      ```
       git clone https://github.com/cplab/sapicore.git
+      ```
 
-* Create a conda virtual environment (optional):
+2. Install dependencies via ``conda`` to manage the virtual environment (if you are not using ``conda``, go to step 3 directly):
 
-      conda create -n <env_name> python=3.10
-      conda activate <env_name>
+* Create a conda virtual environment:
 
-* Change directory to `sapicore` and install with pip:
+      conda create -n sapicore python=3.10
 
-      cd sapicore
-      pip install -e .
+* Activate the previously created virtual environement:
 
-This project uses ``black`` to format code and ``flake8`` for linting. We support ``pre-commit``.
-To configure your local environment, install these development dependencies and set up the commit hooks:
+      conda activate sapicore
 
-	pip install black flake8 pre-commit
-	pre-commit install
+* Install the dependencies both from the standard `environment.yml` and the `environment-dev.yml` file
 
-Documentation can be compiled by installing Sphinx and RTD, then running `docs/refresh.sh`.
+      conda env update --file environment.yml
+      conda env update --file environment-dev.yml
+
+3. Install dependencies via ``poetry``. If you ran step 2 (conda install) this is optional and you can skip to step 4 :
+
+* Install the dependencies:
+
+      poetry install -E "dev"
+
+* Activate the virtual environement:
+
+      poetry shell
+
+4. Verify your installation by running sapinet's tests. Change directory to the one containing `pytest.ini` (currently `sapicore/`) and call:
+
+      ```
+      pytest -v -s
+      ```
+
+      To run tests with a coverage report, run `sapinet/tests/scripts/run_tests.py`.
+      The HTML will be generated in a separate directory on the same level (open `index.html`).
+
+
+5. This project uses ``black`` to format code and ``flake8`` for linting. We make use of ``pre-commit`` to ensure code standards before any commit is being made.
+
+	```
+      pre-commit install
+      ```
+
+If you end up implementing additional features, feel free to submit a pull request (PR).
+Feature and bug fix PRs must include functional, minimally tested code that produces the expected outcome.
+Test, documentation, and proposal PRs should be substantial.
+
+
+The development environemnt include all the package required to compile the documentation, which can be done by running `docs/refresh.sh`.
 
 Citation
 --------

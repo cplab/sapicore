@@ -1,0 +1,57 @@
+[tool.poetry]
+name = "sapicore"
+version = "0.3.1"
+description = "A framework for spiking neural network modeling"
+authors = [
+        "Roy Moyal <rm875@cornell.edu>",
+        "Matthew Einhorn <me263@cornell.edu>",
+        "Jeremy Forest <jerem.forest@gmail.com>",
+        "Ayon Borthakur <ayon.borthakur@ai.iith.ac.in>",
+        "Thomas Cleland <tac29@cornell.edu>",
+        ]
+license = "MIT"
+readme = "README.md"
+homepage = "https://cplab.net/"
+repository = "https://github.com/cplab/sapicore"
+classifiers=[
+        "Development Status :: 2 - Pre-Alpha",
+        "Programming Language :: Python :: 3.10",
+        ]
+
+
+[tool.poetry.dependencies]
+alive_progress="*"
+h5py = "*"
+python = "^3.10"
+matplotlib = "*"
+networkx = ">=2.8.8"
+numpy = "*"
+pandas = "*"
+psutil = "*"
+pyyaml = "*"
+ray = "*"
+scipy = "*"
+tensorboard = ">=2.9.0"
+torch = ">=1.12.0"
+torchvision = "*"
+scikit-learn = "*"
+protobuf = ">=3.20.*"
+black = { version = "*", optional = true }
+coverage = { version = "*", optional = true }
+flake8 = { version = "*", optional = true }
+hypothesis = { version = "*", optional = true }
+ipykernel = { version = "*", optional = true }
+pre-commit = { version = "*", optional = true }
+pytest = { version = ">=7.1.2", optional = true }
+requests = { version = "*", optional = true }
+sphinx = { version = ">=5.3.0", optional = true }
+sphinx_togglebutton = { version = "*", optional = true }
+sphinx-rtd-theme = { version = "*", optional = true }
+
+[tool.poetry.extras]
+test = ['pytest', 'hypothesis']
+dev = ['black', 'coverage', 'flake8', 'hypothesis', 'ipykernel', 'pre-commit', 'pytest', 'requests', 'sphinx', 'sphinx_togglebutton', 'sphinx-rtd-theme', 'm2r2']
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

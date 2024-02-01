@@ -1,0 +1,23 @@
+name: sapicore
+channels:
+  - defaults
+  - conda-forge
+  - pytorch
+dependencies:
+  - h5py
+  - matplotlib
+  - networkx >=2.8.8
+  - numpy
+  - pandas
+  - pip
+  - psutil
+  - pytorch::pytorch >=1.12.0
+  - pytorch::torchvision
+  - pyyaml
+  - ray-tune
+  - setuptools
+  - scikit-learn
+  - scipy
+  - tensorboard >=2.9.0
+  - pip:
+    - alive-progress

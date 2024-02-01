@@ -1,0 +1,17 @@
+name: sapicore
+channels:
+  - defaults
+  - conda-forge
+  - pytorch
+dependencies:
+  - black
+  - coverage
+  - flake8
+  - hypothesis
+  - ipykernel
+  - pre-commit
+  - pytest >=7.1.2
+  - requests
+  - scikit-learn
+  - scipy
+  - tensorboard >=2.9.0
