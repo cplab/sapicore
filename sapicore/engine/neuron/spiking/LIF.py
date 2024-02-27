@@ -34,6 +34,12 @@ class LIFNeuron(SpikingNeuron):
     tau_ref: float or Tensor
         Refractory period (e.g., 1.0).
 
+    cycle_length: int, optional
+        Oscillatory cycle period, required to time optional resetting of the refractory period.
+
+    release_phase: int, optional
+        Oscillation phase at which to release all neurons from refractory mode, if required.
+
     References
     ----------
     `LIF Tutorial <https://compneuro.neuromatch.io/tutorials/W2D3_BiologicalNeuronModels/student/W2D3_Tutorial1.html>`_
@@ -109,6 +115,11 @@ class LIFNeuron(SpikingNeuron):
         # decrement refractory steps, taking care to zero out negatives.
         self.refractory_steps = relu(self.refractory_steps - 1)
         self.simulation_step += 1
+
+        if hasattr(self, "release_phase") and hasattr(self, "cycle_length"):
+            # voltage will start to accumulate at a particular phase, canceling the refractory period across units.
+            if self.simulation_step % self.cycle_length == self.release_phase:
+                self.refractory_steps = 0
 
         # return current state(s) of loggable attributes as a dictionary.
         return self.loggable_state()

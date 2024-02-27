@@ -61,10 +61,10 @@ class AxisDescriptor:
         self.axis = axis
         self.labels = np.array(labels)
 
-    def __getitem__(self, index: slice) -> Tensor:
+    def __getitem__(self, index: Any) -> Tensor:
         return self.labels[index]
 
-    def __setitem__(self, index: slice, values: Any):
+    def __setitem__(self, index: Any, values: Any):
         self.labels[index] = np.array(values)
 
 
@@ -205,11 +205,11 @@ class Data(Dataset):
             # passes silently if not implemented by the user.
             self._standardize()
 
-    def __getitem__(self, index: slice):
+    def __getitem__(self, index: Any):
         """Calls :meth:`access` to slice into the data or access specific file(s), returning the value(s) at `index`."""
         return self.access(index)
 
-    def __setitem__(self, index: slice, values: Tensor):
+    def __setitem__(self, index: Any, values: Tensor):
         """Sets buffer values at the given indices to `values`."""
         self.modify(index, values)
 
@@ -289,7 +289,7 @@ class Data(Dataset):
         """
         pass
 
-    def access(self, index: slice, axis: int = None) -> Tensor:
+    def access(self, index: Any, axis: int = None) -> Tensor:
         """Specifies how to access data by mapping indices to actual samples (e.g., from file(s) in `root`).
 
         The default implementation slices into `self.buffer` to accommodate the trivial cases where the user has
@@ -301,7 +301,7 @@ class Data(Dataset):
 
         Parameters
         ----------
-        index: slice
+        index: Any
             Index(es) to slice into.
 
         axis: int, optional
@@ -315,7 +315,7 @@ class Data(Dataset):
         """
         return self.buffer.index_select(axis, torch.as_tensor(index)) if axis is not None else self.buffer[index]
 
-    def load(self, indices: slice = None):
+    def load(self, indices: Any = None):
         """Populates the `buffer` tensor buffer and/or `descriptors` attribute table by loading one or more files
         into memory, potentially selecting only `indices`.
 
@@ -323,7 +323,7 @@ class Data(Dataset):
 
         Parameters
         ----------
-        indices: slice
+        indices: Any
             Specific indices to include, one for each file.
 
         Returns
@@ -340,7 +340,7 @@ class Data(Dataset):
         """
         pass
 
-    def modify(self, index: slice, values: Tensor):
+    def modify(self, index: Any, values: Tensor):
         """Set or modify data values at the given indices to `values`.
 
         The default implementation edits the `buffer` field of this :class:`Data` object.
@@ -348,7 +348,7 @@ class Data(Dataset):
 
         Parameters
         ----------
-        index: slice
+        index: Any
             Indices to modify.
 
         values: Tensor
@@ -453,13 +453,13 @@ class Data(Dataset):
         # trim buffer and labels, returning a new partial dataset without mutating the original.
         return self.trim(index=subset, axis=axis)
 
-    def trim(self, index: slice, axis: int = None):
+    def trim(self, index: Any, axis: int = None):
         """Trims this instance by selecting `indices`, potentially along `axis`, returning a subset of the original
         dataset in terms of both buffer entries and labels/descriptors. Does not mutate the underlying object.
 
         Parameters
         ----------
-        index: slice
+        index: Any
             Index(es) to retain.
 
         axis: int, optional
