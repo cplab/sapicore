@@ -119,7 +119,8 @@ class LIFNeuron(SpikingNeuron):
         if hasattr(self, "release_phase") and hasattr(self, "cycle_length"):
             # voltage will start to accumulate at a particular phase, canceling the refractory period across units.
             if self.simulation_step % self.cycle_length == self.release_phase:
-                self.refractory_steps = 0
+                self.refractory_steps = torch.zeros_like(self.refractory_steps)
+                self.voltage = self.volt_rest
 
         # return current state(s) of loggable attributes as a dictionary.
         return self.loggable_state()
