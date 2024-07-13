@@ -314,19 +314,6 @@ class Network(Module):
 
         return hooks
 
-    # To micromanage the forward/backward sweeps, subclass Network and override summation(), forward(), backward().
-    @staticmethod
-    def summation(synaptic_input: list[torch.tensor]) -> torch.tensor:
-        """Adds up inputs from multiple synapse objects onto the same ensemble, given as rows.
-
-        Note
-        ----
-        If your model requires some preprocessing of inputs to the postsynaptic neuron, it can be implemented
-        by overriding this method.
-
-        """
-        return torch.sum(torch.vstack(synaptic_input), dim=0)
-
     def backward(self) -> None:
         """Processes a backward sweep for this network object.
 
@@ -377,9 +364,14 @@ class Network(Module):
             ensemble_ref = self.graph.nodes[ensemble]["reference"]
 
             if ensemble_ref.identifier not in self.roots:
-                # apply a summation function to synaptic data flowing into this ensemble (torch.sum by default).
+                # apply an aggregation function to synaptic data flowing into this ensemble.
                 if incoming_synapses:
-                    integrated_data = self.summation([synapse.output for synapse in incoming_synapses]).to(self.device)
+                    inputs = [synapse.output for synapse in incoming_synapses]
+                    ids = [synapse.identifier for synapse in incoming_synapses]
+
+                    # aggregation is (micro)managed at the neuron level; torch.sum is used by default.
+                    integrated_data = ensemble_ref.aggregate(inputs, identifiers=ids).to(self.device)
+
                 else:
                     integrated_data = ensemble_ref.input
 
@@ -388,7 +380,8 @@ class Network(Module):
                 external = [data[self.roots.index(ensemble_ref.identifier)]] if isinstance(data, list) else [data]
                 feedback = [synapse.output for synapse in incoming_synapses]
 
-                integrated_data = self.summation(external + feedback)
+                ids = [f"ext{z}" for z in range(len(external))] + [synapse.identifier for synapse in incoming_synapses]
+                integrated_data = ensemble_ref.aggregate(external + feedback, identifiers=ids)
 
             # forward current ensemble.
             ensemble_ref(integrated_data)

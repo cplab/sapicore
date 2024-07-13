@@ -321,18 +321,16 @@ class Synapse(Component):
         # enforce weight limits.
         self.weights = torch.clamp(self.weights, self.weight_min, self.weight_max)
 
-        # mask non-connections (repeated on every iteration in case mask was updated during simulation).
-        self.weights = self.weights.multiply_(self.connections)
-
         if self.simple_delays:
-            self.output = torch.matmul(self.weights, self.delayed_data)
+            # mask non-connections (repeated on every iteration in case mask was updated during simulation).
+            self.output = torch.matmul(self.weights * self.connections, self.delayed_data)
 
         else:
             self.delayed_data = self.delayed_data.reshape(self.matrix_shape)
 
             # this loop is unavoidable, as N vector multiplications with different delayed_data are needed.
             for i in range(self.matrix_shape[0]):
-                self.output[i] = torch.matmul(self.weights[i, :], self.delayed_data[i, :])
+                self.output[i] = torch.matmul(self.weights[i, :] * self.connections[i, :], self.delayed_data[i, :])
 
         # advance simulation step and return output dictionary.
         self.simulation_step += 1

@@ -15,9 +15,6 @@ setup(
     "tac29@cornell.edu",
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
@@ -39,6 +36,7 @@ setup(
         "alive_progress",
         "tree-config",
         "pytest",
+        "setuptools",
     ],
     extras_require={
         "dev": ["coverage", "flake8", "sphinx<7.0.0", "sphinx-rtd-theme", "m2r2"],

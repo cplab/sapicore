@@ -85,6 +85,11 @@ class STDPSynapse(Synapse):
         # in typical cases, should generally be on during training and off during testing.
         self.learning = True
 
+        # keep track of stale spike pairs, so that weights are only updated on new spike events.
+        # alternatively, set `is_discontinuous` false to update weights on every simulation step.
+        self.is_discontinuous = kwargs.get("is_discontinuous", True)
+        self.stale = torch.ones_like(self.weights).bool()
+
     def update_weights(self) -> Tensor:
         """STDP weight update implementation.
 
@@ -102,27 +107,36 @@ class STDPSynapse(Synapse):
             -self.dst_last_spiked + self.simulation_step
         )
 
-        # initialize dW matrix--remember the format is dst.num_units by src.num_units.
+        # ensure action is only taken on pre-post pairs for whom one or both units spiked in this cycle.
+        if self.is_discontinuous:
+            self.stale[:] = True
+            self.stale[:, torch.argwhere(torch.as_tensor(self.src_last_spiked == self.simulation_step))] = False
+            self.stale[torch.argwhere(torch.as_tensor(self.dst_last_spiked == self.simulation_step)), :] = False
+        else:
+            self.stale[:] = False
+
+        # initialize delta weight matrix (destination X source).
         delta_weight = torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device)
 
-        # subtract postsynaptic last spike time stamps from presynaptic.
-        # transpose dst_last_spiked to a column vector, extend column-wise, then add its negative to src_last_spiked.
-        dst_tr = self.dst_last_spiked.reshape(self.dst_last_spiked.shape[0], 1)
-        delta_spike = -dst_tr.repeat(dst_tr.shape[1], self.src_ensemble.num_units) + self.src_last_spiked
+        if torch.any(~self.stale) or not self.is_discontinuous:
+            # subtract postsynaptic last spike time stamps from presynaptic.
+            # transpose dst_last_spiked to a column vector, extend column-wise, then subtract from src_last_spiked.
+            dst_tr = self.dst_last_spiked.reshape(self.dst_last_spiked.shape[0], 1)
+            delta_spike = -dst_tr.repeat(dst_tr.shape[1], self.src_ensemble.num_units) + self.src_last_spiked
 
-        # spike time differences for the potentiation and depression cases (pre < post, pre > post, respectively).
-        ltp_diffs = (delta_spike < 0.0).int() * delta_spike
-        ltd_diffs = (delta_spike > 0.0).int() * delta_spike
+            # spike time differences for the potentiation and depression cases (pre < post, pre > post, respectively).
+            ltp_diffs = (delta_spike < 0.0).int() * delta_spike
+            ltd_diffs = (delta_spike > 0.0).int() * delta_spike
 
-        # add to total delta weight matrix (diffs are in simulation steps, tau are in ms).
-        delta_weight = delta_weight + (delta_spike < 0.0).int() * (
-            self.alpha_plus * torch.exp(ltp_diffs / (self.tau_plus / self.dt))
-        )
-        delta_weight = delta_weight + (delta_spike > 0.0).int() * (
-            -self.alpha_minus * torch.exp(-ltd_diffs / (self.tau_minus / self.dt))
-        )
+            # add to total delta weight matrix (diffs are in simulation steps, tau are in ms).
+            delta_weight = delta_weight + ~self.stale * (delta_spike < 0.0).int() * (
+                self.alpha_plus * torch.exp(ltp_diffs / (self.tau_plus / self.dt))
+            )
+            delta_weight = delta_weight + ~self.stale * (delta_spike > 0.0).int() * (
+                -self.alpha_minus * torch.exp(-ltd_diffs / (self.tau_minus / self.dt))
+            )
+            self.weights = self.weights.add(delta_weight)
 
-        self.weights = self.weights.add(delta_weight)
         return delta_weight
 
     def forward(self, data: Tensor) -> dict:

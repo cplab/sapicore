@@ -56,20 +56,11 @@ class BalancedSampler:
         frame["index"] = frame.index
         grouped = frame.groupby(group_keys, group_keys=False)
 
-        if self.stratified:
-            # convert `n` to fraction if need be.
-            if isinstance(n, int):
-                frac = len(frame["index"].tolist()) * n
+        # convert `n` to integer if need be.
+        if isinstance(n, float):
+            n = int(n * len(frame["index"].tolist()))
 
-            # perform stratified sampling of `frac` out of every group.
-            subset = grouped.apply(lambda x: x.sample(frac=frac, replace=self.replace))
-
-        else:
-            # convert `n` to integer if need be.
-            if isinstance(n, float):
-                n = int(n * len(frame["index"].tolist()))
-
-            subset = grouped.apply(lambda x: x.sample(n, replace=self.replace))
+        subset = grouped.apply(lambda x: x.sample(n, replace=self.replace))
 
         return subset["index"].tolist()
 

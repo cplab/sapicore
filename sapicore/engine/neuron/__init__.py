@@ -56,7 +56,7 @@ class Neuron(Component):
     Warning
     -------
     When defining `equation` for a custom neuron model, the present value of `voltage` should NOT be added to the
-    right hand side. Do NOT multiply by DT. These operations will be performed as part of the generic Euler forward.
+    right hand side. Do NOT multiply by DT. These operations will be performed within the Integrator.
 
     """
 
@@ -84,7 +84,7 @@ class Neuron(Component):
     def num_units(self):
         """Number of functional units represented by this object.
 
-        Neurons are singletons by coercion, as they are meant to express unit dynamics.
+        Neurons are singletons by coercion, as they are meant to express and encapsulate unit dynamics.
         Derivatives of :class:`~engine.ensemble.Ensemble` can modify this property and duplicate units as necessary.
 
         """
@@ -108,7 +108,7 @@ class Neuron(Component):
         Raises
         ------
         NotImplementedError
-            The forward method must be implemented by each derived class.
+            The forward method must be implemented by derivative classes.
 
         """
         raise NotImplementedError
@@ -138,3 +138,28 @@ class Neuron(Component):
 
         """
         self.voltage = self.voltage + current
+
+    @staticmethod
+    def aggregate(inputs: list[Tensor], identifiers: list[str] = None) -> Tensor:
+        """Determines how presynaptic inputs from multiple sources should be aggregated.
+
+        By default, neurons sum their inputs. However, many use cases may require more sophistication.
+        Shunting inhibition, for instance, can be expressed with torch.div (or torch.prod, if the source
+        synapse is expected to send the inverse).
+
+        Parameters
+        ----------
+        inputs: list of Tensor
+            Input arriving at this layer, synaptic or external.
+
+        identifiers: list of str, optional
+            Labels by which to micromanage input aggregation. Since some inputs may not be
+            synaptic, users are responsible for passing identifiers in an order matching that of the input tensors.
+
+        Note
+        ----
+        If your model requires identifier-dependent preprocessing of synaptic inputs to this neuron (e.g., a
+        combination of addition and multiplication), it can be implemented by overriding this method.
+
+        """
+        return torch.sum(torch.vstack(inputs), dim=0)

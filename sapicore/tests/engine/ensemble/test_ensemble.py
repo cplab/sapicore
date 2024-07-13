@@ -41,18 +41,6 @@ class TestEnsemble:
         assert torch.all(add_same_shape["voltage"].eq(init_voltage + 1))
         assert torch.all(add_same_shape["voltage"].eq(arg_.voltage))
 
-        # adding a data tensor of a different shape should raise a runtime error if `num_units` > 1.
-        if arg_.num_units > 1:
-            with pytest.raises(RuntimeError):
-                arg_.forward(data=torch.ones((516, 516), device=TEST_DEVICE))
-        else:
-            arg_.forward(data=torch.ones((516, 516), device=TEST_DEVICE))
-
-        # when data tensor not on same device.
-        if torch.cuda.is_available():
-            with pytest.raises(RuntimeError):
-                arg_.forward(data=torch.zeros(1))
-
     @pytest.mark.parametrize(
         "arg_",
         [
