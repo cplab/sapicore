@@ -39,7 +39,7 @@ class SimpleSimulator(Pipeline):
     Note
     ----
     For a more complex demonstration involving data processing, selection, sampling, and cross-validation,
-    see `tutorials/basic_training.py`. If using this script with data (be it Data or Tensor),
+    see `tutorials/basic_experiment.py`. If using this script with data (be it Data or Tensor),
     it should be curated and coerced to the shape buffer X labels ahead of time.
 
     """

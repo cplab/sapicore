@@ -23,7 +23,7 @@ model:
 # Simulation settings.
 simulation:
   # simulation duration in steps (by default, 1 ms).
-  steps: 2000
+  steps: 1000
 
   # optional constant current to be added to the data.
   current: 1000.0
