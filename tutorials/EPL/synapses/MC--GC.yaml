@@ -11,8 +11,8 @@ model:
     fixed:
       weight_max: 150.0
       weight_min: 0.0
-      alpha_plus: 0.1
-      alpha_minus: 0.1
+      alpha_plus: 1.0
+      alpha_minus: 1.0
 
     random:
       weights:

@@ -1,4 +1,11 @@
-""" Train a model on a real-world dataset with cross validation. """
+""" Train a model on a real-world dataset with cross validation.
+
+Note
+----
+This tutorial is obsolete and will be superseded in the flagship model repository.
+For now, users are encouraged to run `sapicore/pipeline/simple.py -config ../../tutorials/EPL/EPL.yaml`.
+
+"""
 import os
 import logging
 from argparse import ArgumentParser
@@ -128,7 +135,8 @@ if __name__ == "__main__":
         action="store",
         dest="config",
         metavar="FILE",
-        required=True,
+        required=False,
+        default=os.path.join(os.getcwd(), "EPL", "EPL.yaml"),
         help="Path to a model-simulation configuration YAML.",
     )
     parser.add_argument(

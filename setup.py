@@ -21,7 +21,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "h5py",
-        "numpy",
+        "numpy<2.0",
         "scipy",
         "pandas",
         "torch",

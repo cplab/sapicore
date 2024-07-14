@@ -1,24 +1,17 @@
 # Tutorials
 
 Scripts in this directory are intended to facilitate network development and testing by new users.
-Basic tutorials will introduce and drill into the following features:
-
 
 * Components: neurons (spiking, analog), synapses (STDP).
 * Configuration: dictionary/YAML API, parameter sweeps.
-* Simulation: pipelines, network API.
-* Input: current injection, data loading & synthesis.
-* Visualization: tensorboard.
+* Simulation: pipeline, network, and model API.
+* Input: data loading and synthesis.
+* Visualization: matplotlib and tensorboard (legacy).
 
+Covered topics include:
 
-Advanced tutorials may include:
-
-* Numeric Approximation (Euler vs. RK4).
-* Neuromorphic Normalization (Analog).
-* Oscillators and Pyramidal-Interneuron Gamma (PING).
-* Exploring Spike-Timing-Dependent Plasticity (STDP).
-
-* Feedforward Networks (LIF/IZ).
-* Recurrent Networks (LIF/IZ).
-
-* Olfactory Bulb Model.
+* Numeric approximation (Euler vs. RK4).
+* Oscillators and pyramidal-interneuron gamma (PING).
+* Spike-timing-dependent plasticity (STDP).
+* Setting up recurrent networks of LIF/IZ neurons.
+* Designing cross validated simulation experiments.
