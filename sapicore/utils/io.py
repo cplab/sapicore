@@ -75,25 +75,28 @@ class MonitorHook(Module):
         def fn(_, __, output):
             # add current outputs to this data accumulator instance's cache dictionary, whose values are tensors.
             for attr in self.attributes:
+                odim = output[attr].dim()
                 if attr not in self.cache.keys():
                     # the cache dictionary is empty because this is the first iteration.
                     if self.entries is None:
                         # expand output by one dimension (zero axis) to fit.
-                        self.cache[attr] = output[attr][None, :]
+                        self.cache[attr] = output[attr][None, :] if odim == 1 else output[attr][None, :, :]
                     else:
                         # preallocate if number of steps is known.
-                        self.cache[attr] = torch.empty((self.entries, len(output[attr])))
+                        dim = [self.entries, len(output[attr])] + ([output[attr].shape[1]] if odim == 2 else [])
+                        self.cache[attr] = torch.empty(dim)
 
                 else:
                     if self.entries is None:
                         # vertically stack output attribute to cache tensor at the appropriate key.
-                        self.cache[attr] = torch.vstack([self.cache[attr], output[attr][None, :]])
+                        target = output[attr][None, :] if odim == 1 else output[attr][None, :, :]
+                        self.cache[attr] = torch.vstack([self.cache[attr], target])
                     else:
                         # update appropriate row in preallocated tensor.
-                        self.cache[attr][self.iteration, :] = output[attr]
+                        self.cache[attr][self.iteration] = output[attr]
 
-                # advance iteration counter.
-                self.iteration += 1
+            # advance iteration counter.
+            self.iteration += 1
 
         return fn
 

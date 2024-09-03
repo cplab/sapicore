@@ -460,9 +460,9 @@ class Network(Module):
 
         """
         plt.figure()
-        nx.draw(self.graph, node_size=node_size, with_labels=True, pos=nx.kamada_kawai_layout(self.network.graph))
+        nx.draw(self.graph, node_size=node_size, with_labels=True, pos=nx.kamada_kawai_layout(self.graph))
 
-        plt.savefig(fname=os.path.join(path, self.network.identifier + ".svg"))
+        plt.savefig(fname=os.path.join(path, self.identifier + ".svg"))
         plt.clf()
 
     def _in_edges(self, node: str) -> list[Synapse]:

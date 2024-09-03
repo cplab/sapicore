@@ -5,7 +5,7 @@ and :meth:`save`. This class provides an ML-focused API for the training and usa
 :class:`~engine.network.Network` output for practical purposes.
 
 """
-from typing import Callable
+from typing import Callable, Sequence
 
 import dill
 import os
@@ -38,14 +38,14 @@ class Model:
         # store a reference to one network object.
         self.network = network
 
-    def _serve(self, data: Tensor | list[Tensor], duration: int | list[int], rinse: int | list[int] = 0):
+    def _serve(self, data: Tensor | Sequence[Tensor], duration: int | Sequence[int], rinse: int | Sequence[int] = 0):
         """Serves a batch of data to this model's network.
 
         Each sample `i` is presented for `duration[i]`, followed by all 0s stimulation for `rinse[i]`.
 
         """
         # wrap 2D tensor data in a list if need be, to make subsequent single- and multi-root operations uniform.
-        if not isinstance(data, list):
+        if not isinstance(data, Sequence):
             data = [data]
 
         num_samples = data[0].shape[0]
@@ -67,7 +67,9 @@ class Model:
                 # advance progress bar.
                 bar()
 
-    def fit(self, data: Tensor | list[Tensor], duration: int | list[int], rinse: int | list[int] = 0, **kwargs):
+    def fit(
+        self, data: Tensor | Sequence[Tensor], duration: int | Sequence[int], rinse: int | Sequence[int] = 0, **kwargs
+    ):
         """Applies :meth:`engine.network.Network.forward` sequentially on a block of buffer `data`,
         then turns off learning for the network.
 
@@ -75,15 +77,15 @@ class Model:
 
         Parameters
         ----------
-        data: Tensor or list of Tensor
+        data: Tensor or Sequence of Tensor
             2D tensor(s) of data buffer to be fed to the root ensemble(s) of this object's `network`,
             formatted sample X feature.
 
-        duration: int or list of int
+        duration: int or Sequence of int
             Duration of sample presentation. Simulates duration of exposure to a particular input.
             If a list or a tensor is provided, the i-th sample in the batch is maintained for `duration[i]` steps.
 
-        rinse: int or list of int
+        rinse: int or Sequence of int
             Null stimulation steps (0s in-between samples).
             If a list or a tensor is provided, the i-th sample is followed by `rinse[i]` rinse steps.
 
@@ -99,7 +101,7 @@ class Model:
         for synapse in self.network.get_synapses():
             synapse.set_learning(False)
 
-    def predict(self, data: Data | Tensor) -> Tensor:
+    def predict(self, data: Data | Tensor, **kwargs) -> Tensor:
         """Predicts the labels of `data` by feeding the buffer to a trained network and applying
         some procedure to the resulting population/readout layer response.
 
@@ -116,7 +118,7 @@ class Model:
         """
         raise NotImplementedError
 
-    def similarity(self, data: Tensor, metric: str | Callable) -> Tensor:
+    def similarity(self, data: Tensor, metric: str | Callable, **kwargs) -> Tensor:
         """Performs rudimentary similarity analysis on the network's responses to `data`,
         yielding a pairwise distance matrix.
 

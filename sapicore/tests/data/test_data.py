@@ -57,7 +57,7 @@ class TestData:
             models.append(Model(Network()))
 
             # repeats each sample for a random number of steps (simulating variable exposure durations).
-            models[i].fit(data[train], repetitions=torch.randint(low=2, high=7, size=(data[train].shape[0],)))
+            models[i].fit(data[train], duration=torch.randint(low=2, high=7, size=(data[train].shape[0],)))
 
     @pytest.mark.parametrize(
         "url_",

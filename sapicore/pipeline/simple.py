@@ -141,7 +141,7 @@ class SimpleSimulator(Pipeline):
             model.network.add_data_hook(data_dir, steps)
 
             # save an SVG plot of the network architecture.
-            model.draw(path=run_dir)
+            model.network.draw(path=run_dir)
 
         if not self.data:
             steps = self.configuration.get("simulation", {}).get("steps", {})
@@ -159,7 +159,7 @@ class SimpleSimulator(Pipeline):
 
         # fit the model by passing `data` buffer to the network (`duration` controls exposure time to each sample).
         logging.info(f"Simulating {steps} steps at a resolution of {DT} ms.")
-        model.fit(data=self.data, repetitions=self.configuration.get("duration", 1))
+        model.fit(data=self.data, duration=self.configuration.get("duration", 1))
 
         # optional tensorboard logging.
         if tensorboard:
