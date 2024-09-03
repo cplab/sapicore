@@ -1,4 +1,6 @@
 """ File and user I/O. """
+from typing import Callable, Sequence
+
 import _io
 
 import os
@@ -7,7 +9,6 @@ import logging
 
 from pathlib import Path
 from itertools import chain
-from typing import Callable
 
 import yaml
 import h5py as hdf
@@ -37,6 +38,66 @@ CHUNK_SIZE = 50.0
 """ Data chunks will be dumped to disk after reaching this size in MB. """
 
 
+class MonitorHook(Module):
+    """Accumulates selected attribute data in memory on every forward call. Does not write to disk.
+
+    Parameters
+    ----------
+    component: torch.nn.Module
+        Network component whose attributes should be buffered in memory.
+
+    attributes: list of str
+        Instance attributes to be logged. Defaults to the full list `component.loggable_props`.
+
+    entries: int
+        Expected number of simulation steps. Used to preallocate the buffer.
+        If unknown, `torch.vstack()` is used, which may result in slower performance.
+
+    """
+
+    def __init__(self, component: torch.nn.Module, attributes: Sequence[str], entries: int = None):
+        super().__init__()
+
+        self.component = component
+        self.attributes = component.loggable_props if not attributes else attributes
+
+        self.iteration = 0
+        self.entries = entries
+
+        self.cache = {}
+
+        component.register_forward_hook(self.monitor_hook())
+
+    def __getitem__(self, item):
+        return self.cache[item]
+
+    def monitor_hook(self) -> Callable:
+        def fn(_, __, output):
+            # add current outputs to this data accumulator instance's cache dictionary, whose values are tensors.
+            for attr in self.attributes:
+                if attr not in self.cache.keys():
+                    # the cache dictionary is empty because this is the first iteration.
+                    if self.entries is None:
+                        # expand output by one dimension (zero axis) to fit.
+                        self.cache[attr] = output[attr][None, :]
+                    else:
+                        # preallocate if number of steps is known.
+                        self.cache[attr] = torch.empty((self.entries, len(output[attr])))
+
+                else:
+                    if self.entries is None:
+                        # vertically stack output attribute to cache tensor at the appropriate key.
+                        self.cache[attr] = torch.vstack([self.cache[attr], output[attr][None, :]])
+                    else:
+                        # update appropriate row in preallocated tensor.
+                        self.cache[attr][self.iteration, :] = output[attr]
+
+                # advance iteration counter.
+                self.iteration += 1
+
+        return fn
+
+
 class DataAccumulatorHook(Module):
     """Wraps any :class:`~torch.nn.Module` object, accumulating selected attribute data on every forward call.
 
@@ -60,7 +121,7 @@ class DataAccumulatorHook(Module):
 
     """
 
-    def __init__(self, component: torch.nn.Module, log_dir: str, attributes: list[str], entries: int):
+    def __init__(self, component: torch.nn.Module, log_dir: str, attributes: Sequence[str], entries: int):
         super().__init__()
 
         self.log_dir = log_dir
@@ -86,6 +147,7 @@ class DataAccumulatorHook(Module):
         """Initializes HDF5 file on the first iteration of this data accumulator instance."""
         # detects whether we are in the first iteration before creating or appending to the file.
         if not os.path.exists(self.hdf_file_path):
+            ensure_dir(os.path.dirname(self.hdf_file_path))
             with hdf.File(os.path.join(self.log_dir, self.component.identifier + ".h5"), "a") as hf:
                 # write metadata to be able to identify this HDF with its object.
                 hf.attrs["identifier"] = self.component.identifier
@@ -114,6 +176,8 @@ class DataAccumulatorHook(Module):
                         # log configurable attribute values as metadata in the "configuration" group.
                         value = getattr(self.component, prop)
                         hf["/configuration"].attrs[prop] = repr(value)
+        else:
+            raise FileExistsError("Target HDF5 log file already exists.")
 
     def save_outputs_hook(self) -> Callable:
         def fn(_, __, output):

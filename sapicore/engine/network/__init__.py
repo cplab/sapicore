@@ -1,11 +1,15 @@
 """ Networks are graph representations of neuron ensembles connected by synapses. """
+from typing import Sequence
+
 import os
 from itertools import compress
+
+import matplotlib.pyplot as plt
 
 import networkx as nx
 from networkx import DiGraph
 
-import torch
+from torch import Tensor
 from torch.nn import Module
 
 from sapicore.engine.component import Component
@@ -13,7 +17,7 @@ from sapicore.engine.neuron import Neuron
 from sapicore.engine.synapse import Synapse
 
 from sapicore.utils.constants import SYNAPSE_SPLITTERS
-from sapicore.utils.io import DataAccumulatorHook, flatten, load_yaml
+from sapicore.utils.io import DataAccumulatorHook, flatten, load_yaml, MonitorHook
 
 __all__ = ("Network",)
 
@@ -285,8 +289,39 @@ class Network(Module):
             # unlock to allow automatic root recomputing in subsequent `add_ensembles` or `add_synapses` calls.
             self.root_lock = False
 
-    def add_data_hook(self, data_dir: str, steps: int, *args: Component) -> list:
-        """Attach a data accumulator forward hook to some or all network components.
+    def add_monitor_hook(self, steps: int = None, attrs: Sequence[str] = None, *args: Component) -> dict:
+        """Attach a forward hook to some or all network components, buffering accumulated output in memory.
+
+        Parameters
+        ----------
+        steps: int
+            Total number of simulation steps in the experiment to be logged.
+            Required for HDF5 sizing and chunk management.
+
+        attrs: Sequence of str
+            Attributes to log for the given components.
+
+        args: Component, optional
+            Components to attach data hooks to. If not provided, data will be logged for all components.
+
+        """
+        hooks = {}
+        if not args:
+            for ensemble in self.get_ensembles():
+                hooks[ensemble.identifier] = MonitorHook(
+                    ensemble, ensemble.loggable_props if not attrs else attrs, steps
+                )
+
+            for synapse in self.get_synapses():
+                hooks[synapse.identifier] = MonitorHook(synapse, synapse.loggable_props if not attrs else attrs, steps)
+        else:
+            for comp in args:
+                hooks[comp.identifier] = MonitorHook(comp, comp.loggable_props if not attrs else attrs, steps)
+
+        return hooks
+
+    def add_data_hook(self, data_dir: str, steps: int, attrs: Sequence[str] = None, *args: Component) -> list:
+        """Attach a data accumulator forward hook to some or all network components, logging data to disk.
 
         Parameters
         ----------
@@ -297,6 +332,9 @@ class Network(Module):
             Total number of simulation steps in the experiment to be logged.
             Required for HDF5 sizing and chunk management.
 
+        attrs: Sequence of str
+            Attributes to log for the given components.
+
         args: Component, optional
             Components to attach data hooks to. If not provided, data will be logged for all components.
 
@@ -304,13 +342,17 @@ class Network(Module):
         hooks = []
         if not args:
             for ensemble in self.get_ensembles():
-                hooks.append(DataAccumulatorHook(ensemble, data_dir, ensemble.loggable_props, steps))
+                hooks.append(
+                    DataAccumulatorHook(ensemble, data_dir, ensemble.loggable_props if not attrs else attrs, steps)
+                )
 
             for synapse in self.get_synapses():
-                hooks.append(DataAccumulatorHook(synapse, data_dir, synapse.loggable_props, steps))
+                hooks.append(
+                    DataAccumulatorHook(synapse, data_dir, synapse.loggable_props if not attrs else attrs, steps)
+                )
         else:
             for comp in args:
-                hooks.append(DataAccumulatorHook(comp, data_dir, comp.loggable_props, steps))
+                hooks.append(DataAccumulatorHook(comp, data_dir, comp.loggable_props if not attrs else attrs, steps))
 
         return hooks
 
@@ -323,7 +365,7 @@ class Network(Module):
         """
         pass
 
-    def forward(self, data: torch.tensor) -> dict:
+    def forward(self, data: Tensor | list[Tensor]) -> dict:
         """Processes current simulation step for this network object.
 
         In this generic implementation, forward call order is determined by a BFS traversal starting from
@@ -332,7 +374,7 @@ class Network(Module):
 
         Parameters
         ----------
-        data: torch.tensor
+        data: Tensor or list of Tensor
             External input to be processed by this generic network.
 
         Returns
@@ -400,6 +442,28 @@ class Network(Module):
             state["synapses"][comp.identifier] = comp.loggable_state()
 
         return state
+
+    def draw(self, path: str, node_size: int = 750):
+        """Saves an SVG networkx graph plot showing ensembles and their general connectivity patterns.
+
+        Parameters
+        ----------
+        path: str
+            Destination path for network figure.
+
+        node_size: int, optional
+            Node size in network graph plot.
+
+        Note
+        ----
+        May be extended and/or moved to a dedicated visualization package in future versions.
+
+        """
+        plt.figure()
+        nx.draw(self.graph, node_size=node_size, with_labels=True, pos=nx.kamada_kawai_layout(self.network.graph))
+
+        plt.savefig(fname=os.path.join(path, self.network.identifier + ".svg"))
+        plt.clf()
 
     def _in_edges(self, node: str) -> list[Synapse]:
         """Returns list of synapse objects going into the ensemble `node`."""

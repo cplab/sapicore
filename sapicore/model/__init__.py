@@ -10,25 +10,21 @@ from typing import Callable
 import dill
 import os
 
-import networkx as nx
-import matplotlib.pyplot as plt
-
 from alive_progress import alive_bar
 
 import torch
 from torch import Tensor
 
-from sklearn.base import BaseEstimator
-
 from sapicore.data import Data
 from sapicore.engine.network import Network
+
 from sapicore.utils.io import ensure_dir
 
 
-class Model(BaseEstimator):
+class Model:
     """Model base class.
 
-    Implements and extends the scikit-learn :class:`sklearn.base.BaseEstimator` interface.
+    Loosely follows the design of scikit-learn's :class:`sklearn.base.BaseEstimator` interface.
 
     Note
     ----
@@ -39,10 +35,39 @@ class Model(BaseEstimator):
     """
 
     def __init__(self, network: Network = None, **kwargs):
-        super().__init__()
+        # store a reference to one network object.
         self.network = network
 
-    def fit(self, data: Tensor | list[Tensor], repetitions: int | list[int] | Tensor = 1):
+    def _serve(self, data: Tensor | list[Tensor], duration: int | list[int], rinse: int | list[int] = 0):
+        """Serves a batch of data to this model's network.
+
+        Each sample `i` is presented for `duration[i]`, followed by all 0s stimulation for `rinse[i]`.
+
+        """
+        # wrap 2D tensor data in a list if need be, to make subsequent single- and multi-root operations uniform.
+        if not isinstance(data, list):
+            data = [data]
+
+        num_samples = data[0].shape[0]
+
+        with alive_bar(total=num_samples, force_tty=True) as bar:
+            for i in range(num_samples):
+                # compute presentation and rinse durations.
+                stim_steps = duration if isinstance(duration, int) else duration[i]
+                rinse_steps = rinse if isinstance(rinse, int) else rinse[i]
+
+                for k in range(stim_steps):
+                    # stimulus presentation.
+                    self.network.forward([data[j][i, :] for j in range(len(data))])
+
+                for _ in range(rinse_steps):
+                    # inter-stimulus interval.
+                    self.network.forward([torch.zeros_like(data[j][i, :]) for j in range(len(data))])
+
+                # advance progress bar.
+                bar()
+
+    def fit(self, data: Tensor | list[Tensor], duration: int | list[int], rinse: int | list[int] = 0, **kwargs):
         """Applies :meth:`engine.network.Network.forward` sequentially on a block of buffer `data`,
         then turns off learning for the network.
 
@@ -51,13 +76,16 @@ class Model(BaseEstimator):
         Parameters
         ----------
         data: Tensor or list of Tensor
-            2D tensor(s) of data buffer to be fed to the root ensembles of this object's `network`,
+            2D tensor(s) of data buffer to be fed to the root ensemble(s) of this object's `network`,
             formatted sample X feature.
 
-        repetitions: int or list of int or Tensor
-            How many times to repeat each sample before moving on to the next one.
-            Simulates duration of exposure to a particular input. If a list or a tensor is provided,
-            the i-th row in the batch is repeated `repetitions[i]` times.
+        duration: int or list of int
+            Duration of sample presentation. Simulates duration of exposure to a particular input.
+            If a list or a tensor is provided, the i-th sample in the batch is maintained for `duration[i]` steps.
+
+        rinse: int or list of int
+            Null stimulation steps (0s in-between samples).
+            If a list or a tensor is provided, the i-th sample is followed by `rinse[i]` rinse steps.
 
         Warning
         -------
@@ -65,20 +93,9 @@ class Model(BaseEstimator):
         efficiently stream data to disk throughout the simulation (see :meth:`~engine.network.Network.add_data_hook`).
 
         """
-        # wrap 2D tensor data in a list if need be, to make subsequent single- and multi-root operations uniform.
-        if not isinstance(data, list):
-            data = [data]
+        self._serve(data, rinse, duration)
 
-        num_samples = data[0].shape[0]
-        with alive_bar(total=num_samples, force_tty=True) as bar:
-            # iterate over buffer.
-            for i in range(num_samples):
-                # repeat each sample for as many time steps as instructed.
-                for _ in range(repetitions if isinstance(repetitions, int) else repetitions[i]):
-                    self.network([data[j][i, :] for j in range(len(data))])
-                bar()
-
-        # learning is turned off after fitting by default.
+        # after fitting a model, learning is turned off for all synapses by default.
         for synapse in self.network.get_synapses():
             synapse.set_learning(False)
 
@@ -97,11 +114,11 @@ class Model(BaseEstimator):
             Vector (1D tensor) of predicted labels.
 
         """
-        pass
+        raise NotImplementedError
 
     def similarity(self, data: Tensor, metric: str | Callable) -> Tensor:
-        """Performs rudimentary similarity analysis on the network population responses to `data`,
-        obtaining a pairwise distance matrix reflecting sample separation.
+        """Performs rudimentary similarity analysis on the network's responses to `data`,
+        yielding a pairwise distance matrix.
 
         Parameters
         ----------
@@ -114,7 +131,7 @@ class Model(BaseEstimator):
             `data` tensor and return a scalar corresponding to their distance.
 
         """
-        pass
+        raise NotImplementedError
 
     def save(self, path: str):
         """Saves the :class:`engine.network.Network` object owned by this model to `path`.
@@ -157,27 +174,3 @@ class Model(BaseEstimator):
             self.network = torch.load(path, pickle_module=dill)
 
         return self.network
-
-    def draw(self, path: str, node_size: int = 750):
-        """Saves an SVG networkx graph plot showing ensembles and their general connectivity patterns.
-
-        Parameters
-        ----------
-        path: str
-            Destination path for network figure.
-
-        node_size: int, optional
-            Node size in network graph plot.
-
-        Note
-        ----
-        May be extended and/or moved to a dedicated visualization package in future versions.
-
-        """
-        plt.figure()
-        nx.draw(
-            self.network.graph, node_size=node_size, with_labels=True, pos=nx.kamada_kawai_layout(self.network.graph)
-        )
-
-        plt.savefig(fname=os.path.join(path, self.network.identifier + ".svg"))
-        plt.clf()

@@ -31,6 +31,12 @@ class Synapse(Component):
     dst_ensemble: Neuron
         Reference to postsynaptic ensemble (receiving) ensemble.
 
+    weights: Tensor
+        2D weight matrix.
+
+    connections: Tensor.
+        2D connectivity mask matrix.
+
     weight_max: float or Tensor
         Positive weight value limit for any synapse element (applies throughout the simulation).
 
@@ -66,14 +72,14 @@ class Synapse(Component):
     _loggable_props_: tuple[str] = ("weights", "connections", "output")
 
     # declare loggable instance attributes registered as torch buffers.
-    connections: tensor
-    weights: tensor
-    output: tensor
+    connections: Tensor
 
     def __init__(
         self,
         src_ensemble: [Neuron] = None,
         dst_ensemble: [Neuron] = None,
+        weights: [Tensor] = None,
+        connections: [Tensor] = None,
         weight_max: float = 1000.0,
         weight_min: float = -1000.0,
         delay_ms: float = 0.0,
@@ -124,17 +130,29 @@ class Synapse(Component):
                 for delay in (self.delay_ms / self.dt).flatten().int()
             ]
 
-        # binary connectivity matrix marking enabled/disabled connections (integer mask, all-to-all by default).
-        self.register_buffer("connections", torch.ones(self.matrix_shape, dtype=torch.uint8, device=self.device))
-
         # float matrix containing synaptic weights.
-        self.register_buffer("weights", torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device))
+        if weights is not None:
+            self.register_buffer("weights", weights.to(self.device))
+        else:
+            self.register_buffer(
+                "weights",
+                self.weight_init_method(tensor=torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device)),
+            )
+
+        # binary connectivity matrix marking enabled/disabled connections (integer mask, all-to-all by default).
+        # initialize connections from constructor input, if given.
+        if connections is not None:
+            self.register_buffer("connections", connections.to(self.device))
+        else:
+            self.register_buffer("connections", torch.ones_like(self.weights))
+
+        # if given, apply connection strategy; all connections enabled by default.
+        conn_mode = kwargs.pop("conn_mode", False)
+        if conn_mode:
+            self.connect(conn_mode, kwargs.pop("conn_prop", 1))
 
         # output 1D tensor containing data for the destination ensemble.
         self.register_buffer("output", torch.zeros(self.matrix_shape[0], dtype=torch.float, device=self.device))
-
-        # default initialization method for weights (can be overriden).
-        self.weights = self.weight_init_method(tensor=self.weights)
 
         # clamp weights to acceptable range given this synapse's min and max.
         self.weights = torch.clamp(self.weights, self.weight_min, self.weight_max)
