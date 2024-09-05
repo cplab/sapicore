@@ -2,6 +2,7 @@
 import torch
 
 from torch import tensor, Tensor
+from torch import as_tensor
 from torch.nn.functional import relu
 
 from sapicore.engine.neuron.spiking import SpikingNeuron
@@ -48,19 +49,51 @@ class LIFNeuron(SpikingNeuron):
     """
 
     # loggable properties are identical to those of generic spiking neurons, so no overriding is necessary.
-    _config_props_: tuple[str] = ("volt_thresh", "volt_rest", "leak_gl", "tau_mem", "tau_ref")
+    _config_props_: tuple[str] = (
+        "volt_thresh",
+        "volt_rest",
+        "leak_gl",
+        "tau_mem",
+        "tau_ref",
+        "cycle_length",
+        "release_phase",
+    )
 
-    def __init__(self, volt_thresh=-55.0, volt_rest=-75.0, leak_gl=5.0, tau_mem=5.0, tau_ref=1.0, **kwargs):
+    def __init__(
+        self,
+        volt_thresh=-55.0,
+        volt_rest=-75.0,
+        leak_gl=5.0,
+        tau_mem=5.0,
+        tau_ref=1.0,
+        cycle_length: int = None,
+        release_phase: int = None,
+        **kwargs
+    ):
         """Instantiates a single LIF neuron with its default configurable and simulation attributes."""
         # register universal attributes inherited from `SpikingNeuron`, `Neuron`, and `Component`.
         super().__init__(**kwargs)
 
         # configurable attributes specific to LIF neurons, over and above `SpikingNeuron`.
-        self.volt_thresh = torch.zeros(1, dtype=torch.float, device=self.device) + volt_thresh
-        self.volt_rest = torch.zeros(1, dtype=torch.float, device=self.device) + volt_rest
-        self.leak_gl = torch.zeros(1, dtype=torch.float, device=self.device) + leak_gl
-        self.tau_mem = torch.zeros(1, dtype=torch.float, device=self.device) + tau_mem
-        self.tau_ref = torch.zeros(1, dtype=torch.float, device=self.device) + tau_ref
+        self.volt_thresh = torch.zeros(1, dtype=torch.float, device=self.device) + as_tensor(
+            volt_thresh, device=self.device
+        )
+        self.volt_rest = torch.zeros(1, dtype=torch.float, device=self.device) + as_tensor(
+            volt_rest, device=self.device
+        )
+        self.leak_gl = torch.zeros(1, dtype=torch.float, device=self.device) + as_tensor(leak_gl, device=self.device)
+        self.tau_mem = torch.zeros(1, dtype=torch.float, device=self.device) + as_tensor(tau_mem, device=self.device)
+        self.tau_ref = torch.zeros(1, dtype=torch.float, device=self.device) + as_tensor(tau_ref, device=self.device)
+
+        if cycle_length is not None:
+            self.cycle_length = torch.zeros(1, dtype=torch.int, device=self.device) + cycle_length
+        else:
+            self.cycle_length = None
+
+        if release_phase is not None:
+            self.release_phase = torch.zeros(1, dtype=torch.int, device=self.device) + release_phase
+        else:
+            self.release_phase = None
 
         # simulation/state attributes specific to LIF, over and above `SpikingNeuron`.
         self.input = torch.zeros_like(self.volt_rest)
@@ -116,11 +149,12 @@ class LIFNeuron(SpikingNeuron):
         self.refractory_steps = relu(self.refractory_steps - 1)
         self.simulation_step += 1
 
-        if hasattr(self, "release_phase") and hasattr(self, "cycle_length"):
+        if self.release_phase is not None and self.cycle_length is not None:
             # voltage will start to accumulate at a particular phase, canceling the refractory period across units.
-            if self.simulation_step % self.cycle_length == self.release_phase:
-                self.refractory_steps = torch.zeros_like(self.refractory_steps)
-                self.voltage = self.volt_rest
+            reset = torch.full_like(self.cycle_length, self.simulation_step) % self.cycle_length == self.release_phase
+
+            self.refractory_steps = self.refractory_steps * (~reset) + torch.zeros_like(self.refractory_steps) * reset
+            self.voltage = self.voltage * (~reset) + self.volt_rest * reset
 
         # return current state(s) of loggable attributes as a dictionary.
         return self.loggable_state()

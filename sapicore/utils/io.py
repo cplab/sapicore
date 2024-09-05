@@ -66,37 +66,51 @@ class MonitorHook(Module):
 
         self.cache = {}
 
+        # (de)activate hook without removing it.
+        self.active = True
+
         component.register_forward_hook(self.monitor_hook())
 
     def __getitem__(self, item):
-        return self.cache[item]
+        if item is not None and not isinstance(item, slice):
+            return self.cache[item] if item in self.cache.keys() else {}
+        else:
+            # [:] will be a shorthand for returning the cache dictionary.
+            return self.cache
+
+    def pause(self):
+        self.active = False
+
+    def unpause(self):
+        self.active = True
 
     def monitor_hook(self) -> Callable:
         def fn(_, __, output):
-            # add current outputs to this data accumulator instance's cache dictionary, whose values are tensors.
-            for attr in self.attributes:
-                odim = output[attr].dim()
-                if attr not in self.cache.keys():
-                    # the cache dictionary is empty because this is the first iteration.
-                    if self.entries is None:
-                        # expand output by one dimension (zero axis) to fit.
-                        self.cache[attr] = output[attr][None, :] if odim == 1 else output[attr][None, :, :]
-                    else:
-                        # preallocate if number of steps is known.
-                        dim = [self.entries, len(output[attr])] + ([output[attr].shape[1]] if odim == 2 else [])
-                        self.cache[attr] = torch.empty(dim)
+            if self.active:
+                # add current outputs to this data accumulator instance's cache dictionary, whose values are tensors.
+                for attr in self.attributes:
+                    odim = output[attr].dim()
+                    if attr not in self.cache.keys():
+                        # the cache dictionary is empty because this is the first iteration.
+                        if self.entries is None:
+                            # expand output by one dimension (zero axis) to fit.
+                            self.cache[attr] = output[attr][None, :] if odim == 1 else output[attr][None, :, :]
+                        else:
+                            # preallocate if number of steps is known.
+                            dim = [self.entries, len(output[attr])] + ([output[attr].shape[1]] if odim == 2 else [])
+                            self.cache[attr] = torch.empty(dim)
 
-                else:
-                    if self.entries is None:
-                        # vertically stack output attribute to cache tensor at the appropriate key.
-                        target = output[attr][None, :] if odim == 1 else output[attr][None, :, :]
-                        self.cache[attr] = torch.vstack([self.cache[attr], target])
                     else:
-                        # update appropriate row in preallocated tensor.
-                        self.cache[attr][self.iteration] = output[attr]
+                        if self.entries is None:
+                            # vertically stack output attribute to cache tensor at the appropriate key.
+                            target = output[attr][None, :] if odim == 1 else output[attr][None, :, :]
+                            self.cache[attr] = torch.vstack([self.cache[attr], target])
+                        else:
+                            # update appropriate row in preallocated tensor.
+                            self.cache[attr][self.iteration] = output[attr]
 
-            # advance iteration counter.
-            self.iteration += 1
+                # advance iteration counter.
+                self.iteration += 1
 
         return fn
 

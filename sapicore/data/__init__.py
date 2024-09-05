@@ -1,5 +1,5 @@
 """ Data operations. """
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Sequence
 from numpy.typing import NDArray
 
 import os
@@ -16,7 +16,9 @@ import pandas as pd
 
 from torch import Tensor
 from torch.utils.data import Dataset
+
 from sklearn.model_selection import BaseCrossValidator
+from sklearn.preprocessing import normalize as norm
 
 from sapicore.data.sampling import BalancedSampler, CV
 from sapicore.utils.io import ensure_dir
@@ -357,6 +359,27 @@ class Data(Dataset):
         """
         self.buffer[index] = values
 
+    def normalize(self, p: int = 1, axis: int = 1) -> Tensor:
+        """
+        Apply Lp normalization along a specified axis to the buffer.
+
+        Parameters
+        ----------
+        p: int, optional
+            The order of the norm (default is 1, which corresponds to L1 normalization).
+
+        axis: int, optional
+            The axis along which to normalize (default is 0).
+
+        Returns
+        -------
+        Tensor
+            The normalized buffer.
+
+        """
+        self.buffer = torch.as_tensor(norm(self.buffer.numpy(), axis=axis, norm=f"l{p}"))
+        return self.buffer
+
     def save(self):
         """Dump the buffer contents and metadata to disk at `root`.
 
@@ -413,7 +436,7 @@ class Data(Dataset):
             label_keys: str or list of str
                 Label key(s) by which to stratify sampling, if applicable.
 
-            group_key: str
+            group_key: str or list of str
                 Label key by which to group sampling, if applicable.
 
         Returns
@@ -476,3 +499,23 @@ class Data(Dataset):
                 partial_data.metadata[k] = partial_data.metadata[k][index]
 
         return partial_data
+
+    def ingest(self, folds: int, shots: int, keys: str | Sequence[str], replace: bool = False):
+        """Loads and samples the data, returning a balanced subset thereof.
+
+        Parameters
+        ----------
+        folds: int
+            Number of cross validation folds.
+
+        shots: int
+            Number of samples per class.
+
+        keys: Sequence[str]
+            Keys by which to group the data.
+
+        replace: bool, optional
+            Whether to sample with replacement. Defaults to `False`.
+
+        """
+        raise NotImplementedError

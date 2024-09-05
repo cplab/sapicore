@@ -111,7 +111,7 @@ class DriftExperiment(Pipeline):
             model = EPL(network=Network(configuration=self.configuration, device=self.device))
 
             # adds an in-memory monitor hook.
-            model.network.add_monitor_hook(self.stim_duration * len(train), ["voltage"], model.network["MC"])
+            model.network.add_monitor_hook(self.stim_duration * len(train), ["voltage"], [model.network["MC"]])
 
             logging.info(model.network)
             logging.info(

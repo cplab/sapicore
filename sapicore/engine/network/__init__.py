@@ -289,7 +289,9 @@ class Network(Module):
             # unlock to allow automatic root recomputing in subsequent `add_ensembles` or `add_synapses` calls.
             self.root_lock = False
 
-    def add_monitor_hook(self, steps: int = None, attrs: Sequence[str] = None, *args: Component) -> dict:
+    def add_monitor_hook(
+        self, steps: int = None, attrs: Sequence[str] = None, comps: Sequence[Component] = None
+    ) -> dict:
         """Attach a forward hook to some or all network components, buffering accumulated output in memory.
 
         Parameters
@@ -301,12 +303,12 @@ class Network(Module):
         attrs: Sequence of str
             Attributes to log for the given components.
 
-        args: Component, optional
+        comps: Sequence of Component, optional
             Components to attach data hooks to. If not provided, data will be logged for all components.
 
         """
         hooks = {}
-        if not args:
+        if not comps:
             for ensemble in self.get_ensembles():
                 hooks[ensemble.identifier] = MonitorHook(
                     ensemble, ensemble.loggable_props if not attrs else attrs, steps
@@ -315,12 +317,14 @@ class Network(Module):
             for synapse in self.get_synapses():
                 hooks[synapse.identifier] = MonitorHook(synapse, synapse.loggable_props if not attrs else attrs, steps)
         else:
-            for comp in args:
+            for comp in comps:
                 hooks[comp.identifier] = MonitorHook(comp, comp.loggable_props if not attrs else attrs, steps)
 
         return hooks
 
-    def add_data_hook(self, data_dir: str, steps: int, attrs: Sequence[str] = None, *args: Component) -> list:
+    def add_data_hook(
+        self, data_dir: str, steps: int, attrs: Sequence[str] = None, comps: Sequence[Component] = None
+    ) -> list:
         """Attach a data accumulator forward hook to some or all network components, logging data to disk.
 
         Parameters
@@ -335,12 +339,12 @@ class Network(Module):
         attrs: Sequence of str
             Attributes to log for the given components.
 
-        args: Component, optional
+        comps: Component, optional
             Components to attach data hooks to. If not provided, data will be logged for all components.
 
         """
         hooks = []
-        if not args:
+        if not comps:
             for ensemble in self.get_ensembles():
                 hooks.append(
                     DataAccumulatorHook(ensemble, data_dir, ensemble.loggable_props if not attrs else attrs, steps)
@@ -351,7 +355,7 @@ class Network(Module):
                     DataAccumulatorHook(synapse, data_dir, synapse.loggable_props if not attrs else attrs, steps)
                 )
         else:
-            for comp in args:
+            for comp in comps:
                 hooks.append(DataAccumulatorHook(comp, data_dir, comp.loggable_props if not attrs else attrs, steps))
 
         return hooks

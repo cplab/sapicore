@@ -132,7 +132,11 @@ class Synapse(Component):
 
         # float matrix containing synaptic weights.
         if weights is not None:
-            self.register_buffer("weights", weights.to(self.device))
+            if not isinstance(weights, Tensor):
+                w_init = torch.ones(self.matrix_shape, device=self.device) * weights
+            else:
+                w_init = weights.to(self.device)
+            self.register_buffer("weights", w_init)
         else:
             self.register_buffer(
                 "weights",

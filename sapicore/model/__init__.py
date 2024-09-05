@@ -15,9 +15,7 @@ from alive_progress import alive_bar
 import torch
 from torch import Tensor
 
-from sapicore.data import Data
 from sapicore.engine.network import Network
-
 from sapicore.utils.io import ensure_dir
 
 
@@ -38,9 +36,22 @@ class Model:
         # store a reference to one network object.
         self.network = network
 
-    def _serve(self, data: Tensor | Sequence[Tensor], duration: int | Sequence[int], rinse: int | Sequence[int] = 0):
-        """Serves a batch of data to this model's network.
+    def serve(self, data: Tensor | Sequence[Tensor], duration: int | Sequence[int], rinse: int | Sequence[int] = 0):
+        """Applies :meth:`engine.network.Network.forward` sequentially on a batch of buffer `data`.
 
+        Parameters
+        ----------
+        data: Tensor or Sequence of Tensor
+            2D tensor(s) of data buffer to be fed to the root ensemble(s) of this object's `network`,
+            formatted sample X feature.
+
+        duration: int or Sequence of int
+            Duration of sample presentation. Simulates duration of exposure to a particular input.
+            If a list or a tensor is provided, the i-th sample in the batch is maintained for `duration[i]` steps.
+
+        rinse: int or Sequence of int
+            Null stimulation steps (0s in-between samples).
+            If a list or a tensor is provided, the i-th sample is followed by `rinse[i]` rinse steps.
         Each sample `i` is presented for `duration[i]`, followed by all 0s stimulation for `rinse[i]`.
 
         """
@@ -70,16 +81,28 @@ class Model:
     def fit(
         self, data: Tensor | Sequence[Tensor], duration: int | Sequence[int], rinse: int | Sequence[int] = 0, **kwargs
     ):
-        """Applies :meth:`engine.network.Network.forward` sequentially on a block of buffer `data`,
-        then turns off learning for the network.
+        """Serves a batch of data, then turns off learning for all synapses.
 
-        The training buffer may be obtained, e.g., from a :class:`~data.sampling.CV` cross validator object.
+        Warning
+        -------
+        :meth:`~model.Model.fit` does not return intermediate output. Users should register forward hooks to
+        efficiently stream data to memory or disk throughout the simulation
+        (see :meth:`~engine.network.Network.add_data_hook`).
+
+        """
+        self.serve(data, rinse, duration)
+
+        # after fitting a model, learning is turned off for all synapses by default.
+        for synapse in self.network.get_synapses():
+            synapse.set_learning(False)
+
+    def predict(self, data: Tensor | Sequence[Tensor], **kwargs) -> Sequence:
+        """Predicts the labels of `data`.
 
         Parameters
         ----------
-        data: Tensor or Sequence of Tensor
-            2D tensor(s) of data buffer to be fed to the root ensemble(s) of this object's `network`,
-            formatted sample X feature.
+        data: Data or Tensor
+            Sapicore dataset or a standalone 2D tensor of data buffer, formatted sample X feature.
 
         duration: int or Sequence of int
             Duration of sample presentation. Simulates duration of exposure to a particular input.
@@ -89,31 +112,10 @@ class Model:
             Null stimulation steps (0s in-between samples).
             If a list or a tensor is provided, the i-th sample is followed by `rinse[i]` rinse steps.
 
-        Warning
-        -------
-        :meth:`~model.Model.fit` does not return intermediate output. Users should register forward hooks to
-        efficiently stream data to disk throughout the simulation (see :meth:`~engine.network.Network.add_data_hook`).
-
-        """
-        self._serve(data, rinse, duration)
-
-        # after fitting a model, learning is turned off for all synapses by default.
-        for synapse in self.network.get_synapses():
-            synapse.set_learning(False)
-
-    def predict(self, data: Data | Tensor, **kwargs) -> Tensor:
-        """Predicts the labels of `data` by feeding the buffer to a trained network and applying
-        some procedure to the resulting population/readout layer response.
-
-        Parameters
-        ----------
-        data: Data or Tensor
-            Sapicore dataset or a standalone 2D tensor of data buffer, formatted sample X feature.
-
         Returns
         -------
-        Tensor
-            Vector (1D tensor) of predicted labels.
+        Sequence
+            Vector of predicted labels.
 
         """
         raise NotImplementedError
