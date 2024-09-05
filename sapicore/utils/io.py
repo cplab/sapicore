@@ -53,9 +53,12 @@ class MonitorHook(Module):
         Expected number of simulation steps. Used to preallocate the buffer.
         If unknown, `torch.vstack()` is used, which may result in slower performance.
 
+    dtype:
+        Data type.
+
     """
 
-    def __init__(self, component: torch.nn.Module, attributes: Sequence[str], entries: int = None):
+    def __init__(self, component: torch.nn.Module, attributes: Sequence[str], entries: int = None, dtype=torch.float):
         super().__init__()
 
         self.component = component
@@ -65,6 +68,7 @@ class MonitorHook(Module):
         self.entries = entries
 
         self.cache = {}
+        self.dtype = dtype
 
         # (de)activate hook without removing it.
         self.active = True
@@ -98,7 +102,7 @@ class MonitorHook(Module):
                         else:
                             # preallocate if number of steps is known.
                             dim = [self.entries, len(output[attr])] + ([output[attr].shape[1]] if odim == 2 else [])
-                            self.cache[attr] = torch.empty(dim)
+                            self.cache[attr] = torch.empty(dim, dtype=self.dtype)
 
                     else:
                         if self.entries is None:

@@ -1,10 +1,10 @@
 """ Networks are graph representations of neuron ensembles connected by synapses. """
-from typing import Sequence
+from typing import Sequence, Type
 
 import os
 from itertools import compress
 
-import matplotlib.pyplot as plt
+import torch
 
 import networkx as nx
 from networkx import DiGraph
@@ -18,6 +18,8 @@ from sapicore.engine.synapse import Synapse
 
 from sapicore.utils.constants import SYNAPSE_SPLITTERS
 from sapicore.utils.io import DataAccumulatorHook, flatten, load_yaml, MonitorHook
+
+import matplotlib.pyplot as plt
 
 __all__ = ("Network",)
 
@@ -290,7 +292,11 @@ class Network(Module):
             self.root_lock = False
 
     def add_monitor_hook(
-        self, steps: int = None, attrs: Sequence[str] = None, comps: Sequence[Component] = None
+        self,
+        steps: int = None,
+        attrs: Sequence[str] = None,
+        comps: Sequence[Component] = None,
+        dtype: Type = torch.float,
     ) -> dict:
         """Attach a forward hook to some or all network components, buffering accumulated output in memory.
 
@@ -313,12 +319,13 @@ class Network(Module):
                 hooks[ensemble.identifier] = MonitorHook(
                     ensemble, ensemble.loggable_props if not attrs else attrs, steps
                 )
-
             for synapse in self.get_synapses():
-                hooks[synapse.identifier] = MonitorHook(synapse, synapse.loggable_props if not attrs else attrs, steps)
+                hooks[synapse.identifier] = MonitorHook(
+                    synapse, synapse.loggable_props if not attrs else attrs, steps, dtype
+                )
         else:
             for comp in comps:
-                hooks[comp.identifier] = MonitorHook(comp, comp.loggable_props if not attrs else attrs, steps)
+                hooks[comp.identifier] = MonitorHook(comp, comp.loggable_props if not attrs else attrs, steps, dtype)
 
         return hooks
 

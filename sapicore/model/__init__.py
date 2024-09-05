@@ -96,21 +96,13 @@ class Model:
         for synapse in self.network.get_synapses():
             synapse.set_learning(False)
 
-    def predict(self, data: Tensor | Sequence[Tensor], **kwargs) -> Sequence:
+    def predict(self, data: Tensor, **kwargs) -> Sequence:
         """Predicts the labels of `data`.
 
         Parameters
         ----------
-        data: Data or Tensor
-            Sapicore dataset or a standalone 2D tensor of data buffer, formatted sample X feature.
-
-        duration: int or Sequence of int
-            Duration of sample presentation. Simulates duration of exposure to a particular input.
-            If a list or a tensor is provided, the i-th sample in the batch is maintained for `duration[i]` steps.
-
-        rinse: int or Sequence of int
-            Null stimulation steps (0s in-between samples).
-            If a list or a tensor is provided, the i-th sample is followed by `rinse[i]` rinse steps.
+        data: Tensor
+            Standalone 2D tensor of data buffer, sample X feature.
 
         Returns
         -------
@@ -121,8 +113,7 @@ class Model:
         raise NotImplementedError
 
     def similarity(self, data: Tensor, metric: str | Callable, **kwargs) -> Tensor:
-        """Performs rudimentary similarity analysis on the network's responses to `data`,
-        yielding a pairwise distance matrix.
+        """Performs a similarity analysis on network responses to `data`, yielding a pairwise distance matrix.
 
         Parameters
         ----------
