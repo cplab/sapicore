@@ -170,6 +170,9 @@ class Data(Dataset):
     overwrite: bool, optional
         Whether to download the set regardless of whether `root` already contains cached/pre-downloaded data.
 
+    labels: Sequence, optional
+        Labels to create row metadata from, using a default procedure.
+
     See Also
     --------
     `PyTorch Storage Class <https://discuss.pytorch.org/t/memory-mapped-tensor/8954>`_
@@ -180,11 +183,12 @@ class Data(Dataset):
         self,
         identifier: str = "",
         buffer: Tensor = None,
-        metadata: Metadata = None,
+        metadata: Metadata | Sequence = None,
         root: Optional[str] = None,
         remote_urls: str | list[str] = "",
         download: bool = False,
         overwrite: bool = False,
+        labels: Sequence = None,
     ):
         # dataset identifier, sometimes used with default methods.
         self.identifier = identifier
@@ -192,8 +196,14 @@ class Data(Dataset):
         # optional data tensor provided by user at instantiation.
         self.buffer = buffer
 
-        # reference to metadata object containing axis-specific descriptor labels.
-        self.metadata = metadata if metadata is not None else Metadata()
+        # metadata object containing axis-specific descriptor labels.
+        if isinstance(metadata, Metadata):
+            self.metadata = metadata
+        else:
+            self.metadata = Metadata()
+            if isinstance(metadata, Sequence) and labels is not None:
+                # if labels supplied, use them to create row metadata.
+                self.metadata.add_descriptors(AxisDescriptor(labels))
 
         # optional, local and remote directories.
         self.root = root
@@ -225,10 +235,6 @@ class Data(Dataset):
 
         """
         return len(self.buffer)
-
-    def get_metadata(self, keys: bool = True) -> list[Any]:
-        """Returns metadata keys by default, or their values (AxisDescriptor references) if `keys` is False."""
-        return list(self.metadata.table.keys()) if keys else list(self.metadata.table.values())
 
     def _check_downloaded(self) -> bool:
         """Checks whether files have already been downloaded.
@@ -290,6 +296,10 @@ class Data(Dataset):
 
         """
         pass
+
+    def get_metadata(self, keys: bool = True) -> list[Any]:
+        """Returns metadata keys by default, or their values (AxisDescriptor references) if `keys` is False."""
+        return list(self.metadata.table.keys()) if keys else list(self.metadata.table.values())
 
     def access(self, index: Any, axis: int = None) -> Tensor:
         """Specifies how to access data by mapping indices to actual samples (e.g., from file(s) in `root`).

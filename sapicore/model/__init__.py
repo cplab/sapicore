@@ -36,7 +36,9 @@ class Model:
         # store a reference to one network object.
         self.network = network
 
-    def serve(self, data: Tensor | Sequence[Tensor], duration: int | Sequence[int], rinse: int | Sequence[int] = 0):
+    def serve(
+        self, data: Tensor | Sequence[Tensor], duration: int | Sequence[int], rinse: int | Sequence[int] = 0, **kwargs
+    ):
         """Applies :meth:`engine.network.Network.forward` sequentially on a batch of buffer `data`.
 
         Parameters

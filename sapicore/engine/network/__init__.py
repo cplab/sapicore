@@ -1,18 +1,18 @@
 """ Networks are graph representations of neuron ensembles connected by synapses. """
-from typing import Sequence, Type
+from typing import Sequence
 
 import os
 from itertools import compress
 
-import torch
-
 import networkx as nx
 from networkx import DiGraph
 
+import torch
 from torch import Tensor
 from torch.nn import Module
 
 from sapicore.engine.component import Component
+from sapicore.engine.ensemble import Ensemble
 from sapicore.engine.neuron import Neuron
 from sapicore.engine.synapse import Synapse
 
@@ -98,7 +98,7 @@ class Network(Module):
             # keep unlocked in case of subsequent `add_ensemble` or `add_synapse` calls.
             self._find_roots()
 
-    def __getitem__(self, item: str) -> Component | None:
+    def __getitem__(self, item: str) -> Ensemble | Synapse | None:
         """Look up and return a network component by its string identifier."""
         if self.graph.nodes.get(item):
             return self.graph.nodes.get(item)["reference"]
@@ -225,7 +225,7 @@ class Network(Module):
             else:
                 raise TypeError("Synapses must be given as object references, dictionaries, or paths to YAML.")
 
-            # # heterogenize modifies the object iff a `sweep` specification was provided in the model configuration.
+            # heterogenize modifies the object iff a `sweep` specification was provided in the model configuration.
             synapse.heterogenize(num_combinations=synapse.num_units)
 
         # update root node list.
@@ -296,7 +296,7 @@ class Network(Module):
         steps: int = None,
         attrs: Sequence[str] = None,
         comps: Sequence[Component] = None,
-        dtype: Type = torch.float,
+        dtype: torch.dtype = torch.float,
     ) -> dict:
         """Attach a forward hook to some or all network components, buffering accumulated output in memory.
 
@@ -311,6 +311,9 @@ class Network(Module):
 
         comps: Sequence of Component, optional
             Components to attach data hooks to. If not provided, data will be logged for all components.
+
+        dtype: torch.dtype
+            Torch datatype for this monitor hook; initialize correctly to save memory.
 
         """
         hooks = {}

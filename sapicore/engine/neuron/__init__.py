@@ -80,6 +80,14 @@ class Neuron(Component):
         # specifies which loggable attribute should be considered this unit's output (e.g., voltage or spikes).
         self.output_field = "voltage"
 
+        # optional gating tensor to multiply data by.
+        self.gate = torch.ones_like(self.voltage)
+        self.gate_ = False
+
+        # optional teaching signal tensor to replace data by.
+        self.teach = torch.ones_like(self.voltage)
+        self.teach_ = False
+
     @property
     def num_units(self):
         """Number of functional units represented by this object.
@@ -89,55 +97,6 @@ class Neuron(Component):
 
         """
         return 1
-
-    def forward(self, data: Tensor) -> dict:
-        """Passes input through the neuron.
-
-        Parameters
-        ----------
-        data: Tensor
-            Input current whose value is used to compute the next value of the numeric state tensor `voltage`.
-
-        Returns
-        -------
-        dict
-            A dictionary whose keys are loggable attributes and whose values are their states as of this time step.
-            For potential use by a :class:`~pipeline.simulation.SimpleSimulator` or any other
-            :class:`~pipeline.Pipeline` script handling runtime operations.
-
-        Raises
-        ------
-        NotImplementedError
-            The forward method must be implemented by derivative classes.
-
-        """
-        raise NotImplementedError
-
-    def integrate(self, **kwargs) -> Tensor:
-        """Generic support for numeric approximation.
-
-        This wrapper is meant to be called from within :meth:`~engine.neuron.Neuron.forward` in the voltage
-        update step. Its purpose is to take the difference equation defining a neuron and approximate the
-        voltage value at time t + :attr:`~utils.constants.DT`. Keyword arguments should include variables that
-        `equation` depends on. The argument `x` is the tensor's state at time t, typically `voltage`.
-
-        See Also
-        --------
-        :class:`~utils.integration.RungeKutta`
-
-        """
-        return self.integrator(x=self.voltage, equation=self.equation, **kwargs)
-
-    def inject(self, current: Tensor):
-        """Injects a current into this neuron.
-
-        Parameters
-        ----------
-        current: Tensor
-            Float tensor containing value(s) to be added to this neuron's `voltage` tensor.
-
-        """
-        self.voltage = self.voltage + current
 
     @staticmethod
     def aggregate(inputs: list[Tensor], identifiers: list[str] = None) -> Tensor:
@@ -163,3 +122,80 @@ class Neuron(Component):
 
         """
         return torch.sum(torch.vstack(inputs), dim=0)
+
+    def forward(self, data: Tensor) -> dict:
+        """Passes input through the neuron.
+
+        Parameters
+        ----------
+        data: Tensor
+            Input current whose value is used to compute the next value of the numeric state tensor `voltage`.
+
+        Returns
+        -------
+        dict
+            A dictionary whose keys are loggable attributes and whose values are their states as of this time step.
+            For potential use by a :class:`~pipeline.simulation.SimpleSimulator` or any other
+            :class:`~pipeline.Pipeline` script handling runtime operations.
+
+        Raises
+        ------
+        NotImplementedError
+            The forward method must be implemented by derivative classes.
+
+        """
+        raise NotImplementedError
+
+    def inject(self, current: Tensor, mult: bool = False):
+        """Injects a current into this neuron.
+
+        Parameters
+        ----------
+        current: Tensor
+            Float tensor containing value(s) to be added to this neuron's `voltage` tensor.
+
+        mult: bool
+            Whether the current is multiplicative. Defaults to additive (False).
+
+        """
+        if mult:
+            self.voltage = self.voltage * current
+        else:
+            self.voltage = self.voltage + current
+
+    def integrate(self, **kwargs) -> Tensor:
+        """Generic support for numeric approximation.
+
+        This wrapper is meant to be called from within :meth:`~engine.neuron.Neuron.forward` in the voltage
+        update step. Its purpose is to take the difference equation defining a neuron and approximate the
+        voltage value at time t + :attr:`~utils.constants.DT`. Keyword arguments should include variables that
+        `equation` depends on. The argument `x` is the tensor's state at time t, typically `voltage`.
+
+        See Also
+        --------
+        :class:`~utils.integration.RungeKutta`
+
+        """
+        return self.integrator(x=self.voltage, equation=self.equation, **kwargs)
+
+    def gate_signal(self, signal: Tensor):
+        """Inject external gating `signal`, to be multiplied by synaptic input to this neuron.
+
+        Warning
+        -------
+        Has no effect unless derivative class forward method utilizes it.
+
+        """
+        self.gate = signal
+        self.gate = True
+
+    def teach_signal(self, signal: Tensor):
+        """Inject external teaching `signal`, to replace synaptic input to this neuron.
+
+        Warning
+        -------
+        Has no effect unless derivative class forward method utilizes it.
+
+        """
+        self.teach = signal
+        self.teach_ = True

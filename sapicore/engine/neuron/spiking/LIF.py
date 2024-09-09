@@ -1,7 +1,7 @@
 """ Leaky Integrate-and-Fire neuron model (LIF). """
 import torch
 
-from torch import tensor, Tensor
+from torch import Tensor
 from torch import as_tensor
 from torch.nn.functional import relu
 
@@ -85,6 +85,7 @@ class LIFNeuron(SpikingNeuron):
         self.tau_mem = torch.zeros(1, dtype=torch.float, device=self.device) + as_tensor(tau_mem, device=self.device)
         self.tau_ref = torch.zeros(1, dtype=torch.float, device=self.device) + as_tensor(tau_ref, device=self.device)
 
+        # optional periodic LIF features.
         if cycle_length is not None:
             self.cycle_length = torch.zeros(1, dtype=torch.int, device=self.device) + cycle_length
         else:
@@ -118,8 +119,18 @@ class LIFNeuron(SpikingNeuron):
             Dictionary containing the numeric state tensors `voltage`, `spiked`, and `input`.
 
         """
+        if self.gate_:
+            # update input data based on gating signal.
+            data = self.gate * data
+            self.gate_ = False
+
+        if self.teach_:
+            # teaching signals override gating signals.
+            data = self.teach
+            self.teach_ = False
+
         # update internal representation of input current for tensorboard logging purposes.
-        self.input = tensor([data.detach().clone()]) if not data.size() else data.detach().clone()
+        self.input = as_tensor(data, device=self.device)
 
         # detect spikes in a pytorch-friendly way by thresholding the voltage attribute.
         spiked_prev = self.voltage >= self.volt_thresh

@@ -25,6 +25,7 @@ from sapicore.utils.tensorboard import TensorboardWriter, HDFData
 
 __all__ = (
     "DataAccumulatorHook",
+    "MonitorHook",
     "ensure_dir",
     "flatten",
     "load_yaml",
