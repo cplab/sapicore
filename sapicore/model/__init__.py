@@ -98,13 +98,16 @@ class Model:
         for synapse in self.network.get_synapses():
             synapse.set_learning(False)
 
-    def predict(self, data: Tensor, **kwargs) -> Sequence:
+    def predict(self, data: Tensor, labels: Sequence, **kwargs) -> Sequence:
         """Predicts the labels of `data`.
 
         Parameters
         ----------
         data: Tensor
             Standalone 2D tensor of data buffer, sample X feature.
+
+        labels: Sequence
+            Label values corresponding to classification layer cell indices.
 
         Returns
         -------

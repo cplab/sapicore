@@ -141,7 +141,7 @@ class Synapse(Component):
         if connections is not None:
             self.register_buffer("connections", connections.to(self.device))
         else:
-            self.register_buffer("connections", torch.ones_like(self.weights))
+            self.register_buffer("connections", torch.ones_like(self.weights, dtype=torch.bool))
 
         # if given, apply connection strategy; all connections enabled by default.
         conn_mode = kwargs.pop("conn_mode", "all")
@@ -233,16 +233,22 @@ class Synapse(Component):
         """
         match mode:
             case "all":
-                self.connections = torch.ones_like(self.connections, device=self.device)
+                self.connections = torch.ones_like(self.connections, device=self.device, dtype=torch.bool)
 
             case "one":
-                self.connections = torch.eye(*self.connections.size(), device=self.device)
+                num_src = self.src_ensemble.num_units
+                num_dst = self.dst_ensemble.num_units
+
+                # produces identity-like non-square matrices if applicable.
+                self.connections = torch.eye(num_src, device=self.device, dtype=torch.bool).repeat_interleave(
+                    num_dst // num_src, dim=0
+                )
 
             case "prop":
                 selection_size = int(np.round(prop * self.matrix_shape[0]))
                 torch.randperm(self.matrix_shape[0])
 
-                self.connections = torch.zeros_like(self.connections, device=self.device)
+                self.connections = torch.zeros_like(self.connections, device=self.device, dtype=torch.bool)
                 for i in range(self.matrix_shape[1]):
                     self.connections[torch.randperm(self.matrix_shape[0])[:selection_size], i] = 1
 
@@ -250,7 +256,7 @@ class Synapse(Component):
                 num_enabled = int(np.round(prop * self.weights.numel()))
                 ids_enabled = np.random.choice(np.arange(self.weights.numel()), size=num_enabled, replace=False)
 
-                self.connections = torch.zeros_like(self.connections, device=self.device)
+                self.connections = torch.zeros_like(self.connections, device=self.device, dtype=torch.bool)
                 self.connections[np.unravel_index(ids_enabled, shape=self.matrix_shape)] = 1.0
 
             case _:
@@ -312,7 +318,7 @@ class Synapse(Component):
         """
         if not self.legacy:
             # Add the incoming spikes at the current positions indicated by delay_indices
-            n_synapses = current_data.size(0)
+            n_synapses = self.matrix_shape[1]
             self.delay_buffer[torch.arange(n_synapses), self.delay_indices % self.max_delay] = current_data
 
             # Transmit the spikes at index 0 (front of the queue)

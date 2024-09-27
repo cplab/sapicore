@@ -189,6 +189,7 @@ class Data(Dataset):
         download: bool = False,
         overwrite: bool = False,
         labels: Sequence = None,
+        **kwargs,
     ):
         # dataset identifier, sometimes used with default methods.
         self.identifier = identifier

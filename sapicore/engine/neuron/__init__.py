@@ -187,7 +187,7 @@ class Neuron(Component):
 
         """
         self.gate = signal
-        self.gate = True
+        self.gate_ = True
 
     def teach_signal(self, signal: Tensor):
         """Inject external teaching `signal`, to replace synaptic input to this neuron.

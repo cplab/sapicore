@@ -73,8 +73,7 @@ class MonitorHook(Module):
 
         # (de)activate hook without removing it.
         self.active = True
-
-        component.register_forward_hook(self.monitor_hook())
+        self.handle = component.register_forward_hook(self.monitor_hook())
 
     def __getitem__(self, item):
         if item is not None and not isinstance(item, slice):
@@ -82,6 +81,9 @@ class MonitorHook(Module):
         else:
             # [:] will be a shorthand for returning the cache dictionary.
             return self.cache
+
+    def remove(self):
+        self.handle.remove()
 
     def pause(self):
         self.active = False
@@ -103,7 +105,7 @@ class MonitorHook(Module):
                         else:
                             # preallocate if number of steps is known.
                             dim = [self.entries, len(output[attr])] + ([output[attr].shape[1]] if odim == 2 else [])
-                            self.cache[attr] = torch.empty(dim, dtype=self.dtype)
+                            self.cache[attr] = torch.empty(dim, device=self.component.device, dtype=self.dtype)
 
                     else:
                         if self.entries is None:
