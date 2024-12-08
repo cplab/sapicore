@@ -1,12 +1,10 @@
 Sapicore
 ========
 
-A project of the [Computational Physiology Laboratory](https://cplab.net/) at Cornell University.
+PyTorch-Based Spiking Neural Network Simulation
+---------------------------------------------
 
-A Framework for Spiking Neural Network Modeling
------------------------------------------------
-
-Sapicore is a spiking neural network (SNN) simulator built with PyTorch, designed to support
+Sapicore is a spiking neural network (SNN) simulator, built with PyTorch and designed for
 neuroscience-inspired models with realistic architectures and dynamics.
 
 We provide a simple API for:
@@ -19,15 +17,16 @@ We provide a simple API for:
 * Deploying neuromorphic networks as machine learning models.
 * Visualizing, interpreting, and analyzing output.
 
-Sapicore makes it easy to build and extend neuron, synapse, network, and data loader classes.
-It includes efficient default implementations of models commonly used in computational neuroscience and neuromorphic
-machine learning applications. Users may configure networks in YAML or instantiate components directly in code.
+<b>Users may configure networks in YAML or directly in code.</b>
+Develop custom neuron, synapse, network, and data loader classes.
 
-Sapicore interfaces with industry-standard ML libraries, including
-[ray](https://docs.ray.io/en/latest/ray-core/walkthrough.html),
-[scikit-learn](https://scikit-learn.org/stable/), [networkX](https://networkx.org/), and
-[tensorboard](https://pytorch.org/docs/stable/tensorboard.html).
-Object configuration using [tree-config](https://github.com/matham/tree-config/) is also supported.
+<b>We made component extension and customization easy.</b> Default implementations of common models used in
+computational neuroscience and neuromorphic machine learning applications are provided out of the box.</b>
+
+<b>Sapicore interfaces with industry-standard ML libraries</b>, including
+[scikit-learn](https://scikit-learn.org/stable/).
+
+A project of the [Computational Physiology Lab](https://cplab.net/) @ Cornell University.
 
 ***
 
@@ -98,7 +97,9 @@ See ``setup.py`` for more information.
 
 Citation
 --------
-If you use Sapicore, please cite it per [CITATION.cff](https://github.com/cplab/sapicore/blob/main/CITATION.cff).
+If you use Sapicore, please cite it as:
+
+* Moyal, R., Einhorn, M., Borthakur, A., & Cleland, T. (2024). Sapicore (Version 0.4.0) [Computer software]. https://github.com/cplab/sapicore
 
 
 References
