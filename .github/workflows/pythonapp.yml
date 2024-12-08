@@ -1,56 +1,57 @@
 name: Python Application
 
 on:
-  push:
-  pull_request:
+  push:  # Trigger the workflow on push events
+  pull_request:  # Trigger the workflow on pull request events
     branches:
-    - main
+    - main  # Only trigger on the main branch
+    - patch
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v4  # Check out the repository
     - name: Set up Python 3.11
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v5  # Set up Python 3.11
       with:
         python-version: 3.11
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip virtualenv wheel setuptools
+        python3 -m pip install --upgrade pip virtualenv wheel setuptools  # Upgrade pip and install essential packages
     - name: Lint with pycodestyle
       run: |
-        python3 -m pip install flake8
-        python3 -m flake8 . --count --ignore=E125,E126,E127,E128,E203,E226,E402,E741,E731,W503,F401,W504,F841 --show-source --statistics --max-line-length=120 --exclude=__pycache__,.tox,.git/,doc/
+        python3 -m pip install flake8  # Install flake8 for linting
+        python3 -m flake8 . --count --ignore=E125,E126,E127,E128,E203,E226,E402,E741,E731,W503,F401,W504,F841 --show-source --statistics --max-line-length=120 --exclude=__pycache__,.tox,.git/,doc/  # Run flake8 with specific options
 
   linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v4  # Check out the repository
     - name: Set up Python 3.11
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v5  # Set up Python 3.11
       with:
         python-version: 3.11
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip virtualenv wheel setuptools
+        python3 -m pip install --upgrade pip virtualenv wheel setuptools  # Upgrade pip and install essential packages
     - name: Make sdist
-      run: python3 setup.py sdist --formats=gztar
+      run: python3 setup.py sdist --formats=gztar  # Create a source distribution
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip virtualenv wheel setuptools pytest
-        python3 -m pip install torch torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html
+        python3 -m pip install --upgrade pip virtualenv wheel setuptools pytest  # Upgrade pip and install essential packages and pytest
+        python3 -m pip install torch torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html  # Install PyTorch and torchvision
     - name: Install project
-      run: python3 -m pip install -e .[dev]
+      run: python3 -m pip install -e .[dev]  # Install the project in editable mode with development dependencies
     - name: Make wheel
-      run: python3 setup.py bdist_wheel --universal
+      run: python3 setup.py bdist_wheel --universal  # Create a wheel distribution
     - name: Upload wheels as artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3  # Upload the wheel files as artifacts
       with:
         name: wheels
         path: dist
     - name: Upload to GitHub Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v1  # Upload the artifacts to a GitHub release
       if: startsWith(github.ref, 'refs/tags/')
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -60,39 +61,41 @@ jobs:
     - name: Pytest
       run: |
         cd sapicore
-        python3 -m pytest -m "not functional"
+        python3 -m pytest -m "not functional"  # Run pytest excluding functional tests
 
   docs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v4  # Check out the repository
     - name: Set up Python 3.11
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v5  # Set up Python 3.11
       with:
         python-version: 3.11
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip virtualenv wheel setuptools m2r2
-        python3 -m pip install torch torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html
-        python3 -m pip install -e .[dev]
+        python3 -m pip install --upgrade pip virtualenv wheel setuptools m2r2  # Upgrade pip and install essential packages and m2r2
+        python3 -m pip install torch torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html  # Install PyTorch and torchvision
+        python3 -m pip install -e .[dev]  # Install the project in editable mode with development dependencies
     - name: Generate docs
       run: |
         cd docs
-        make html
+        make html  # Generate HTML documentation
     - name: Upload docs as artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3  # Upload the documentation as artifacts
       with:
         name: docs
         path: docs/build/html
     - name: gh-pages upload
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'  # Only run on push events to the main branch
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}  # Use secret for git user email
+        GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}  # Use secret for git username
       run: |
         cp -r docs/build/html ~/docs_temp
 
-        git config --global user.email "cplab@cornell.edu"
-        git config --global user.name "CPLab"
+        git config --global user.email "${GIT_USER_EMAIL}"  # Configure git with user email from secret
+        git config --global user.name "${GIT_USER_NAME}"  # Configure git with user name from secret
         git remote rm origin || true
         git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/cplab/sapicore.git"
 
@@ -108,4 +111,4 @@ jobs:
 
         git add .
         git commit -a -m "Docs for git-$GITHUB_SHA"
-        git push origin gh-pages -f
+        git push origin gh-pages -f  # Force push the documentation to the gh-pages branch
