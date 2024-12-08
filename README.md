@@ -1,8 +1,8 @@
 Sapicore
 ========
 
-PyTorch-Based Spiking Neural Network Simulation
----------------------------------------------
+A PyTorch-Based Spiking Neural Network Simulation Framework
+-----------------------------------------------------------
 
 Sapicore is a spiking neural network (SNN) simulator, built with PyTorch and designed for
 neuroscience-inspired models with realistic architectures and dynamics.
