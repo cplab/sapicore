@@ -6,15 +6,22 @@ A project of the [Computational Physiology Laboratory](https://cplab.net/) at Co
 A Framework for Spiking Neural Network Modeling
 -----------------------------------------------
 
-Sapicore is a spiking neural network (SNN) simulator built with PyTorch. It streamlines
-the design and iterative testing of neuroscience-inspired models with nontrivial dynamics.
+Sapicore is a spiking neural network (SNN) simulator built with PyTorch, designed to support
+neuroscience-inspired models with realistic architectures and dynamics.
 
-We provide programmatic and YAML-based APIs for specifying network structure and behavior,
-designing simulation pipelines, utilizing models for classification and clustering, and data visualization.
+We provide a simple API for:
 
-Sapicore's incremental class hierarchy includes efficient default implementations of neuron
-and synapse models commonly used in neuroscience and machine learning applications.
-Users may write their own dataloaders, derivative classes, and specification files in separate repositories.
+* Data loading and transformation.
+* Initializing and connecting network components.
+* Extending base neurons (e.g., LIF) and synapses (e.g., STDP).
+* Orchestrating experiment pipelines.
+* Selectively logging intermediate results.
+* Deploying neuromorphic networks as machine learning models.
+* Visualizing, interpreting, and analyzing output.
+
+Sapicore makes it easy to build and extend neuron, synapse, network, and data loader classes.
+It includes efficient default implementations of models commonly used in computational neuroscience and neuromorphic
+machine learning applications. Users may configure networks in YAML or instantiate components directly in code.
 
 Sapicore interfaces with industry-standard ML libraries, including
 [ray](https://docs.ray.io/en/latest/ray-core/walkthrough.html),
@@ -26,15 +33,15 @@ Object configuration using [tree-config](https://github.com/matham/tree-config/)
 
 Current Release
 ---------------
-Sapicore 0.3.0 is in beta. The current version includes the following features:
+Sapicore 0.4 is runtime- and memory-optimized. This beta version includes:
 
+* Flexible data classes (metadata-based row selection).
 * Spiking neurons (LIF and IZ).
-* Analog neurons and oscillators.
-* Static and STDP synapses.
-* Network design and simulation tools.
-* Scikit-compatible model API (fit/predict).
+* Graded neurons (integrators, oscillators).
+* Static and plastic synapses (STDP).
+* Automated network construction and simulation.
+* Scikit-integrated ML model API (fit/predict).
 * Sampling and cross validation tools.
-* Data classes with basic ETL support.
 * Visualization tools.
 
 To simulate a network from a YAML configuration using the default simulation pipeline:
@@ -47,12 +54,7 @@ See `tutorials` and `tests/engine/network/test_network` for instructive scripts 
 
 Installation
 ------------
-Basic requirements include Python 3.10+, PyTorch 1.12+, NetworkX, and the scientific stack (numpy, scipy, pandas).
-Developers should also install pytest and sphinx. See ``setup.py`` for more information.
-
-To install the latest stable version of Sapicore:
-
-	pip install sapicore
+Basic requirements include Python 3.11+, PyTorch 2.1+, NetworkX, and the scientific stack (numpy, scipy, pandas).
 
 To install the most recent development version:
 
@@ -77,7 +79,7 @@ If you would like to modify or extend this library:
 
 * Create a conda virtual environment (optional):
 
-      conda create -n <env_name> python=3.10
+      conda create -n <env_name> python=3.11
       conda activate <env_name>
 
 * Change directory to `sapicore` and install with pip:
@@ -92,37 +94,32 @@ To configure your local environment, install these development dependencies and 
 	pre-commit install
 
 Documentation can be compiled by installing Sphinx and RTD, then running `docs/refresh.sh`.
+See ``setup.py`` for more information.
 
 Citation
 --------
-Sapinet, the primary focus of this effort, is a multilayer spiking model designed for few-shot online learning of
-multiple inputs without catastrophic forgetting and without the need for data-specific hyperparameter
-retuning. Key features of Sapinet include denoising, regularization, scaling, classification, and stimulus
-similarity mapping.
+If you use Sapicore, please cite it per [CITATION.cff](https://github.com/cplab/sapicore/blob/main/CITATION.cff).
 
-If you use Sapicore, please cite the following article:
 
-* Borthakur, A. (2022). [Sapinet: A sparse event-based spatiotemporal oscillator for learning in the
+References
+----------
+For more information about past and ongoing projects utilizing Sapicore, refer to the following publications:
+
+* R. Moyal, K. R. Mama, M. Einhorn, A. Borthakur, and T. A. Cleland (2024). [Heterogeneous quantization regularizes spiking
+neural network activity](https://doi.org/10.48550/arXiv.2409.18396). <i>arXiv:2409.18396</i>.
+
+* A. Borthakur (2022). [Sapinet: A sparse event-based spatiotemporal oscillator for learning in the
 wild](https://arxiv.org/abs/2204.06216). <i>arXiv:2204.06216</i>.
 
-If you are interested in dynamical perspectives on neural computation, oscillatory synchronization,
-or top-down control over representational state transitions, check out and cite the following articles:
+For a dynamical systems perspective on neural computation, temporal coding, and top-down control of
+sensory processing, the following article may be of interest:
 
-* Moyal, R. & Edelman, S. (2019). [Dynamic Computation in Visual Thalamocortical
-Networks](https://www.mdpi.com/1099-4300/21/5/500). <i>Entropy, 21</i>(5).
+* R. Moyal and S. Edelman (2019). [Dynamic computation in visual thalamocortical
+networks](https://www.mdpi.com/1099-4300/21/5/500). <i>Entropy, 21</i>(5).
 
-
-* Edelman, S. & Moyal, R. (2017). [Fundamental computational constraints on the time course of perception and
-action](https://www.sciencedirect.com/science/article/abs/pii/S007961231730050X).
-<i>Progress in Brain Research, 236</i>, 121-141.
-
-Authors
--------
+Contributors
+------------
 [Roy Moyal](https://scholar.google.com/citations?user=P8Ztxr4AAAAJ),
-[Matthew Einhorn](https://matham.dev/about/), [Jeremy Forest](https://jeremyforest.netlify.app/),
-[Ayon Borthakur](https://borthakurayon.github.io/), [Thomas Cleland](https://cplab.net/people/thomas-cleland/).
-
-- Engine, simulator, pipelines, data classes, and visualization tools by Roy Moyal.
-- Framework architecture by Matthew Einhorn and Roy Moyal.
-- Algorithms by Roy Moyal, Ayon Borthakur, and Thomas Cleland.
-- Tutorials, utilities, and examples by Roy Moyal and Jeremy Forest.
+[Matthew Einhorn](https://matham.dev/about/),
+[Ayon Borthakur](https://borthakurayon.github.io/),
+[Thomas Cleland](https://cplab.net/people/thomas-cleland/).
