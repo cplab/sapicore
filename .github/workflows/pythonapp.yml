@@ -18,7 +18,8 @@ jobs:
         python-version: 3.11
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip virtualenv wheel setuptools  # Upgrade pip and install essential packages
+        python3 -m pip install --upgrade setuptools=="75.6.0"
+        python3 -m pip install --upgrade pip virtualenv wheel  # Upgrade pip and install essential packages
     - name: Lint with pycodestyle
       run: |
         python3 -m pip install flake8  # Install flake8 for linting
@@ -34,12 +35,14 @@ jobs:
         python-version: 3.11
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip virtualenv wheel setuptools  # Upgrade pip and install essential packages
+        python3 -m pip install --upgrade setuptools=="75.6.0"
+        python3 -m pip install --upgrade pip virtualenv wheel  # Upgrade pip and install essential packages
     - name: Make sdist
       run: python3 setup.py sdist --formats=gztar  # Create a source distribution
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip virtualenv wheel setuptools pytest  # Upgrade pip and install essential packages and pytest
+        python3 -m pip install --upgrade setuptools=="75.6.0"
+        python3 -m pip install --upgrade pip virtualenv wheel pytest  # Upgrade pip and install essential packages and pytest
         python3 -m pip install torch torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html  # Install PyTorch and torchvision
     - name: Install project
       run: python3 -m pip install -e .[dev]  # Install the project in editable mode with development dependencies
@@ -73,7 +76,8 @@ jobs:
         python-version: 3.11
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip virtualenv wheel setuptools m2r2  # Upgrade pip and install essential packages and m2r2
+        python3 -m pip install --upgrade setuptools=="75.6.0"
+        python3 -m pip install --upgrade pip virtualenv wheel m2r2  # Upgrade pip and install essential packages and m2r2
         python3 -m pip install torch torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html  # Install PyTorch and torchvision
         python3 -m pip install -e .[dev]  # Install the project in editable mode with development dependencies
     - name: Generate docs
