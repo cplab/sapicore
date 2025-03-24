@@ -72,11 +72,11 @@ class OscillatorNeuron(AnalogNeuron):
         """Constructs an iterator-based oscillator."""
         super().__init__(**kwargs)
 
-        self.amplitudes = as_tensor(amplitudes if amplitudes else [5.0], device=self.device)
-        self.frequencies = as_tensor(frequencies if frequencies else [40.0], device=self.device)
-        self.phases = as_tensor(phases if phases else [0.0], device=self.device)
-        self.amp_freq = as_tensor(amp_freq if amp_freq else [0.0], device=self.device)
-        self.baseline_shift = as_tensor(baseline_shift if baseline_shift else [0.0], device=self.device)
+        self.amplitudes = as_tensor(amplitudes if amplitudes is not None else [5.0], device=self.device)
+        self.frequencies = as_tensor(frequencies if frequencies is not None else [40.0], device=self.device)
+        self.phases = as_tensor(phases if phases is not None else [0.0], device=self.device)
+        self.amp_freq = as_tensor(amp_freq if amp_freq is not None else [0.0], device=self.device)
+        self.baseline_shift = as_tensor(baseline_shift if baseline_shift is not None else [0.0], device=self.device)
 
         # placeholder for waves and wave iterator.
         self._iter = []

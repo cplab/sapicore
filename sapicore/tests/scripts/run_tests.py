@@ -13,7 +13,7 @@ from sapicore.utils.io import ensure_dir
 from sapicore.tests import ROOT
 
 
-if __name__ == "__main__":
+def run_tests(root=ROOT):
     # parse runtime arguments.
     parser = ArgumentParser()
     parser.add_argument(
@@ -42,10 +42,10 @@ if __name__ == "__main__":
         args_list += ["-m " + " ".join(args.m)]
 
     # unavoidable--pytest refuses to work with .ini at root or accept absolute paths when executed from here.
-    os.chdir(ROOT)
+    os.chdir(root)
 
     # initialize coverage.py object.
-    cov = Coverage(omit=[os.path.join(ROOT, folder, "*") for folder in ["scripts"]])
+    cov = Coverage(omit=[os.path.join(root, folder, "*") for folder in ["scripts"]])
     cov.start()
 
     # run configurable tests.
@@ -53,4 +53,8 @@ if __name__ == "__main__":
 
     # generate HTML coverage report.
     cov.stop()
-    cov.html_report(directory=ensure_dir(os.path.join(ROOT, "tests", "scripts", "coverage_report")))
+    cov.html_report(directory=ensure_dir(os.path.join(root, "tests", "scripts", "coverage_report")))
+
+
+if __name__ == "__main__":
+    run_tests()

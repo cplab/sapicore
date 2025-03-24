@@ -19,12 +19,12 @@ class Component(Module, Configurable, Loggable):
     """Model component base class.
 
     Defines instance attributes and methods shared by all model components.
-    Its primary purpose is to implement generic operations on loggable and configurable attributes.
+    Implements generic operations on loggable and configurable attributes.
 
     Parameters
     ----------
     identifier: str, optional
-        Human-readable identifier for the component instance.
+        Human-readable name for the component instance.
 
     configuration: dict, optional
         Configuration dictionary used during parameter initialization.
@@ -56,11 +56,7 @@ class Component(Module, Configurable, Loggable):
 
         # simulation-related tracking variables.
         self.simulation_step = 0
-        self.dt = DT
-
-        # we don't know what attributes derivative component classes might introduce, but we want them initialized.
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+        self.dt = kwargs.pop("dt", DT)
 
     def configure(self, configuration: dict[str, Any] = None, log_destination: str = ""):
         """Applies a configuration to this object by adding the keys of `configuration` as instance attributes,

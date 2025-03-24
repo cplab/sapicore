@@ -31,6 +31,12 @@ class Synapse(Component):
     dst_ensemble: Neuron
         Reference to postsynaptic ensemble (receiving) ensemble.
 
+    weights: Tensor
+        2D weight matrix.
+
+    connections: Tensor.
+        2D connectivity mask matrix.
+
     weight_max: float or Tensor
         Positive weight value limit for any synapse element (applies throughout the simulation).
 
@@ -66,17 +72,17 @@ class Synapse(Component):
     _loggable_props_: tuple[str] = ("weights", "connections", "output")
 
     # declare loggable instance attributes registered as torch buffers.
-    connections: tensor
-    weights: tensor
-    output: tensor
+    connections: Tensor
 
     def __init__(
         self,
         src_ensemble: [Neuron] = None,
         dst_ensemble: [Neuron] = None,
+        weights: [Tensor] = None,
+        connections: [Tensor] = None,
         weight_max: float = 1000.0,
         weight_min: float = -1000.0,
-        delay_ms: float = 0.0,
+        delay_ms: int = 0,
         simple_delays: bool = True,
         weight_init_method: Callable = xavier_uniform_,
         **kwargs,
@@ -101,40 +107,49 @@ class Synapse(Component):
         self.weight_min = torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device) + weight_min
         self.weight_init_method = weight_init_method  # xavier_uniform by default.
 
-        # whether transmission delays from one presynaptic element are shared among postsynaptic targets.
+        # [FAST] synaptic delay ring buffer initialization.
+        self.delay_ms = delay_ms
+        self.delay_buffer = None
+        self.delay_indices = None
+
+        # [LEGACY] whether transmission delays from one presynaptic element are shared among postsynaptic targets.
         self.simple_delays = simple_delays
+        self.delay_queue = None
+        self.delayed_data = None
+        self.legacy = kwargs.pop("legacy", False)
 
-        if self.simple_delays:
-            # initialize default transmission delay values as a tensor of size `src_ensemble.num_units`.
-            self.delay_ms = torch.zeros(self.matrix_shape[1], dtype=torch.float, device=self.device) + delay_ms
+        self._compute_delays()
 
-            # container for data pulled from the queue in this simulation step (input as seen by `dst_ensemble`).
-            self.delayed_data = torch.zeros(self.matrix_shape[1], dtype=torch.float, device=self.device)
-
-            # maintains delayed data queues
-            self.delay_queue = [
-                deque(torch.zeros(delay.int(), device=self.device)) for delay in (self.delay_ms / self.dt).int()
-            ]
-        else:
-            # the extensive delay setting, where delayed input views may vary across postsynaptic elements.
-            self.delay_ms = torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device) + delay_ms
-            self.delayed_data = torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device)
-            self.delay_queue = [
-                deque(torch.zeros(delay.int(), device=self.device))
-                for delay in (self.delay_ms / self.dt).flatten().int()
-            ]
-
-        # binary connectivity matrix marking enabled/disabled connections (integer mask, all-to-all by default).
-        self.register_buffer("connections", torch.ones(self.matrix_shape, dtype=torch.uint8, device=self.device))
+        # container for data pulled from the queue in this simulation step (input as seen by `dst_ensemble`).
+        self.delayed_data = torch.zeros(self.matrix_shape[1], dtype=torch.float, device=self.device)
 
         # float matrix containing synaptic weights.
-        self.register_buffer("weights", torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device))
+        if weights is not None:
+            if not isinstance(weights, Tensor):
+                w_init = torch.ones(self.matrix_shape, device=self.device) * weights
+            else:
+                w_init = weights.to(self.device)
+            self.register_buffer("weights", w_init)
+        else:
+            self.register_buffer(
+                "weights",
+                self.weight_init_method(tensor=torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device)),
+            )
+
+        # binary connectivity matrix marking enabled/disabled connections (integer mask, all-to-all by default).
+        # initialize connections from constructor input, if given.
+        if connections is not None:
+            self.register_buffer("connections", connections.to(self.device))
+        else:
+            self.register_buffer("connections", torch.ones_like(self.weights, dtype=torch.bool))
+
+        # if given, apply connection strategy; all connections enabled by default.
+        conn_mode = kwargs.pop("conn_mode", "all")
+        if conn_mode:
+            self.connect(conn_mode, kwargs.pop("conn_prop", 1))
 
         # output 1D tensor containing data for the destination ensemble.
         self.register_buffer("output", torch.zeros(self.matrix_shape[0], dtype=torch.float, device=self.device))
-
-        # default initialization method for weights (can be overriden).
-        self.weights = self.weight_init_method(tensor=self.weights)
 
         # clamp weights to acceptable range given this synapse's min and max.
         self.weights = torch.clamp(self.weights, self.weight_min, self.weight_max)
@@ -150,6 +165,40 @@ class Synapse(Component):
         # specifies which loggable attribute should be considered this unit's output.
         self.output_field = "output"
 
+    def _compute_delays(self):
+        """Compute synaptic delay buffers. Backward compatible with Sapicore < 0.4.0.
+
+        Note
+        ----
+        Invoked in :meth:`heterogenize`, as it can potentially alter delay values after synapse instantiation.
+
+        """
+        # initialize default transmission delay values as a tensor of size `src_ensemble.num_units`.
+        self.delay_ms = torch.zeros(self.matrix_shape[1], dtype=torch.float, device=self.device) + self.delay_ms
+
+        if self.legacy:
+            if self.simple_delays:
+                # maintains delayed data queues.
+                self.delay_queue = [
+                    deque(torch.zeros(delay, device=self.device)) for delay in (self.delay_ms // self.dt).int()
+                ]
+            else:
+                # the extensive delay setting, where delayed input views may vary across postsynaptic elements.
+                self.delay_ms = torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device) + self.delay_ms
+                self.delayed_data = torch.zeros(self.matrix_shape, dtype=torch.float, device=self.device)
+                self.delay_queue = [
+                    deque(torch.zeros(delay.int(), device=self.device))
+                    for delay in (self.delay_ms / self.dt).flatten().int()
+                ]
+        else:
+            delay_ms_int = self.delay_ms.int()
+            self.max_delay = delay_ms_int.max().item() + 1
+
+            self.delay_indices = self.delay_ms.clone().to(self.device).long()
+            self.delay_buffer = torch.zeros(
+                (self.matrix_shape[1], self.max_delay), dtype=torch.float, device=self.device
+            )
+
     def connect(self, mode: str = "all", prop: float = 1.0):
         """Applies a predefined connectivity mask strategy.
 
@@ -164,7 +213,7 @@ class Synapse(Component):
             of the matrix elements to 1 with no balance constraints (unlike "prop").
 
         prop:
-            Desired proportion a neurons in destination receiving a connection from a particular neuron
+            Desired proportion of neurons in destination receiving a connection from a particular neuron
             in the source ensemble. Rounded to an integer using np.round.
 
             E.g., if prop = 0.2 and matrix_shape is (100, 5), 20 random row elements (destination neurons)
@@ -184,16 +233,22 @@ class Synapse(Component):
         """
         match mode:
             case "all":
-                self.connections = torch.ones_like(self.connections, device=self.device)
+                self.connections = torch.ones_like(self.connections, device=self.device, dtype=torch.bool)
 
             case "one":
-                self.connections = torch.eye(*self.connections.size(), device=self.device)
+                num_src = self.src_ensemble.num_units
+                num_dst = self.dst_ensemble.num_units
+
+                # produces identity-like non-square matrices if applicable.
+                self.connections = torch.eye(num_src, device=self.device, dtype=torch.bool).repeat_interleave(
+                    num_dst // num_src, dim=0
+                )
 
             case "prop":
                 selection_size = int(np.round(prop * self.matrix_shape[0]))
                 torch.randperm(self.matrix_shape[0])
 
-                self.connections = torch.zeros_like(self.connections, device=self.device)
+                self.connections = torch.zeros_like(self.connections, device=self.device, dtype=torch.bool)
                 for i in range(self.matrix_shape[1]):
                     self.connections[torch.randperm(self.matrix_shape[0])[:selection_size], i] = 1
 
@@ -201,7 +256,7 @@ class Synapse(Component):
                 num_enabled = int(np.round(prop * self.weights.numel()))
                 ids_enabled = np.random.choice(np.arange(self.weights.numel()), size=num_enabled, replace=False)
 
-                self.connections = torch.zeros_like(self.connections, device=self.device)
+                self.connections = torch.zeros_like(self.connections, device=self.device, dtype=torch.bool)
                 self.connections[np.unravel_index(ids_enabled, shape=self.matrix_shape)] = 1.0
 
             case _:
@@ -212,17 +267,8 @@ class Synapse(Component):
         the spike delay queue in case values were altered."""
         super().heterogenize(num_combinations=self.num_units, unravel=unravel)
 
-        # recompute delay steps and reinitialize queue.
-        if self.simple_delays:
-            self.delay_queue = [
-                deque(torch.zeros(delay.int(), device=self.device)) for delay in (self.delay_ms / self.dt).int()
-            ]
-
-        else:
-            self.delay_queue = [
-                deque(torch.zeros(delay.int(), device=self.device))
-                for delay in (self.delay_ms / self.dt).flatten().int()
-            ]
+        # recompute delay steps and reinitialize ring buffer (or queues in legacy).
+        self._compute_delays()
 
     def set_learning(self, state: bool = False) -> None:
         """Switch weight updates on or off, e.g. before a training/testing round commences.
@@ -253,7 +299,12 @@ class Synapse(Component):
         self.weights = weight_initializer(tensor=self.weights, *args, **kwargs)
 
     def queue_input(self, current_data: Tensor) -> Tensor:
-        """Uses a list of queues to implement transmission delays and "release" input appropriately.
+        """Loads incoming spikes into the back of a ring buffer at the correct index,
+        and returns the delayed spikes ready for transmission (from the front of the queue).
+
+        Note
+        ----
+        Legacy variant uses a list of queues to implement transmission delays and "release" input appropriately.
 
         Initializes a list whose Nth element is a queue pre-filled with ``self.delay_ms[N] // DT`` zeros.
         On each forward iteration, call this method. It will enqueue the current source input data value and
@@ -265,20 +316,37 @@ class Synapse(Component):
             1D tensor of input that occurred an appropriate number of steps ago for each unit.
 
         """
-        if self.simple_delays:
-            # append updated presynaptic data to the queues, each corresponding to one presynaptic element.
-            for i, value in enumerate(current_data):
-                self.delay_queue[i].append(value)
+        if not self.legacy:
+            # Add the incoming spikes at the current positions indicated by delay_indices
+            n_synapses = self.matrix_shape[1]
+            self.delay_buffer[torch.arange(n_synapses), self.delay_indices % self.max_delay] = current_data
+
+            # Transmit the spikes at index 0 (front of the queue)
+            spikes_to_transmit = self.delay_buffer[:, 0]
+
+            # Rotate the delay buffer to the left (advance the spikes)
+            self.delay_buffer = torch.cat(
+                [self.delay_buffer[:, 1:], torch.zeros((n_synapses, 1), device=self.device)], dim=1
+            )
+            return spikes_to_transmit
 
         else:
-            # append updated presynaptic data to the delayed view of each postsynaptic element (src X dst queues).
-            for i in range(len(self.delay_queue)):
-                multi_index = np.unravel_index(i, self.matrix_shape)
-                self.delay_queue[i].append(current_data[multi_index[1]])
+            if self.simple_delays:
+                # append updated presynaptic data to the queues, each corresponding to one presynaptic element.
+                for i, value in enumerate(current_data):
+                    if i >= len(self.delay_queue):
+                        breakpoint()
+                    self.delay_queue[i].append(value)
 
-        # return appropriate data tensor while popping the head of the line.
-        valid_data = [item.popleft() for item in self.delay_queue]
-        return tensor(valid_data, device=self.device)
+            else:
+                # append updated presynaptic data to the delayed view of each postsynaptic element (src X dst queues).
+                for i in range(len(self.delay_queue)):
+                    multi_index = np.unravel_index(i, self.matrix_shape)
+                    self.delay_queue[i].append(current_data[multi_index[1]])
+
+            # return appropriate data tensor while popping the head of the line.
+            valid_data = [item.popleft() for item in self.delay_queue]
+            return tensor(valid_data, device=self.device)
 
     # child classes would typically only implement one or more of the methods below this line.
     def update_weights(self) -> Tensor:

@@ -60,7 +60,7 @@ class BalancedSampler:
         if isinstance(n, float):
             n = int(n * len(frame["index"].tolist()))
 
-        subset = grouped.apply(lambda x: x.sample(n, replace=self.replace))
+        subset = grouped.apply(lambda x: x.sample(n, replace=self.replace), include_groups=False)
 
         return subset["index"].tolist()
 

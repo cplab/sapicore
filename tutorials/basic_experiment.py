@@ -110,6 +110,9 @@ class DriftExperiment(Pipeline):
             logging.info("Instantiating a new copy of the EPL network.")
             model = EPL(network=Network(configuration=self.configuration, device=self.device))
 
+            # adds an in-memory monitor hook.
+            model.network.add_monitor_hook(self.stim_duration * len(train), ["voltage"], [model.network["MC"]])
+
             logging.info(model.network)
             logging.info(
                 f"CV fold {i+1} with {len(train)} samples, "
@@ -117,7 +120,7 @@ class DriftExperiment(Pipeline):
             )
 
             # maintains each sample `stim_duration` steps (milliseconds).
-            model.fit(drift_subset[train], repetitions=self.stim_duration)
+            model.fit(drift_subset[train], duration=self.stim_duration)
 
             # save trained network objects for future use if a path was provided as a runtime argument.
             if self.log_dir:

@@ -68,10 +68,10 @@ class IZNeuron(SpikingNeuron):
 
         # configurable attributes specific to Izhikevich neurons, over and above `SpikingNeuron`.
         self.volt_peak = torch.zeros(1, dtype=torch.float, device=self.device) + volt_peak
-        self.a = torch.zeros(1, dtype=torch.float, device=self.device) + a
-        self.b = torch.zeros(1, dtype=torch.float, device=self.device) + b
-        self.c = torch.zeros(1, dtype=torch.float, device=self.device) + c
-        self.d = torch.zeros(1, dtype=torch.float, device=self.device) + d
+        self.a = torch.zeros(1, dtype=torch.float, device=self.device) + torch.as_tensor(a, device=self.device)
+        self.b = torch.zeros(1, dtype=torch.float, device=self.device) + torch.as_tensor(b, device=self.device)
+        self.c = torch.zeros(1, dtype=torch.float, device=self.device) + torch.as_tensor(c, device=self.device)
+        self.d = torch.zeros(1, dtype=torch.float, device=self.device) + torch.as_tensor(d, device=self.device)
 
         # state attribute initialization.
         self.input = torch.zeros_like(self.c)

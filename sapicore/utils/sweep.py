@@ -1,5 +1,6 @@
 """ Sweep hyperparameter or argument search spaces. """
 from typing import Any
+from torch import Tensor
 
 import torch
 import scipy
@@ -97,16 +98,19 @@ class Sweep:
                 value = torch.tensor(value, device=obj.device)
 
                 # some attributes may not exhaust all possible combinations (e.g., if some are 2D and some are 1D).
-                if i < getattr(obj, key).numel():
-                    # assumes attribute to be modified is already a tensor after super().__init__.
+                attr = getattr(obj, key)
+                if isinstance(attr, Tensor) and i < attr.numel():
+                    # FIX assumes attribute to be modified is already a tensor after super().__init__.
                     if unravel:
                         # compute unraveled index given the shape of the tensor to be heterogenized.
-                        unraveled_index = np.unravel_index(i, getattr(obj, key).shape)
-                        getattr(obj, key)[unraveled_index] = value
+                        unraveled_index = np.unravel_index(i, attr.shape)
+                        attr[unraveled_index] = value
 
                     else:
                         # handle the case where values should overwrite attribute tensor rows.
-                        getattr(obj, key)[i] = value
+                        attr[i] = value
+                else:
+                    attr = value
 
     def generate_combinations(self) -> list[dict]:
         """Determine the argument combinations defining this sweep, update the `combinations` attribute,

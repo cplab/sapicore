@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Moyal"
+  given-names: "Roy"
+  orcid: "https://orcid.org/0000-0001-8224-8410"
+- family-names: "Einhorn"
+  given-names: "Matthew"
+- family-names: "Borthakur"
+  given-names: "Ayon"
+  orcid: "https://orcid.org/0000-0003-1558-9869"
+- family-names: "Cleland"
+  given-names: "Thomas"
+  orcid: "https://orcid.org/0000-0001-7506-1201"
+title: "Sapicore"
+version: 0.4.0
+date-released: 2024-12-08
+url: "https://github.com/cplab/sapicore"

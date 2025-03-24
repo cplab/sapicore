@@ -53,12 +53,14 @@ class Ensemble(Neuron):
         # expand extensible parameter tensors to size `num_units`.
         for prop in self.extensible_props:
             temp = getattr(self, prop)
-            setattr(self, prop, torch.zeros(self.num_units, dtype=torch.float, device=self.device) + temp)
+            if temp is not None:
+                setattr(self, prop, torch.zeros(self.num_units, dtype=torch.float, device=self.device) + temp)
 
         # expand loggable property tensor buffers to size `num_units`.
         for prop in self.loggable_props:
             temp = getattr(self, prop)
-            setattr(self, prop, torch.zeros(self.num_units, dtype=torch.float, device=self.device) + temp)
+            if temp is not None:
+                setattr(self, prop, torch.zeros(self.num_units, dtype=torch.float, device=self.device) + temp)
 
     @property
     def num_units(self):

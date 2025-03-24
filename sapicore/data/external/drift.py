@@ -86,7 +86,7 @@ class DriftDataset(Data):
 
         """
         # the labels file has been created by _standardize upon first obtaining the data.
-        labels = torch.load(os.path.join(self.root, "labels.pt"))
+        labels = torch.load(os.path.join(self.root, "labels.pt"), weights_only=False)
         if indices is not None:
             labels = labels[indices]
 
@@ -94,7 +94,7 @@ class DriftDataset(Data):
         self.metadata = Metadata(*[AxisDescriptor(name=col, labels=labels[col].to_list(), axis=0) for col in labels])
 
         # load the data into the buffer (since the drift set is small, no need for lazy loading).
-        self.buffer = torch.load(os.path.join(self.root, "data.pt"))
+        self.buffer = torch.load(os.path.join(self.root, "data.pt"), weights_only=False)
 
         if indices is not None:
             self.buffer = self.buffer[indices]
