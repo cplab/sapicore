@@ -1,6 +1,7 @@
 name: Python Application
 
 on:
+  workflow_dispatch:  # run workflow from GitHub actions page
   push:  # Trigger the workflow on push events
   pull_request:  # Trigger the workflow on pull request events
     branches:
