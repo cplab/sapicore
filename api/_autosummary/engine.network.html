@@ -1,0 +1,303 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>engine.network &mdash; Sapicore  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+
+  
+      <script src="../../_static/jquery.js"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+      <script src="../../_static/doctools.js"></script>
+      <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="engine.neuron" href="engine.neuron.html" />
+    <link rel="prev" title="engine.ensemble.spiking" href="engine.ensemble.spiking.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Sapicore
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Data</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html#engine">Engine</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="engine.html">engine</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="engine.component.html">engine.component</a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.ensemble.html">engine.ensemble</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">engine.network</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#engine.network.Network"><code class="docutils literal notranslate"><span class="pre">Network</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="engine.neuron.html">engine.neuron</a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.synapse.html">engine.synapse</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html#workflow">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html#utilities">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Sapicore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Data</a></li>
+          <li class="breadcrumb-item"><a href="engine.html">engine</a></li>
+      <li class="breadcrumb-item active">engine.network</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/_autosummary/engine.network.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-engine.network">
+<span id="engine-network"></span><h1>engine.network<a class="headerlink" href="#module-engine.network" title="Permalink to this heading"></a></h1>
+<p>Networks are graph representations of neuron ensembles connected by synapses.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="engine.network.Network">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">engine.network.</span></span><span class="sig-name descname"><span class="pre">Network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#engine.network.Network" title="Permalink to this definition"></a></dt>
+<dd><p>Generalized spiking neural network instance. Maintains and orchestrates the processing of multiple
+ensembles connected by synapses.</p>
+<p>Networks may be constructed from a configuration dictionary (read from a YAML or defined programmatically)
+by applying <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code>. User may also initialize an empty network and apply <a class="reference internal" href="#engine.network.Network.add_ensembles" title="engine.network.Network.add_ensembles"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_ensembles()</span></code></a>
+and <a class="reference internal" href="#engine.network.Network.add_synapses" title="engine.network.Network.add_synapses"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_synapses()</span></code></a> to build the network <cite>graph</cite> directly. One or more <cite>root</cite> nodes may be specified
+in the YAML/dictionary or passed to the Network constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>identifier</strong> (<em>str</em><em>, </em><em>optional</em>) – String identifier for file I/O and visualization operations.</p></li>
+<li><p><strong>configuration</strong> (<em>dict</em><em>, </em><em>optional</em>) – Configuration dictionary containing model specification and simulation parameters. Used to construct
+the <cite>graph</cite> and initialize the <cite>root</cite> instance attributes if provided.</p></li>
+<li><p><strong>roots</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – List of one or more ensemble identifiers corresponding to root nodes, i.e. the starting point of each
+forward pass. Can be passed to the constructor, configured in a YAML (model/roots), or automatically
+detected by checking for nodes with in-degree=0 (the latter is a fallback strategy and does not override
+user configuration). In cases where multiple external data tensors are passed to
+<a class="reference internal" href="#engine.network.Network.forward" title="engine.network.Network.forward"><code class="xref py py-meth docutils literal notranslate"><span class="pre">forward()</span></code></a> or <a class="reference internal" href="model.html#model.Model.fit" title="model.Model.fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code></a>, they are routed to these ensembles
+(the i-th tensor to the i-th root by convention).</p></li>
+<li><p><strong>device</strong> (<em>str</em>) – Specifies a hardware device on which to process this object’s tensors, e.g. “cuda:0”.
+Must be a valid torch.device() string value. Defaults to “cpu”.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Synapse objects know their source and destination ensemble references; they are 2D objects
+capable of connecting two ensembles in a unidirectional fashion with heterogeneous parameters.
+Lateral connections from an ensemble to itself are supported by design and warrant no special treatment.</p>
+<p>On <a class="reference internal" href="#engine.network.Network.forward" title="engine.network.Network.forward"><code class="xref py py-meth docutils literal notranslate"><span class="pre">forward()</span></code></a> calls, the nodes of the graph are traversed in breadth-first search (BFS) order. The ensemble
+referenced by the current node is processed first, followed by its outgoing synapses. If multiple source nodes
+exist, the <code class="docutils literal notranslate"><span class="pre">networkX</span></code> multi-source BFS implementation is used.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="engine.network.Network.add_data_hook">
+<span class="sig-name descname"><span class="pre">add_data_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Component</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#engine.network.Network.add_data_hook" title="Permalink to this definition"></a></dt>
+<dd><p>Attach a data accumulator forward hook to some or all network components, logging data to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dir</strong> (<em>str</em>) – Path to directory in which to save intermediate simulation output.</p></li>
+<li><p><strong>steps</strong> (<em>int</em>) – Total number of simulation steps in the experiment to be logged.
+Required for HDF5 sizing and chunk management.</p></li>
+<li><p><strong>attrs</strong> (<em>Sequence</em><em> of </em><em>str</em>) – Attributes to log for the given components.</p></li>
+<li><p><strong>comps</strong> (<a class="reference internal" href="engine.component.html#engine.component.Component" title="engine.component.Component"><em>Component</em></a><em>, </em><em>optional</em>) – Components to attach data hooks to. If not provided, data will be logged for all components.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="engine.network.Network.add_ensembles">
+<span class="sig-name descname"><span class="pre">add_ensembles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Neuron</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#engine.network.Network.add_ensembles" title="Permalink to this definition"></a></dt>
+<dd><p>Adds ensemble nodes to the network graph from paths to YAML, from pre-initialized
+<a class="reference internal" href="engine.neuron.html#engine.neuron.Neuron" title="engine.neuron.Neuron"><code class="xref py py-class docutils literal notranslate"><span class="pre">engine.neuron.Neuron</span></code></a> objects or children thereof (e.g., any <cite>Ensemble</cite>), or from
+configuration dictionaries. User may mix and match if necessary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>TypeError</strong> – If user attempts to pass an argument that is not a string path, a dictionary, or an instance derived
+    from <code class="xref py py-class docutils literal notranslate"><span class="pre">neuron.Neuron</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The component <cite>identifier</cite> field is used to reference nodes and edge sources or destinations when
+constructing the network graph.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="engine.network.Network.add_monitor_hook">
+<span class="sig-name descname"><span class="pre">add_monitor_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Component</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype" title="(in PyTorch v2.6)"><span class="pre">dtype</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#engine.network.Network.add_monitor_hook" title="Permalink to this definition"></a></dt>
+<dd><p>Attach a forward hook to some or all network components, buffering accumulated output in memory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>steps</strong> (<em>int</em>) – Total number of simulation steps in the experiment to be logged.
+Required for HDF5 sizing and chunk management.</p></li>
+<li><p><strong>attrs</strong> (<em>Sequence</em><em> of </em><em>str</em>) – Attributes to log for the given components.</p></li>
+<li><p><strong>comps</strong> (<em>Sequence</em><em> of </em><a class="reference internal" href="engine.component.html#engine.component.Component" title="engine.component.Component"><em>Component</em></a><em>, </em><em>optional</em>) – Components to attach data hooks to. If not provided, data will be logged for all components.</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/tensor_attributes.html#torch.dtype" title="(in PyTorch v2.6)"><em>torch.dtype</em></a>) – Torch datatype for this monitor hook; initialize correctly to save memory.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="engine.network.Network.add_synapses">
+<span class="sig-name descname"><span class="pre">add_synapses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Synapse</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#engine.network.Network.add_synapses" title="Permalink to this definition"></a></dt>
+<dd><p>Adds synapse edges to the network graph from paths to YAML, from pre-initialized
+<a class="reference internal" href="engine.synapse.html#engine.synapse.Synapse" title="engine.synapse.Synapse"><code class="xref py py-class docutils literal notranslate"><span class="pre">engine.synapse.Synapse</span></code></a> objects or children thereof (e.g.,`STDPSynapse`), or from
+configuration dictionaries. User may mix and match if necessary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>TypeError</strong> – If user attempts to pass an argument that is not a string path, a dictionary, or an instance derived
+    from <code class="xref py py-class docutils literal notranslate"><span class="pre">synapse.Synapse</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="engine.network.Network.backward">
+<span class="sig-name descname"><span class="pre">backward</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#engine.network.Network.backward" title="Permalink to this definition"></a></dt>
+<dd><p>Processes a backward sweep for this network object.</p>
+<p>This is not required for SNNs that learn with STDP and can be implemented by child classes that
+might require a backward pass.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="engine.network.Network.draw">
+<span class="sig-name descname"><span class="pre">draw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">750</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#engine.network.Network.draw" title="Permalink to this definition"></a></dt>
+<dd><p>Saves an SVG networkx graph plot showing ensembles and their general connectivity patterns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – Destination path for network figure.</p></li>
+<li><p><strong>node_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Node size in network graph plot.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>May be extended and/or moved to a dedicated visualization package in future versions.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="engine.network.Network.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#engine.network.Network.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Processes current simulation step for this network object.</p>
+<p>In this generic implementation, forward call order is determined by a BFS traversal starting from
+the edges fanning out of the root nodes. Every node is visited once; for each node, every outgoing synapse
+is forwarded. That way, we are guaranteed to forward any component exactly once on every simulation step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>Tensor</em><em> or </em><em>list</em><em> of </em><em>Tensor</em>) – External input to be processed by this generic network.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary containing the loggable properties of this network’s ensembles and synapses in this
+simulation step.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Networks now support multiple root nodes and external input streams. In those cases, the graph is
+traversed layer-wise, using multi-source BFS.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">simulation.SimpleSimulator.run()</span></code></dt><dd><p>For a demonstration of how to programmatically feed heterogeneous external current to multiple nodes. Note that this functionality will eventually be relegated to the data loader, with arbitrary current injections during the simulation being implemented by biases.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="engine.network.Network.get_ensembles">
+<span class="sig-name descname"><span class="pre">get_ensembles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#engine.network.Network.get_ensembles" title="Permalink to this definition"></a></dt>
+<dd><p>Returns all ensemble references in the network <cite>graph</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="engine.network.Network.get_synapses">
+<span class="sig-name descname"><span class="pre">get_synapses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#engine.network.Network.get_synapses" title="Permalink to this definition"></a></dt>
+<dd><p>Returns all synapse references in the network <cite>graph</cite>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="engine.ensemble.spiking.html" class="btn btn-neutral float-left" title="engine.ensemble.spiking" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="engine.neuron.html" class="btn btn-neutral float-right" title="engine.neuron" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Roy Moyal, Matthew Einhorn, Jeremy Forest, Ayon Borthakur, Chen Yang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

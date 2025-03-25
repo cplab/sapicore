@@ -1,0 +1,414 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>data &mdash; Sapicore  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+
+  
+      <script src="../../_static/jquery.js"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+      <script src="../../_static/doctools.js"></script>
+      <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="data.external" href="data.external.html" />
+    <link rel="prev" title="Data" href="../api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Sapicore
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Data</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data.AxisDescriptor"><code class="docutils literal notranslate"><span class="pre">AxisDescriptor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#data.Data.access"><code class="docutils literal notranslate"><span class="pre">Data.access()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.Data.get_metadata"><code class="docutils literal notranslate"><span class="pre">Data.get_metadata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.Data.ingest"><code class="docutils literal notranslate"><span class="pre">Data.ingest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.Data.load"><code class="docutils literal notranslate"><span class="pre">Data.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.Data.modify"><code class="docutils literal notranslate"><span class="pre">Data.modify()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.Data.normalize"><code class="docutils literal notranslate"><span class="pre">Data.normalize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.Data.sample"><code class="docutils literal notranslate"><span class="pre">Data.sample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.Data.save"><code class="docutils literal notranslate"><span class="pre">Data.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.Data.scan"><code class="docutils literal notranslate"><span class="pre">Data.scan()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.Data.trim"><code class="docutils literal notranslate"><span class="pre">Data.trim()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#data.Metadata"><code class="docutils literal notranslate"><span class="pre">Metadata</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#data.Metadata.add_descriptors"><code class="docutils literal notranslate"><span class="pre">Metadata.add_descriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data.Metadata.to_dataframe"><code class="docutils literal notranslate"><span class="pre">Metadata.to_dataframe()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="data.external.html">data.external</a></li>
+<li class="toctree-l3"><a class="reference internal" href="data.sampling.html">data.sampling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html#engine">Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html#workflow">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html#utilities">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Sapicore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Data</a></li>
+      <li class="breadcrumb-item active">data</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/_autosummary/data.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-data">
+<span id="data"></span><h1>data<a class="headerlink" href="#module-data" title="Permalink to this heading"></a></h1>
+<p>Data operations.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="data.AxisDescriptor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">AxisDescriptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">_ScalarType_co</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#data.AxisDescriptor" title="Permalink to this definition"></a></dt>
+<dd><p>Metadata vector of <cite>labels</cite> describing a particular axis of an N-dimensional array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the descriptor (i.e., the variable whose value is given by the labels).</p></li>
+<li><p><strong>labels</strong> (<em>list</em><em> or </em><em>NDarray</em><em> or </em><em>Tensor</em><em>, </em><em>optional</em>) – Label values given as a list, numpy array, or tensor. Regardless of passed type, these are internally
+converted to a numpy array (not tensors, as those do not support string labels).</p></li>
+<li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – The data axis described by this variable. Defaults to 1 (columns).</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Generate a dummy dataset and describe its axes with multiple lists of labels:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">(</span><span class="n">buffer</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">study</span> <span class="o">=</span> <span class="n">AxisDescriptor</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;study&quot;</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">animal</span> <span class="o">=</span> <span class="n">AxisDescriptor</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;animal&quot;</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sensor</span> <span class="o">=</span> <span class="n">AxisDescriptor</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;sensor&quot;</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Occipital&quot;</span><span class="p">,</span> <span class="s2">&quot;Parietal&quot;</span><span class="p">,</span> <span class="s2">&quot;Temporal&quot;</span><span class="p">,</span> <span class="s2">&quot;Frontal&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here, we have eight buffer (rows) of four measured dimensions (columns). The third AxisDescriptor indicates
+that the columns correspond to sensor locations. The first two describe the rows, and contain information
+about the study and animal each sample was obtained from.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="data.Data">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">Data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#data.Metadata" title="data.Metadata"><span class="pre">Metadata</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remote_urls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#data.Data" title="Permalink to this definition"></a></dt>
+<dd><p>Dataset base class.</p>
+<p>Provides an interface and basic default implementations for fetching, organizing,
+and representing external datasets. Designed to be incrementally extended.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>identifier</strong> (<em>str</em><em>, </em><em>optional</em>) – Name for this dataset.</p></li>
+<li><p><strong>metadata</strong> (<a class="reference internal" href="#data.Metadata" title="data.Metadata"><em>Metadata</em></a><em>, </em><em>optional</em>) – Metadata object describing this dataset. Consists of multiple <a class="reference internal" href="#data.AxisDescriptor" title="data.AxisDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">AxisDescriptor</span></code></a> references.</p></li>
+<li><p><strong>root</strong> (<em>str</em><em>, </em><em>optional</em>) – Local root directory for dataset file(s), if applicable.</p></li>
+<li><p><strong>remote_urls</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – Remote URL(s) from which to fetch this dataset, if applicable.</p></li>
+<li><p><strong>buffer</strong> (<em>Tensor</em><em>, </em><em>optional</em>) – A buffer holding data buffer in tensor form. Useful for initializing objects on the fly, e.g.
+during data synthesis. Users may leverage <a class="reference internal" href="#data.Data.access" title="data.Data.access"><code class="xref py py-meth docutils literal notranslate"><span class="pre">access()</span></code></a> to manage disk I/O, e.g.
+using <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.storage.Storage</span></code>, memory mapped arrays/tensors, or HDF lazy loading.</p></li>
+<li><p><strong>download</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to download the set. Defaults to <cite>False</cite>.
+If <cite>True</cite>, the download only commences if the <cite>root</cite> doesn’t exist or is empty.</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to download the set regardless of whether <cite>root</cite> already contains cached/pre-downloaded data.</p></li>
+<li><p><strong>labels</strong> (<em>Sequence</em><em>, </em><em>optional</em>) – Labels to create row metadata from, using a default procedure.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://discuss.pytorch.org/t/memory-mapped-tensor/8954">PyTorch Storage Class</a></p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="data.Data.access">
+<span class="sig-name descname"><span class="pre">access</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a></span></span><a class="headerlink" href="#data.Data.access" title="Permalink to this definition"></a></dt>
+<dd><p>Specifies how to access data by mapping indices to actual samples (e.g., from file(s) in <cite>root</cite>).</p>
+<p>The default implementation slices into <cite>self.buffer</cite> to accommodate the trivial cases where the user has
+directly initialized this <a class="reference internal" href="#data.Data" title="data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a> object with a <cite>buffer</cite> tensor or loaded its values by reading
+a file that fits in memory (the latter case would be handled by <a class="reference internal" href="#data.Data.load" title="data.Data.load"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load()</span></code></a>).</p>
+<p>More sophisticated use cases may require lazy loading or navigating HDF files. That kind of logic should
+be implemented here by derivative classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> (<em>Any</em>) – Index(es) to slice into.</p></li>
+<li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – Optionally, a specific axis along which to apply index selection.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Where file data are concerned (e.g., audio/image, each being a labeled “sample”), use this method to read
+and potentially transform them, returning the finished product.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data.Data.get_metadata">
+<span class="sig-name descname"><span class="pre">get_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#data.Data.get_metadata" title="Permalink to this definition"></a></dt>
+<dd><p>Returns metadata keys by default, or their values (AxisDescriptor references) if <cite>keys</cite> is False.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data.Data.ingest">
+<span class="sig-name descname"><span class="pre">ingest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#data.Data.ingest" title="Permalink to this definition"></a></dt>
+<dd><p>Loads and samples the data, returning a balanced subset thereof.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>folds</strong> (<em>int</em>) – Number of cross validation folds.</p></li>
+<li><p><strong>shots</strong> (<em>int</em>) – Number of samples per class.</p></li>
+<li><p><strong>keys</strong> (<em>Sequence</em><em>[</em><em>str</em><em>]</em>) – Keys by which to group the data.</p></li>
+<li><p><strong>replace</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to sample with replacement. Defaults to <cite>False</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data.Data.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#data.Data.load" title="Permalink to this definition"></a></dt>
+<dd><p>Populates the <cite>buffer</cite> tensor buffer and/or <cite>descriptors</cite> attribute table by loading one or more files
+into memory, potentially selecting only <cite>indices</cite>.</p>
+<p>Since different datasets and pipelines call for different formats, implementation is left to the user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>indices</strong> (<em>Any</em>) – Specific indices to include, one for each file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self reference. For use in single-line initialization and loading.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#data.Data" title="data.Data">Data</a></p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Populating the <cite>buffer</cite> with the entire dataset should only be done when it can fit in memory.
+For large sets, the buffer should not be used naively; <a class="reference internal" href="#data.Data.access" title="data.Data.access"><code class="xref py py-meth docutils literal notranslate"><span class="pre">access()</span></code></a> should be overriden
+to implement some form of lazy loading.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data.Data.modify">
+<span class="sig-name descname"><span class="pre">modify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#data.Data.modify" title="Permalink to this definition"></a></dt>
+<dd><p>Set or modify data values at the given indices to <cite>values</cite>.</p>
+<p>The default implementation edits the <cite>buffer</cite> field of this <a class="reference internal" href="#data.Data" title="data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code></a> object.
+Users may wish to override it in cases where the buffer is not used directly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> (<em>Any</em>) – Indices to modify.</p></li>
+<li><p><strong>values</strong> (<em>Tensor</em>) – Values to set data at indices to.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data.Data.normalize">
+<span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a></span></span><a class="headerlink" href="#data.Data.normalize" title="Permalink to this definition"></a></dt>
+<dd><p>Apply Lp normalization along a specified axis to the buffer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>int</em><em>, </em><em>optional</em>) – The order of the norm (default is 1, which corresponds to L1 normalization).</p></li>
+<li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – The axis along which to normalize (default is 0).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The normalized buffer.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data.Data.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#data.Data.sample" title="Permalink to this definition"></a></dt>
+<dd><p>Applies <cite>method</cite> to sample from this dataset once without mutating it, returning
+a copy of the object containing only the data and labels at the sampled indices.</p>
+<p>The method can be a reference to a <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCrossValidator</span></code>.
+In that case, the keyword arguments should include any applicable keyword arguments,
+e.g. <cite>shuffle</cite>, <cite>label_key</cite>, <cite>group_key</cite> if applicable (see also <a class="reference internal" href="data.sampling.html#data.sampling.CV" title="data.sampling.CV"><code class="xref py py-class docutils literal notranslate"><span class="pre">CV</span></code></a>).</p>
+<p>If <cite>method</cite> is not a base cross validator, keyword arguments will be passed to it directly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>method</strong> (<em>Callable</em><em> or </em><em>BaseCrossValidator</em>) – Method used to sample from this dataset.</p></li>
+<li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – Axis along which selection is performed. Defaults to zero (that is, rows/buffer).</p></li>
+<li><p><strong>kwargs</strong> – <dl class="simple">
+<dt>retain: int or float</dt><dd><p>The number or proportion of buffer to retain.</p>
+</dd>
+<dt>shuffle: bool</dt><dd><p>If using a <code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.model_selection.BaseCrossValidator</span></code> to sample,
+whether to toggle the <cite>shuffle</cite> parameter on.</p>
+</dd>
+<dt>label_keys: str or list of str</dt><dd><p>Label key(s) by which to stratify sampling, if applicable.</p>
+</dd>
+<dt>group_key: str or list of str</dt><dd><p>Label key by which to group sampling, if applicable.</p>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A subset of this dataset.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#data.Data" title="data.Data">Data</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data.Data.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#data.Data.save" title="Permalink to this definition"></a></dt>
+<dd><p>Dump the buffer contents and metadata to disk at <cite>root</cite>.</p>
+<p>Since different datasets and pipelines call for different formats, implementation is left to the user.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data.Data.scan">
+<span class="sig-name descname"><span class="pre">scan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recursive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#data.Data.scan" title="Permalink to this definition"></a></dt>
+<dd><p>Scans the <cite>root</cite> directory and returns a list of files found that match the glob <cite>pattern</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pattern</strong> (<em>str</em><em>, </em><em>optional</em>) – Pattern to look for in file names that should be included, glob-formatted. Defaults to “*” (any).</p></li>
+<li><p><strong>recursive</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether glob should search recursively. Defaults to <cite>False</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data.Data.trim">
+<span class="sig-name descname"><span class="pre">trim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#data.Data.trim" title="Permalink to this definition"></a></dt>
+<dd><p>Trims this instance by selecting <cite>indices</cite>, potentially along <cite>axis</cite>, returning a subset of the original
+dataset in terms of both buffer entries and labels/descriptors. Does not mutate the underlying object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> (<em>Any</em>) – Index(es) to retain.</p></li>
+<li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – Single axis to apply index selection to. Defaults to None, in which case <cite>index</cite> is used directly
+within <a class="reference internal" href="#data.Data.access" title="data.Data.access"><code class="xref py py-meth docutils literal notranslate"><span class="pre">access()</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="data.Metadata">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">Metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#data.AxisDescriptor" title="data.AxisDescriptor"><span class="pre">AxisDescriptor</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#data.Metadata" title="Permalink to this definition"></a></dt>
+<dd><p>Collection of <a class="reference internal" href="#data.AxisDescriptor" title="data.AxisDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">AxisDescriptor</span></code></a> objects indexed in a table.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="data.Metadata.add_descriptors">
+<span class="sig-name descname"><span class="pre">add_descriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#data.AxisDescriptor" title="data.AxisDescriptor"><span class="pre">AxisDescriptor</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#data.Metadata.add_descriptors" title="Permalink to this definition"></a></dt>
+<dd><p>Adds one or more <a class="reference internal" href="#data.AxisDescriptor" title="data.AxisDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">AxisDescriptor</span></code></a> objects to this metadata instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data.Metadata.to_dataframe">
+<span class="sig-name descname"><span class="pre">to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#data.Metadata.to_dataframe" title="Permalink to this definition"></a></dt>
+<dd><p>Condenses the <code class="xref py py-class docutils literal notranslate"><span class="pre">AxisDescriptor</span></code> objects registered in this dataset’s
+<code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data.Metadata</span></code> <cite>table</cite> attribute to a pandas dataframe.</p>
+<p>Performed for row (sample) descriptors by default, but can also be used to aggregate
+<a class="reference internal" href="#data.AxisDescriptor" title="data.AxisDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">AxisDescriptor</span></code></a> objects describing any other <cite>axis</cite>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If descriptors for a particular axis vary in length, NaN values will be filled in as necessary.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<p class="rubric">Modules</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="data.external.html#module-data.external" title="data.external"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data.external</span></code></a></p></td>
+<td><p>External dataset processing.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="data.sampling.html#module-data.sampling" title="data.sampling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data.sampling</span></code></a></p></td>
+<td><p>Data sampling utility classes.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../api.html" class="btn btn-neutral float-left" title="Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="data.external.html" class="btn btn-neutral float-right" title="data.external" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Roy Moyal, Matthew Einhorn, Jeremy Forest, Ayon Borthakur, Chen Yang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

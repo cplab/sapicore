@@ -1,0 +1,8 @@
+pipeline.simple
+===============
+
+.. automodule:: pipeline.simple
+   :members:
+
+
+

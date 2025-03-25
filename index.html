@@ -1,0 +1,563 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sapicore &mdash; Sapicore  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+
+  
+      <script src="_static/jquery.js"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+      <script src="_static/doctools.js"></script>
+      <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Data" href="api/api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            Sapicore
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/api.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api.html#engine">Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api.html#workflow">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api.html#utilities">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Sapicore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Sapicore</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sapicore">
+<h1>Sapicore<a class="headerlink" href="#sapicore" title="Permalink to this heading"></a></h1>
+<section id="a-pytorch-based-spiking-neural-network-simulation-framework">
+<h2>A PyTorch-Based Spiking Neural Network Simulation Framework<a class="headerlink" href="#a-pytorch-based-spiking-neural-network-simulation-framework" title="Permalink to this heading"></a></h2>
+<p>Sapicore is a spiking neural network (SNN) simulator, built with PyTorch and designed for
+neuroscience-inspired models with realistic architectures and dynamics.</p>
+<p>We provide a simple API for:</p>
+<ul class="simple">
+<li><p>Data loading and transformation.</p></li>
+<li><p>Initializing and connecting network components.</p></li>
+<li><p>Extending base neurons (e.g., LIF) and synapses (e.g., STDP).</p></li>
+<li><p>Orchestrating experiment pipelines.</p></li>
+<li><p>Selectively logging intermediate results.</p></li>
+<li><p>Deploying neuromorphic networks as machine learning models.</p></li>
+<li><p>Visualizing, interpreting, and analyzing output.</p></li>
+</ul>
+<p><span class="raw-html-m2r"><b>Users may configure networks in YAML or directly in code.</b></span>
+Develop custom neuron, synapse, network, and data loader classes.</p>
+<p><span class="raw-html-m2r"><b>We made component extension and customization easy.</b></span> Default implementations of common models used in
+computational neuroscience and neuromorphic machine learning applications are provided out of the box.&lt;/b&gt;</p>
+<p><span class="raw-html-m2r"><b>Sapicore interfaces with industry-standard ML libraries</b></span>, including
+<a class="reference external" href="https://scikit-learn.org/stable/">scikit-learn</a>.</p>
+<p>A project of the <a class="reference external" href="https://cplab.net/">Computational Physiology Lab</a> &#64; Cornell University.</p>
+</section>
+<hr class="docutils" />
+<section id="current-release">
+<h2>Current Release<a class="headerlink" href="#current-release" title="Permalink to this heading"></a></h2>
+<p>Sapicore 0.4 is runtime- and memory-optimized. This beta version includes:</p>
+<ul class="simple">
+<li><p>Flexible data classes (metadata-based row selection).</p></li>
+<li><p>Spiking neurons (LIF and IZ).</p></li>
+<li><p>Graded neurons (integrators, oscillators).</p></li>
+<li><p>Static and plastic synapses (STDP).</p></li>
+<li><p>Automated network construction and simulation.</p></li>
+<li><p>Scikit-integrated ML model API (fit/predict).</p></li>
+<li><p>Sampling and cross validation tools.</p></li>
+<li><p>Visualization tools.</p></li>
+</ul>
+<p>To simulate a network from a YAML configuration using the default simulation pipeline:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">simple</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">config</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">config_file</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+<p>See <code class="docutils literal notranslate"><span class="pre">tutorials</span></code> and <code class="docutils literal notranslate"><span class="pre">tests/engine/network/test_network</span></code> for instructive scripts and YAML files.</p>
+</section>
+<hr class="docutils" />
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<p>Basic requirements include Python 3.11+, PyTorch 2.1+, NetworkX, and the scientific stack (numpy, scipy, pandas).</p>
+<p>To install the most recent development version:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">cplab</span><span class="o">/</span><span class="n">sapicore</span><span class="o">/</span><span class="n">archive</span><span class="o">/</span><span class="n">refs</span><span class="o">/</span><span class="n">heads</span><span class="o">/</span><span class="n">main</span><span class="o">.</span><span class="n">zip</span>
+</pre></div>
+</div>
+<p>To run tests, change directory to the one containing <code class="docutils literal notranslate"><span class="pre">pytest.ini</span></code> (<code class="docutils literal notranslate"><span class="pre">sapicore</span></code>) and call:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pytest</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>To run tests with a coverage report, run <code class="docutils literal notranslate"><span class="pre">sapicore/tests/scripts/run_tests.py</span></code>.
+The coverage report will be generated in a separate directory on the same level (open <code class="docutils literal notranslate"><span class="pre">index.html</span></code>).</p>
+</section>
+<hr class="docutils" />
+<section id="development">
+<h2>Development<a class="headerlink" href="#development" title="Permalink to this heading"></a></h2>
+<p>If you would like to modify or extend this library:</p>
+<ul>
+<li><p>Clone the repository:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">cplab</span><span class="o">/</span><span class="n">sapicore</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+</li>
+<li><p>Create a conda virtual environment (optional):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="o">&lt;</span><span class="n">env_name</span><span class="o">&gt;</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.11</span>
+<span class="n">conda</span> <span class="n">activate</span> <span class="o">&lt;</span><span class="n">env_name</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Change directory to <code class="docutils literal notranslate"><span class="pre">sapicore</span></code> and install with pip:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">sapicore</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>This project uses <code class="docutils literal notranslate"><span class="pre">black</span></code> to format code and <code class="docutils literal notranslate"><span class="pre">flake8</span></code> for linting. We support <code class="docutils literal notranslate"><span class="pre">pre-commit</span></code>.
+To configure your local environment, install these development dependencies and set up the commit hooks:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">black</span> <span class="n">flake8</span> <span class="n">pre</span><span class="o">-</span><span class="n">commit</span>
+<span class="n">pre</span><span class="o">-</span><span class="n">commit</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>Documentation can be compiled by installing Sphinx and RTD, then running <code class="docutils literal notranslate"><span class="pre">docs/refresh.sh</span></code>.
+See <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> for more information.</p>
+</section>
+<section id="citation">
+<h2>Citation<a class="headerlink" href="#citation" title="Permalink to this heading"></a></h2>
+<p>If you use Sapicore, please cite it as:</p>
+<ul class="simple">
+<li><p>Moyal, R., Einhorn, M., Borthakur, A., &amp; Cleland, T. (2024). Sapicore (Version 0.4.0) [Computer software]. <a class="reference external" href="https://github.com/cplab/sapicore">https://github.com/cplab/sapicore</a></p></li>
+</ul>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this heading"></a></h2>
+<p>For more information about past and ongoing projects utilizing Sapicore, refer to the following publications:</p>
+<ul class="simple">
+<li><p>R. Moyal, K. R. Mama, M. Einhorn, A. Borthakur, and T. A. Cleland (2024). <a class="reference external" href="https://doi.org/10.48550/arXiv.2409.18396">Heterogeneous quantization regularizes spiking
+neural network activity</a>. <span class="raw-html-m2r"><i>arXiv:2409.18396</i></span>.</p></li>
+<li><p>A. Borthakur (2022). <a class="reference external" href="https://arxiv.org/abs/2204.06216">Sapinet: A sparse event-based spatiotemporal oscillator for learning in the
+wild</a>. <span class="raw-html-m2r"><i>arXiv:2204.06216</i></span>.</p></li>
+</ul>
+<p>For a dynamical systems perspective on neural computation, temporal coding, and top-down control of
+sensory processing, the following article may be of interest:</p>
+<ul class="simple">
+<li><p>R. Moyal and S. Edelman (2019). <a class="reference external" href="https://www.mdpi.com/1099-4300/21/5/500">Dynamic computation in visual thalamocortical
+networks</a>. <span class="raw-html-m2r"><i>Entropy, 21</i></span>(5).</p></li>
+</ul>
+</section>
+<section id="contributors">
+<h2>Contributors<a class="headerlink" href="#contributors" title="Permalink to this heading"></a></h2>
+<p><a class="reference external" href="https://scholar.google.com/citations?user=P8Ztxr4AAAAJ">Roy Moyal</a>,
+<a class="reference external" href="https://matham.dev/about/">Matthew Einhorn</a>,
+<a class="reference external" href="https://borthakurayon.github.io/">Ayon Borthakur</a>,
+<a class="reference external" href="https://cplab.net/people/thomas-cleland/">Thomas Cleland</a>.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/api.html">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/_autosummary/data.html">data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/data.html#data.AxisDescriptor"><code class="docutils literal notranslate"><span class="pre">AxisDescriptor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/data.html#data.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/data.html#data.Data.access"><code class="docutils literal notranslate"><span class="pre">Data.access()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/data.html#data.Data.get_metadata"><code class="docutils literal notranslate"><span class="pre">Data.get_metadata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/data.html#data.Data.ingest"><code class="docutils literal notranslate"><span class="pre">Data.ingest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/data.html#data.Data.load"><code class="docutils literal notranslate"><span class="pre">Data.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/data.html#data.Data.modify"><code class="docutils literal notranslate"><span class="pre">Data.modify()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/data.html#data.Data.normalize"><code class="docutils literal notranslate"><span class="pre">Data.normalize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/data.html#data.Data.sample"><code class="docutils literal notranslate"><span class="pre">Data.sample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/data.html#data.Data.save"><code class="docutils literal notranslate"><span class="pre">Data.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/data.html#data.Data.scan"><code class="docutils literal notranslate"><span class="pre">Data.scan()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/data.html#data.Data.trim"><code class="docutils literal notranslate"><span class="pre">Data.trim()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/data.html#data.Metadata"><code class="docutils literal notranslate"><span class="pre">Metadata</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/data.html#data.Metadata.add_descriptors"><code class="docutils literal notranslate"><span class="pre">Metadata.add_descriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/data.html#data.Metadata.to_dataframe"><code class="docutils literal notranslate"><span class="pre">Metadata.to_dataframe()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/data.external.html">data.external</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/data.external.drift.html">data.external.drift</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/data.external.drift.html#data.external.drift.DriftDataset"><code class="docutils literal notranslate"><span class="pre">DriftDataset</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/_autosummary/data.external.drift.html#data.external.drift.DriftDataset.load"><code class="docutils literal notranslate"><span class="pre">DriftDataset.load()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/_autosummary/data.external.drift.html#data.external.drift.DriftDataset.save"><code class="docutils literal notranslate"><span class="pre">DriftDataset.save()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/_autosummary/data.external.drift.html#data.external.drift.DriftDataset.select"><code class="docutils literal notranslate"><span class="pre">DriftDataset.select()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/data.sampling.html">data.sampling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/data.sampling.html#data.sampling.BalancedSampler"><code class="docutils literal notranslate"><span class="pre">BalancedSampler</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/data.sampling.html#data.sampling.CV"><code class="docutils literal notranslate"><span class="pre">CV</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/api.html#engine">Engine</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/_autosummary/engine.html">engine</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/engine.component.html">engine.component</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/engine.component.html#engine.component.Component"><code class="docutils literal notranslate"><span class="pre">Component</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.component.html#engine.component.Component.configure"><code class="docutils literal notranslate"><span class="pre">Component.configure()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.component.html#engine.component.Component.forward"><code class="docutils literal notranslate"><span class="pre">Component.forward()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.component.html#engine.component.Component.heterogenize"><code class="docutils literal notranslate"><span class="pre">Component.heterogenize()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.component.html#engine.component.Component.loggable_state"><code class="docutils literal notranslate"><span class="pre">Component.loggable_state()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/engine.ensemble.html">engine.ensemble</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/engine.ensemble.html#engine.ensemble.Ensemble"><code class="docutils literal notranslate"><span class="pre">Ensemble</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.ensemble.html#engine.ensemble.Ensemble._extensible_props_"><code class="docutils literal notranslate"><span class="pre">Ensemble._extensible_props_</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.ensemble.html#engine.ensemble.Ensemble.forward"><code class="docutils literal notranslate"><span class="pre">Ensemble.forward()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.ensemble.html#engine.ensemble.Ensemble.num_units"><code class="docutils literal notranslate"><span class="pre">Ensemble.num_units</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/engine.ensemble.analog.html">engine.ensemble.analog</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.ensemble.analog.html#engine.ensemble.analog.AnalogEnsemble"><code class="docutils literal notranslate"><span class="pre">AnalogEnsemble</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.ensemble.analog.html#engine.ensemble.analog.OscillatorEnsemble"><code class="docutils literal notranslate"><span class="pre">OscillatorEnsemble</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/_autosummary/engine.ensemble.analog.html#engine.ensemble.analog.OscillatorEnsemble.heterogenize"><code class="docutils literal notranslate"><span class="pre">OscillatorEnsemble.heterogenize()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/engine.ensemble.spiking.html">engine.ensemble.spiking</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.ensemble.spiking.html#engine.ensemble.spiking.IZEnsemble"><code class="docutils literal notranslate"><span class="pre">IZEnsemble</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/_autosummary/engine.ensemble.spiking.html#engine.ensemble.spiking.IZEnsemble.heterogenize"><code class="docutils literal notranslate"><span class="pre">IZEnsemble.heterogenize()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.ensemble.spiking.html#engine.ensemble.spiking.LIFEnsemble"><code class="docutils literal notranslate"><span class="pre">LIFEnsemble</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/_autosummary/engine.ensemble.spiking.html#engine.ensemble.spiking.LIFEnsemble.heterogenize"><code class="docutils literal notranslate"><span class="pre">LIFEnsemble.heterogenize()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/engine.network.html">engine.network</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/engine.network.html#engine.network.Network"><code class="docutils literal notranslate"><span class="pre">Network</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.network.html#engine.network.Network.add_data_hook"><code class="docutils literal notranslate"><span class="pre">Network.add_data_hook()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.network.html#engine.network.Network.add_ensembles"><code class="docutils literal notranslate"><span class="pre">Network.add_ensembles()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.network.html#engine.network.Network.add_monitor_hook"><code class="docutils literal notranslate"><span class="pre">Network.add_monitor_hook()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.network.html#engine.network.Network.add_synapses"><code class="docutils literal notranslate"><span class="pre">Network.add_synapses()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.network.html#engine.network.Network.backward"><code class="docutils literal notranslate"><span class="pre">Network.backward()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.network.html#engine.network.Network.draw"><code class="docutils literal notranslate"><span class="pre">Network.draw()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.network.html#engine.network.Network.forward"><code class="docutils literal notranslate"><span class="pre">Network.forward()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.network.html#engine.network.Network.get_ensembles"><code class="docutils literal notranslate"><span class="pre">Network.get_ensembles()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.network.html#engine.network.Network.get_synapses"><code class="docutils literal notranslate"><span class="pre">Network.get_synapses()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/engine.neuron.html">engine.neuron</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/engine.neuron.html#engine.neuron.Neuron"><code class="docutils literal notranslate"><span class="pre">Neuron</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.neuron.html#engine.neuron.Neuron.aggregate"><code class="docutils literal notranslate"><span class="pre">Neuron.aggregate()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.neuron.html#engine.neuron.Neuron.forward"><code class="docutils literal notranslate"><span class="pre">Neuron.forward()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.neuron.html#engine.neuron.Neuron.gate_signal"><code class="docutils literal notranslate"><span class="pre">Neuron.gate_signal()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.neuron.html#engine.neuron.Neuron.inject"><code class="docutils literal notranslate"><span class="pre">Neuron.inject()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.neuron.html#engine.neuron.Neuron.integrate"><code class="docutils literal notranslate"><span class="pre">Neuron.integrate()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.neuron.html#engine.neuron.Neuron.num_units"><code class="docutils literal notranslate"><span class="pre">Neuron.num_units</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.neuron.html#engine.neuron.Neuron.teach_signal"><code class="docutils literal notranslate"><span class="pre">Neuron.teach_signal()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/engine.neuron.analog.html">engine.neuron.analog</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.neuron.analog.html#engine.neuron.analog.AnalogNeuron"><code class="docutils literal notranslate"><span class="pre">AnalogNeuron</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/_autosummary/engine.neuron.analog.html#engine.neuron.analog.AnalogNeuron.forward"><code class="docutils literal notranslate"><span class="pre">AnalogNeuron.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.neuron.analog.oscillator.html">engine.neuron.analog.oscillator</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/_autosummary/engine.neuron.analog.oscillator.html#engine.neuron.analog.oscillator.OscillatorNeuron"><code class="docutils literal notranslate"><span class="pre">OscillatorNeuron</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="api/_autosummary/engine.neuron.analog.oscillator.html#engine.neuron.analog.oscillator.OscillatorNeuron._config_props_"><code class="docutils literal notranslate"><span class="pre">OscillatorNeuron._config_props_</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="api/_autosummary/engine.neuron.analog.oscillator.html#engine.neuron.analog.oscillator.OscillatorNeuron.forward"><code class="docutils literal notranslate"><span class="pre">OscillatorNeuron.forward()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="api/_autosummary/engine.neuron.analog.oscillator.html#engine.neuron.analog.oscillator.OscillatorNeuron.register_waveforms"><code class="docutils literal notranslate"><span class="pre">OscillatorNeuron.register_waveforms()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/engine.neuron.spiking.html">engine.neuron.spiking</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.neuron.spiking.html#engine.neuron.spiking.SpikingNeuron"><code class="docutils literal notranslate"><span class="pre">SpikingNeuron</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/_autosummary/engine.neuron.spiking.html#engine.neuron.spiking.SpikingNeuron.forward"><code class="docutils literal notranslate"><span class="pre">SpikingNeuron.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.neuron.spiking.IZ.html">engine.neuron.spiking.IZ</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/_autosummary/engine.neuron.spiking.IZ.html#engine.neuron.spiking.IZ.IZNeuron"><code class="docutils literal notranslate"><span class="pre">IZNeuron</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="api/_autosummary/engine.neuron.spiking.IZ.html#engine.neuron.spiking.IZ.IZNeuron._config_props_"><code class="docutils literal notranslate"><span class="pre">IZNeuron._config_props_</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="api/_autosummary/engine.neuron.spiking.IZ.html#engine.neuron.spiking.IZ.IZNeuron.forward"><code class="docutils literal notranslate"><span class="pre">IZNeuron.forward()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="api/_autosummary/engine.neuron.spiking.IZ.html#engine.neuron.spiking.IZ.IZNeuron.integrate"><code class="docutils literal notranslate"><span class="pre">IZNeuron.integrate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.neuron.spiking.LIF.html">engine.neuron.spiking.LIF</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/_autosummary/engine.neuron.spiking.LIF.html#engine.neuron.spiking.LIF.LIFNeuron"><code class="docutils literal notranslate"><span class="pre">LIFNeuron</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="api/_autosummary/engine.neuron.spiking.LIF.html#engine.neuron.spiking.LIF.LIFNeuron._config_props_"><code class="docutils literal notranslate"><span class="pre">LIFNeuron._config_props_</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="api/_autosummary/engine.neuron.spiking.LIF.html#engine.neuron.spiking.LIF.LIFNeuron.forward"><code class="docutils literal notranslate"><span class="pre">LIFNeuron.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/engine.synapse.html">engine.synapse</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/engine.synapse.html#engine.synapse.Synapse"><code class="docutils literal notranslate"><span class="pre">Synapse</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.synapse.html#engine.synapse.Synapse._config_props_"><code class="docutils literal notranslate"><span class="pre">Synapse._config_props_</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.synapse.html#engine.synapse.Synapse.connect"><code class="docutils literal notranslate"><span class="pre">Synapse.connect()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.synapse.html#engine.synapse.Synapse.forward"><code class="docutils literal notranslate"><span class="pre">Synapse.forward()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.synapse.html#engine.synapse.Synapse.heterogenize"><code class="docutils literal notranslate"><span class="pre">Synapse.heterogenize()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.synapse.html#engine.synapse.Synapse.queue_input"><code class="docutils literal notranslate"><span class="pre">Synapse.queue_input()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.synapse.html#engine.synapse.Synapse.set_learning"><code class="docutils literal notranslate"><span class="pre">Synapse.set_learning()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.synapse.html#engine.synapse.Synapse.set_weights"><code class="docutils literal notranslate"><span class="pre">Synapse.set_weights()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.synapse.html#engine.synapse.Synapse.update_weights"><code class="docutils literal notranslate"><span class="pre">Synapse.update_weights()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/engine.synapse.STDP.html">engine.synapse.STDP</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/engine.synapse.STDP.html#engine.synapse.STDP.STDPSynapse"><code class="docutils literal notranslate"><span class="pre">STDPSynapse</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/_autosummary/engine.synapse.STDP.html#engine.synapse.STDP.STDPSynapse._config_props_"><code class="docutils literal notranslate"><span class="pre">STDPSynapse._config_props_</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/_autosummary/engine.synapse.STDP.html#engine.synapse.STDP.STDPSynapse.forward"><code class="docutils literal notranslate"><span class="pre">STDPSynapse.forward()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/_autosummary/engine.synapse.STDP.html#engine.synapse.STDP.STDPSynapse.update_weights"><code class="docutils literal notranslate"><span class="pre">STDPSynapse.update_weights()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/api.html#workflow">Workflow</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/_autosummary/model.html">model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/model.html#model.Model"><code class="docutils literal notranslate"><span class="pre">Model</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/model.html#model.Model.fit"><code class="docutils literal notranslate"><span class="pre">Model.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/model.html#model.Model.load"><code class="docutils literal notranslate"><span class="pre">Model.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/model.html#model.Model.predict"><code class="docutils literal notranslate"><span class="pre">Model.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/model.html#model.Model.save"><code class="docutils literal notranslate"><span class="pre">Model.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/model.html#model.Model.serve"><code class="docutils literal notranslate"><span class="pre">Model.serve()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/model.html#model.Model.similarity"><code class="docutils literal notranslate"><span class="pre">Model.similarity()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/_autosummary/pipeline.html">pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/pipeline.html#pipeline.Pipeline"><code class="docutils literal notranslate"><span class="pre">Pipeline</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/pipeline.html#pipeline.Pipeline.run"><code class="docutils literal notranslate"><span class="pre">Pipeline.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/pipeline.simple.html">pipeline.simple</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/pipeline.simple.html#pipeline.simple.SimpleSimulator"><code class="docutils literal notranslate"><span class="pre">SimpleSimulator</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/pipeline.simple.html#pipeline.simple.SimpleSimulator.initialize"><code class="docutils literal notranslate"><span class="pre">SimpleSimulator.initialize()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/pipeline.simple.html#pipeline.simple.SimpleSimulator.run"><code class="docutils literal notranslate"><span class="pre">SimpleSimulator.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/api.html#utilities">Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/_autosummary/utils.html">utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/utils.constants.html">utils.constants</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.constants.html#utils.constants.DT"><code class="docutils literal notranslate"><span class="pre">DT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.constants.html#utils.constants.PLOT_BACKEND"><code class="docutils literal notranslate"><span class="pre">PLOT_BACKEND</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.constants.html#utils.constants.SEED"><code class="docutils literal notranslate"><span class="pre">SEED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.constants.html#utils.constants.SYNAPSE_SPLITTERS"><code class="docutils literal notranslate"><span class="pre">SYNAPSE_SPLITTERS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.constants.html#utils.constants.TIME_FORMAT"><code class="docutils literal notranslate"><span class="pre">TIME_FORMAT</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/utils.integration.html">utils.integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.integration.html#utils.integration.Integrator"><code class="docutils literal notranslate"><span class="pre">Integrator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.integration.html#utils.integration.RungeKutta"><code class="docutils literal notranslate"><span class="pre">RungeKutta</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/utils.io.html">utils.io</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.io.html#utils.io.DataAccumulatorHook"><code class="docutils literal notranslate"><span class="pre">DataAccumulatorHook</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.io.html#utils.io.DataAccumulatorHook.forward"><code class="docutils literal notranslate"><span class="pre">DataAccumulatorHook.forward()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.io.html#utils.io.DataAccumulatorHook.initialize_hdf"><code class="docutils literal notranslate"><span class="pre">DataAccumulatorHook.initialize_hdf()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.io.html#utils.io.MonitorHook"><code class="docutils literal notranslate"><span class="pre">MonitorHook</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.io.html#utils.io.ensure_dir"><code class="docutils literal notranslate"><span class="pre">ensure_dir()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.io.html#utils.io.flatten"><code class="docutils literal notranslate"><span class="pre">flatten()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.io.html#utils.io.load_yaml"><code class="docutils literal notranslate"><span class="pre">load_yaml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.io.html#utils.io.log_settings"><code class="docutils literal notranslate"><span class="pre">log_settings()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.io.html#utils.io.plot_tensorboard"><code class="docutils literal notranslate"><span class="pre">plot_tensorboard()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.io.html#utils.io.save_yaml"><code class="docutils literal notranslate"><span class="pre">save_yaml()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/utils.loggable.html">utils.loggable</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.loggable.html#loggable">Loggable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.loggable.html#api">API</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.Loggable"><code class="docutils literal notranslate"><span class="pre">Loggable</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.Loggable.loggable_children"><code class="docutils literal notranslate"><span class="pre">Loggable.loggable_children</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.Loggable.loggable_props"><code class="docutils literal notranslate"><span class="pre">Loggable.loggable_props</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogReader"><code class="docutils literal notranslate"><span class="pre">NixLogReader</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogReader.close_file"><code class="docutils literal notranslate"><span class="pre">NixLogReader.close_file()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogReader.filename"><code class="docutils literal notranslate"><span class="pre">NixLogReader.filename</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogReader.get_experiment_names"><code class="docutils literal notranslate"><span class="pre">NixLogReader.get_experiment_names()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogReader.get_experiment_property_data"><code class="docutils literal notranslate"><span class="pre">NixLogReader.get_experiment_property_data()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogReader.get_experiment_property_paths"><code class="docutils literal notranslate"><span class="pre">NixLogReader.get_experiment_property_paths()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogReader.nix_file"><code class="docutils literal notranslate"><span class="pre">NixLogReader.nix_file</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogReader.open_file"><code class="docutils literal notranslate"><span class="pre">NixLogReader.open_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogWriter"><code class="docutils literal notranslate"><span class="pre">NixLogWriter</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogWriter.close_file"><code class="docutils literal notranslate"><span class="pre">NixLogWriter.close_file()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogWriter.compression"><code class="docutils literal notranslate"><span class="pre">NixLogWriter.compression</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogWriter.config_data"><code class="docutils literal notranslate"><span class="pre">NixLogWriter.config_data</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogWriter.create_block"><code class="docutils literal notranslate"><span class="pre">NixLogWriter.create_block()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogWriter.create_file"><code class="docutils literal notranslate"><span class="pre">NixLogWriter.create_file()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogWriter.filename"><code class="docutils literal notranslate"><span class="pre">NixLogWriter.filename</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogWriter.get_property_arrays"><code class="docutils literal notranslate"><span class="pre">NixLogWriter.get_property_arrays()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogWriter.git_hash"><code class="docutils literal notranslate"><span class="pre">NixLogWriter.git_hash</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogWriter.log"><code class="docutils literal notranslate"><span class="pre">NixLogWriter.log()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogWriter.metadata"><code class="docutils literal notranslate"><span class="pre">NixLogWriter.metadata</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.NixLogWriter.nix_file"><code class="docutils literal notranslate"><span class="pre">NixLogWriter.nix_file</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.dump_loggable"><code class="docutils literal notranslate"><span class="pre">dump_loggable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.get_loggable_properties"><code class="docutils literal notranslate"><span class="pre">get_loggable_properties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.load_save_get_loggable_properties"><code class="docutils literal notranslate"><span class="pre">load_save_get_loggable_properties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.log_tensor_board"><code class="docutils literal notranslate"><span class="pre">log_tensor_board()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.read_loggable_from_file"><code class="docutils literal notranslate"><span class="pre">read_loggable_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.read_loggable_from_object"><code class="docutils literal notranslate"><span class="pre">read_loggable_from_object()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.loggable.html#utils.loggable.update_loggable_from_object"><code class="docutils literal notranslate"><span class="pre">update_loggable_from_object()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/utils.plotting.html">utils.plotting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.plotting.html#utils.plotting.spike_raster"><code class="docutils literal notranslate"><span class="pre">spike_raster()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/utils.seed.html">utils.seed</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.seed.html#utils.seed.fix_random_seed"><code class="docutils literal notranslate"><span class="pre">fix_random_seed()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/utils.signals.html">utils.signals</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.signals.html#utils.signals.Wave"><code class="docutils literal notranslate"><span class="pre">Wave</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.signals.html#utils.signals.WaveIterable"><code class="docutils literal notranslate"><span class="pre">WaveIterable</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.signals.html#utils.signals.extend_input_current"><code class="docutils literal notranslate"><span class="pre">extend_input_current()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/utils.sweep.html">utils.sweep</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.sweep.html#utils.sweep.Sweep"><code class="docutils literal notranslate"><span class="pre">Sweep</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.sweep.html#utils.sweep.Sweep.count_combinations"><code class="docutils literal notranslate"><span class="pre">Sweep.count_combinations()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.sweep.html#utils.sweep.Sweep.extract_combinations"><code class="docutils literal notranslate"><span class="pre">Sweep.extract_combinations()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.sweep.html#utils.sweep.Sweep.generate_combinations"><code class="docutils literal notranslate"><span class="pre">Sweep.generate_combinations()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.sweep.html#utils.sweep.Sweep.heterogenize"><code class="docutils literal notranslate"><span class="pre">Sweep.heterogenize()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/_autosummary/utils.tensorboard.html">utils.tensorboard</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.tensorboard.html#utils.tensorboard.HDFData"><code class="docutils literal notranslate"><span class="pre">HDFData</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.tensorboard.html#utils.tensorboard.HDFData.read"><code class="docutils literal notranslate"><span class="pre">HDFData.read()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/_autosummary/utils.tensorboard.html#utils.tensorboard.TensorboardWriter"><code class="docutils literal notranslate"><span class="pre">TensorboardWriter</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.tensorboard.html#utils.tensorboard.TensorboardWriter.heatmap"><code class="docutils literal notranslate"><span class="pre">TensorboardWriter.heatmap()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.tensorboard.html#utils.tensorboard.TensorboardWriter.hparam"><code class="docutils literal notranslate"><span class="pre">TensorboardWriter.hparam()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.tensorboard.html#utils.tensorboard.TensorboardWriter.raster"><code class="docutils literal notranslate"><span class="pre">TensorboardWriter.raster()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.tensorboard.html#utils.tensorboard.TensorboardWriter.trace"><code class="docutils literal notranslate"><span class="pre">TensorboardWriter.trace()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/_autosummary/utils.tensorboard.html#utils.tensorboard.TensorboardWriter.write"><code class="docutils literal notranslate"><span class="pre">TensorboardWriter.write()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<section id="links">
+<h3>Links<a class="headerlink" href="#links" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api/api.html" class="btn btn-neutral float-right" title="Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Roy Moyal, Matthew Einhorn, Jeremy Forest, Ayon Borthakur, Chen Yang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,209 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>engine.neuron.spiking.IZ &mdash; Sapicore  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+
+  
+      <script src="../../_static/jquery.js"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+      <script src="../../_static/doctools.js"></script>
+      <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="engine.neuron.spiking.LIF" href="engine.neuron.spiking.LIF.html" />
+    <link rel="prev" title="engine.neuron.spiking" href="engine.neuron.spiking.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Sapicore
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Data</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html#engine">Engine</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="engine.html">engine</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="engine.component.html">engine.component</a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.ensemble.html">engine.ensemble</a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.network.html">engine.network</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="engine.neuron.html">engine.neuron</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="engine.neuron.html#engine.neuron.Neuron"><code class="docutils literal notranslate"><span class="pre">Neuron</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="engine.neuron.analog.html">engine.neuron.analog</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="engine.neuron.spiking.html">engine.neuron.spiking</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="engine.synapse.html">engine.synapse</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html#workflow">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html#utilities">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Sapicore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Data</a></li>
+          <li class="breadcrumb-item"><a href="engine.html">engine</a></li>
+          <li class="breadcrumb-item"><a href="engine.neuron.html">engine.neuron</a></li>
+          <li class="breadcrumb-item"><a href="engine.neuron.spiking.html">engine.neuron.spiking</a></li>
+      <li class="breadcrumb-item active">engine.neuron.spiking.IZ</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/_autosummary/engine.neuron.spiking.IZ.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-engine.neuron.spiking.IZ">
+<span id="engine-neuron-spiking-iz"></span><h1>engine.neuron.spiking.IZ<a class="headerlink" href="#module-engine.neuron.spiking.IZ" title="Permalink to this heading"></a></h1>
+<p>Izhikevich neuron model (IZ).</p>
+<p>These neurons, while computationally efficient, also exhibit nontrivial dynamics resembling recorded
+electrophysiological data (e.g., subthreshold oscillations).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The results of the original Izhikevich simple model rely on <a class="reference internal" href="utils.constants.html#utils.constants.DT" title="utils.constants.DT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">DT</span></code></a> being set to 1.0 ms.
+At finer temporal resolutions, weaker synchronization with a dominant frequency of ~25 Hz is observed.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.izhikevich.org/publications/spikes.pdf">Original Izhikevich simple model</a> (Izhikevich, 2003).</p></li>
+<li><p><a class="reference external" href="https://www.frontiersin.org/articles/10.3389/fninf.2018.00046/full">Reproducibility</a> (Pauli et al., 2018).</p></li>
+</ul>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="engine.neuron.spiking.IZ.IZNeuron">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">engine.neuron.spiking.IZ.</span></span><span class="sig-name descname"><span class="pre">IZNeuron</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-65.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_curr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-14.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volt_peak</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">35.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#engine.neuron.spiking.IZ.IZNeuron" title="Permalink to this definition"></a></dt>
+<dd><p>Base class for the Izhikevich neuron model.</p>
+<p>Extends <a class="reference internal" href="engine.neuron.spiking.html#engine.neuron.spiking.SpikingNeuron" title="engine.neuron.spiking.SpikingNeuron"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpikingNeuron</span></code></a> by adding necessary parameters and implementing
+the IZ forward method efficiently for 1D tensors of arbitrary size.</p>
+<p>User may implement subclasses to differentiate IZ model variants along additional dimensions
+(e.g., parameterizing ODE scalars as well).</p>
+<p>IZ units own the following attributes on top of those inherited from <a class="reference internal" href="engine.neuron.spiking.html#engine.neuron.spiking.SpikingNeuron" title="engine.neuron.spiking.SpikingNeuron"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpikingNeuron</span></code></a>:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>volt_peak</strong> (<em>float</em><em> or </em><em>Tensor</em>) – Spike peak voltage, defaults to 35.0.</p></li>
+<li><p><strong>u_curr</strong> (<em>float</em><em> or </em><em>Tensor</em>) – Recovery variable, defaults to -14.0.</p></li>
+<li><p><strong>a</strong> (<em>float</em><em> or </em><em>Tensor</em>) – Timescale of the recovery variable <cite>u_curr</cite>, smaller is slower, defaults to 0.02.</p></li>
+<li><p><strong>b</strong> (<em>float</em><em> or </em><em>Tensor</em>) – Sensitivity of the recovery variable <cite>u_curr</cite> to subthreshold fluctuations in membrane potential, defaults to
+0.2. Higher values couple <cite>u_curr</cite> and <cite>voltage</cite> more strongly, resulting in subthreshold oscillations and/or
+LTS-like dynamics.</p></li>
+<li><p><strong>c</strong> (<em>float</em><em> or </em><em>Tensor</em>) – Post-spike reset value of the membrane potential, defaults to -65.0.</p></li>
+<li><p><strong>d</strong> (<em>float</em><em> or </em><em>Tensor</em>) – Post-spike reset of the recovery variable <cite>u_curr</cite>, defaults to 2.0.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Parameters are named <cite>a</cite>, <cite>b</cite>, <cite>c</cite>, and <cite>d</cite> in the original publication (Izhikevich, 2003).</p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="engine.neuron.spiking.IZ.IZNeuron._config_props_">
+<span class="sig-name descname"><span class="pre">_config_props_</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('a',</span> <span class="pre">'b',</span> <span class="pre">'c',</span> <span class="pre">'d',</span> <span class="pre">'volt_peak')</span></em><a class="headerlink" href="#engine.neuron.spiking.IZ.IZNeuron._config_props_" title="Permalink to this definition"></a></dt>
+<dd><p>A list of configurable property names of the class that is set/read
+by the configuration API.</p>
+<p>Each sub/super-class can define this and the properties are accumulated
+across all the sub/super-classes.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="engine.neuron.spiking.IZ.IZNeuron.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#engine.neuron.spiking.IZ.IZNeuron.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Izhikevich forward method, to be used by ensemble or singleton 1D tensors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>Tensor</em>) – External input to be processed by this Izhikevich unit.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary containing the tensors <cite>voltage</cite>, <cite>spiked</cite>, and <cite>input</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="engine.neuron.spiking.IZ.IZNeuron.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a></span></span><a class="headerlink" href="#engine.neuron.spiking.IZ.IZNeuron.integrate" title="Permalink to this definition"></a></dt>
+<dd><p>Handles the multi-function integration necessary for IZ neurons (<cite>u_curr</cite> and <cite>voltage</cite>).</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="engine.neuron.spiking.html" class="btn btn-neutral float-left" title="engine.neuron.spiking" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="engine.neuron.spiking.LIF.html" class="btn btn-neutral float-right" title="engine.neuron.spiking.LIF" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Roy Moyal, Matthew Einhorn, Jeremy Forest, Ayon Borthakur, Chen Yang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
