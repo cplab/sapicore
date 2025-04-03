@@ -1,0 +1,213 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>engine.ensemble &mdash; Sapicore  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+
+  
+      <script src="../../_static/jquery.js"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+      <script src="../../_static/doctools.js"></script>
+      <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="engine.ensemble.analog" href="engine.ensemble.analog.html" />
+    <link rel="prev" title="engine.component" href="engine.component.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Sapicore
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Data</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html#engine">Engine</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="engine.html">engine</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="engine.component.html">engine.component</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">engine.ensemble</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#engine.ensemble.Ensemble"><code class="docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="engine.ensemble.analog.html">engine.ensemble.analog</a></li>
+<li class="toctree-l4"><a class="reference internal" href="engine.ensemble.spiking.html">engine.ensemble.spiking</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="engine.network.html">engine.network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.neuron.html">engine.neuron</a></li>
+<li class="toctree-l3"><a class="reference internal" href="engine.synapse.html">engine.synapse</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html#workflow">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html#utilities">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Sapicore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Data</a></li>
+          <li class="breadcrumb-item"><a href="engine.html">engine</a></li>
+      <li class="breadcrumb-item active">engine.ensemble</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/_autosummary/engine.ensemble.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-engine.ensemble">
+<span id="engine-ensemble"></span><h1>engine.ensemble<a class="headerlink" href="#module-engine.ensemble" title="Permalink to this heading"></a></h1>
+<p>Ensembles (layers) manage neuron collections by fixing their size, extending select attribute tensors,
+and handling layer-aware operations such as heterogeneous parameter initialization and normalization.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Ensemble instance attributes are 1D tensors corresponding to potentially heterogeneous parameters
+and states of neurons (tensor elements) whose behavior is prescribed by their parent class
+(e.g., <a class="reference internal" href="engine.neuron.spiking.LIF.html#engine.neuron.spiking.LIF.LIFNeuron" title="engine.neuron.spiking.LIF.LIFNeuron"><code class="xref py py-class docutils literal notranslate"><span class="pre">LIFNeuron</span></code></a>).</p>
+<p>Ensembles can be initialized programmatically or from a configuration YAML containing neuron parameters and their
+generation method (fixed, zipped, grid, or drawn from a distribution). Forward calls invoke the parent neuron class
+method.</p>
+</div>
+<p class="rubric">Example</p>
+<p>Initialize an ensemble of basic analog neurons, inheriting default parameters and behavior from
+<a class="reference internal" href="engine.neuron.analog.html#engine.neuron.analog.AnalogNeuron" title="engine.neuron.analog.AnalogNeuron"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalogNeuron</span></code></a>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sapicore.engine.ensemble.spiking</span><span class="w"> </span><span class="kn">import</span> <span class="n">LIFEnsemble</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">layer</span> <span class="o">=</span> <span class="n">LIFEnsemble</span><span class="p">(</span><span class="n">num_units</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="utils.sweep.html#utils.sweep.Sweep" title="utils.sweep.Sweep"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sweep</span></code></a></dt><dd><p>For built-in parameter sweep utility methods.</p>
+</dd>
+</dl>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="engine.ensemble.Ensemble">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">engine.ensemble.</span></span><span class="sig-name descname"><span class="pre">Ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#engine.ensemble.Ensemble" title="Permalink to this definition"></a></dt>
+<dd><p>Ensemble base class. Provides generic implementations of tensor expansion and parameter diversification.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="engine.ensemble.Ensemble._extensible_props_">
+<span class="sig-name descname"><span class="pre">_extensible_props_</span></span><a class="headerlink" href="#engine.ensemble.Ensemble._extensible_props_" title="Permalink to this definition"></a></dt>
+<dd><p>The subset of this object’s configurable property names (<cite>_config_props_</cite>) that needs to be duplicated
+<cite>num_units</cite> times. Defaults to <cite>None</cite>, in which case all <cite>_config_props_</cite> are assumed extensible.
+In the rare case where no configurable properties should be extended, use an empty tuple.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="engine.ensemble.Ensemble.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#engine.ensemble.Ensemble.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Processes the ensemble using the size-agnostic forward method of its neuron parent class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>Tensor</em>) – External input to be processed by this ensemble.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary containing the numeric state tensor <cite>voltage</cite>, per the parent class method.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If population-aware operations are necessary (e.g., layer-wise normalization), those should go here.</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="engine.ensemble.Ensemble.num_units">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_units</span></span><a class="headerlink" href="#engine.ensemble.Ensemble.num_units" title="Permalink to this definition"></a></dt>
+<dd><p>Number of functional units represented by this object.</p>
+<p>Neurons are singletons by coercion, as they are meant to express and encapsulate unit dynamics.
+Derivatives of <a class="reference internal" href="#engine.ensemble.Ensemble" title="engine.ensemble.Ensemble"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ensemble</span></code></a> can modify this property and duplicate units as necessary.</p>
+</dd></dl>
+
+</dd></dl>
+
+<p class="rubric">Modules</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="engine.ensemble.analog.html#module-engine.ensemble.analog" title="engine.ensemble.analog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">engine.ensemble.analog</span></code></a></p></td>
+<td><p>Analog ensemble variants.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="engine.ensemble.spiking.html#module-engine.ensemble.spiking" title="engine.ensemble.spiking"><code class="xref py py-obj docutils literal notranslate"><span class="pre">engine.ensemble.spiking</span></code></a></p></td>
+<td><p>Spiking ensemble variants.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="engine.component.html" class="btn btn-neutral float-left" title="engine.component" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="engine.ensemble.analog.html" class="btn btn-neutral float-right" title="engine.ensemble.analog" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Roy Moyal, Matthew Einhorn, Jeremy Forest, Ayon Borthakur, Chen Yang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

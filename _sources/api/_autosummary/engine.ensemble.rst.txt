@@ -1,0 +1,18 @@
+engine.ensemble
+===============
+
+.. automodule:: engine.ensemble
+   :members:
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   engine.ensemble.analog
+   engine.ensemble.spiking
+

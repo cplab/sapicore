@@ -1,0 +1,17 @@
+﻿pipeline
+========
+
+.. automodule:: pipeline
+   :members:
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   pipeline.simple
+

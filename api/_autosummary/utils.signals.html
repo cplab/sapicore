@@ -1,0 +1,251 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>utils.signals &mdash; Sapicore  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+
+  
+      <script src="../../_static/jquery.js"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+      <script src="../../_static/doctools.js"></script>
+      <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="utils.sweep" href="utils.sweep.html" />
+    <link rel="prev" title="utils.seed" href="utils.seed.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Sapicore
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html#engine">Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html#workflow">Workflow</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html#utilities">Utilities</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="utils.html">utils</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="utils.constants.html">utils.constants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.integration.html">utils.integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.io.html">utils.io</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.loggable.html">utils.loggable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.plotting.html">utils.plotting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.seed.html">utils.seed</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">utils.signals</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#utils.signals.Wave"><code class="docutils literal notranslate"><span class="pre">Wave</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.signals.WaveIterable"><code class="docutils literal notranslate"><span class="pre">WaveIterable</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.signals.extend_input_current"><code class="docutils literal notranslate"><span class="pre">extend_input_current()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="utils.sweep.html">utils.sweep</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.tensorboard.html">utils.tensorboard</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Sapicore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Data</a></li>
+          <li class="breadcrumb-item"><a href="utils.html">utils</a></li>
+      <li class="breadcrumb-item active">utils.signals</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/_autosummary/utils.signals.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-utils.signals">
+<span id="utils-signals"></span><h1>utils.signals<a class="headerlink" href="#module-utils.signals" title="Permalink to this heading"></a></h1>
+<p>Utility classes and functions for artificial signal generation.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="utils.signals.Wave">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">utils.signals.</span></span><span class="sig-name descname"><span class="pre">Wave</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amplitudes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_shifts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_amplitude_coupling</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseline_shift</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#utils.signals.Wave" title="Permalink to this definition"></a></dt>
+<dd><p>Waves are iterables that produce the next value of a specified combination of sine waves, as needed.
+This allows for the generation of arbitrary waveforms with no concern for memory usage.</p>
+<p>Supports basic phase-amplitude coupling as well as phase shifting frequency components with respect to each other.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>amplitudes</strong> (<em>Tensor</em>) – Amplitudes of each frequency component, in arbitrary units.</p></li>
+<li><p><strong>frequencies</strong> (<em>Tensor</em>) – Sine component frequencies, in Hz.</p></li>
+<li><p><strong>phase_shifts</strong> (<em>Tensor</em>) – Starting phase of each frequency component, to be multiplied by np.pi.</p></li>
+<li><p><strong>phase_amplitude_coupling</strong> (<em>Tensor</em><em>, </em><em>optional</em>) – Frequency of variations in amplitude of each component, if such coupling is desired. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>baseline_shift</strong> (<em>Tensor</em><em>, </em><em>optional</em>) – Value by which to shift the entire signal (on the y-axis).</p></li>
+<li><p><strong>sampling_rate</strong> (<em>int</em><em>, </em><em>optional</em>) – Sampling rate in Hz. Defaults to 1000.0 / <a class="reference internal" href="utils.constants.html#utils.constants.DT" title="utils.constants.DT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">DT</span></code></a> (simulation time step).</p></li>
+<li><p><strong>device</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies a hardware device on which to process tensors, e.g. “cuda:0”. Defaults to “cpu”.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="engine.neuron.analog.oscillator.html#engine.neuron.analog.oscillator.OscillatorNeuron" title="engine.neuron.analog.oscillator.OscillatorNeuron"><code class="xref py py-class docutils literal notranslate"><span class="pre">OscillatorNeuron</span></code></a></dt><dd><p>An analog neuron that uses a Wave iterator to generate its output.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Example</p>
+<p>Define a fast oscillation amplitude-coupled to the phase of a slower oscillation, maxing out at its trough:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sampling_rate</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">amplitudes</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frequencies</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">50.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">phase_shifts</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">torch</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">phase_amplitude_coupling</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">frequencies</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Prepare a signal based on the above parameters:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">signal</span> <span class="o">=</span> <span class="n">Wave</span><span class="p">(</span><span class="n">amplitudes</span><span class="o">=</span><span class="n">amplitudes</span><span class="p">,</span> <span class="n">frequencies</span><span class="o">=</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">phase_shifts</span> <span class="o">=</span> <span class="n">phase_shifts</span><span class="p">,</span>
+<span class="gp">... </span><span class="n">phase_amplitude_coupling</span><span class="o">=</span><span class="n">phase_amplitude_coupling</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Generate and plot two seconds of the signal:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">next</span><span class="p">(</span><span class="n">signal</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sampling_rate</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">values</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="utils.signals.WaveIterable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">utils.signals.</span></span><span class="sig-name descname"><span class="pre">WaveIterable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wave</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#utils.signals.WaveIterable" title="Permalink to this definition"></a></dt>
+<dd><p>Implicit iterator returned by the <a class="reference internal" href="#utils.signals.Wave" title="utils.signals.Wave"><code class="xref py py-class docutils literal notranslate"><span class="pre">Wave</span></code></a> iterable.</p>
+<p>I.e. when you do <code class="docutils literal notranslate"><span class="pre">iter(wave)</span></code> or <code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">x</span> <span class="pre">in</span> <span class="pre">wave:...</span></code> it implicitly
+creates an instance of this class and uses it to iterate over.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>wave</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Wave:</span></code>) – The wave class that will be iterated over.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.signals.extend_input_current">
+<span class="sig-prename descclassname"><span class="pre">utils.signals.</span></span><span class="sig-name descname"><span class="pre">extend_input_current</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blueprint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'smear'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a></span></span><a class="headerlink" href="#utils.signals.extend_input_current" title="Permalink to this definition"></a></dt>
+<dd><p>Accepts a tensor of values <cite>blueprint</cite> and either smears or repeats it, depending on <cite>mode</cite>.</p>
+<p>Convenience function for generating a dummy input current from a <cite>blueprint</cite>. That is to say,
+the user provides the desired <strong>shape</strong> of the current time series and specifies how to extend it.</p>
+<p>For instance, if mode is “smear”, [0, 1, 0, 2] will be extended to [0, 0, 1, 1, 0, 0, 2, 2, …]
+to fit the requested duration in simulation step units, <cite>num_steps</cite>.  If mode is “repeat”,
+[0, 1, 0, 2] will be extended to [0, 1, 0, 2, 0, 1, 0, 2, …].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>blueprint</strong> (<em>Tensor</em>) – Input current values to be extended (typically given under simulation/current in the configuration YAML).</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em>) – Length of current to be generated, equal to the number of simulation steps.
+This is also the number of columns in the returned tensor.</p></li>
+<li><p><strong>num_units</strong> (<em>int</em>) – Number of neurons (tensor elements) in the ensemble that will receive the generated current.
+This is also the number of rows in the returned tensor.</p></li>
+<li><p><strong>device</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies a hardware device on which to register PyTorch buffer fields, e.g. “cuda:0”. Defaults to “cpu”.</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – Whether to “smear” the given blueprint or “repeat” it (as in np.tile).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The generated current, given as a tensor whose columns are its values at each time point (ensemble elements
+correspond to rows).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">extend_input_current</span><span class="p">(</span><span class="n">blueprint</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">num_units</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;smear&quot;</span><span class="p">)</span>
+<span class="go">tensor([[0., 0., 1., 1., 1., 1., 0., 0.],</span>
+<span class="go">        [0., 0., 1., 1., 1., 1., 0., 0.]])</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">extend_input_current</span><span class="p">(</span><span class="n">blueprint</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">num_units</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;repeat&quot;</span><span class="p">)</span>
+<span class="go">tensor([[0., 1., 1., 0., 0., 1., 1., 0.],</span>
+<span class="go">        [0., 1., 1., 0., 0., 1., 1., 0.]])</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Providing a nonsensical <cite>num_steps</cite> (shorter than or not divisible by the length of the blueprint)
+will result in truncating or extending the output to the nearest integer multiple of the blueprint length.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The present implementation supports duplication of the current time series to accommodate multiple units.
+<code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleSimulator</span></code> uses this function to support sending varying dummy currents
+to different ensemble elements.</p>
+<p>Note, however, that these mechanisms are better suited for <code class="xref py py-mod docutils literal notranslate"><span class="pre">data.synthesis</span></code>
+and will be implemented there in a principled manner. This utility function may be deprecated or moved.</p>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="utils.seed.html" class="btn btn-neutral float-left" title="utils.seed" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="utils.sweep.html" class="btn btn-neutral float-right" title="utils.sweep" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Roy Moyal, Matthew Einhorn, Jeremy Forest, Ayon Borthakur, Chen Yang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,253 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>utils.io &mdash; Sapicore  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+
+  
+      <script src="../../_static/jquery.js"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+      <script src="../../_static/doctools.js"></script>
+      <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="utils.loggable" href="utils.loggable.html" />
+    <link rel="prev" title="utils.integration" href="utils.integration.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Sapicore
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html#engine">Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html#workflow">Workflow</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html#utilities">Utilities</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="utils.html">utils</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="utils.constants.html">utils.constants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.integration.html">utils.integration</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">utils.io</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#utils.io.DataAccumulatorHook"><code class="docutils literal notranslate"><span class="pre">DataAccumulatorHook</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.io.MonitorHook"><code class="docutils literal notranslate"><span class="pre">MonitorHook</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.io.ensure_dir"><code class="docutils literal notranslate"><span class="pre">ensure_dir()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.io.flatten"><code class="docutils literal notranslate"><span class="pre">flatten()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.io.load_yaml"><code class="docutils literal notranslate"><span class="pre">load_yaml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.io.log_settings"><code class="docutils literal notranslate"><span class="pre">log_settings()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.io.plot_tensorboard"><code class="docutils literal notranslate"><span class="pre">plot_tensorboard()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.io.save_yaml"><code class="docutils literal notranslate"><span class="pre">save_yaml()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="utils.loggable.html">utils.loggable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.plotting.html">utils.plotting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.seed.html">utils.seed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.signals.html">utils.signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.sweep.html">utils.sweep</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.tensorboard.html">utils.tensorboard</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Sapicore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Data</a></li>
+          <li class="breadcrumb-item"><a href="utils.html">utils</a></li>
+      <li class="breadcrumb-item active">utils.io</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/_autosummary/utils.io.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-utils.io">
+<span id="utils-io"></span><h1>utils.io<a class="headerlink" href="#module-utils.io" title="Permalink to this heading"></a></h1>
+<p>File and user I/O.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="utils.io.DataAccumulatorHook">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">utils.io.</span></span><span class="sig-name descname"><span class="pre">DataAccumulatorHook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.6)"><span class="pre">Module</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#utils.io.DataAccumulatorHook" title="Permalink to this definition"></a></dt>
+<dd><p>Wraps any <a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a> object, accumulating selected attribute data on every forward call.</p>
+<p>If used with a <a class="reference internal" href="engine.component.html#engine.component.Component" title="engine.component.Component"><code class="xref py py-class docutils literal notranslate"><span class="pre">Component</span></code></a>, selectable attributes are those included in the dictionary
+returned by the Module’s forward method, and are a subset of the object’s <cite>_loggable_props_</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.6)"><em>torch.nn.Module</em></a>) – Reference to the network component object whose loggable buffered attributes should be dumped to disk.</p></li>
+<li><p><strong>log_dir</strong> (<em>str</em>) – Path to the desired data loggable directory.</p></li>
+<li><p><strong>attributes</strong> (<em>list</em><em> of </em><em>str</em>) – Instance attribute names to be logged. Defaults to the full list <cite>component.loggable_props</cite>.</p></li>
+<li><p><strong>entries</strong> (<em>int</em>) – Number of log entries, equal to the number of simulation steps. Used to ensure the last batch in the run
+is written to disk despite its size being smaller than <code class="xref py py-attr docutils literal notranslate"><span class="pre">CHUNK_SIZE</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.io.DataAccumulatorHook.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.6)"><span class="pre">Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#utils.io.DataAccumulatorHook.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.io.DataAccumulatorHook.initialize_hdf">
+<span class="sig-name descname"><span class="pre">initialize_hdf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#utils.io.DataAccumulatorHook.initialize_hdf" title="Permalink to this definition"></a></dt>
+<dd><p>Initializes HDF5 file on the first iteration of this data accumulator instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="utils.io.MonitorHook">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">utils.io.</span></span><span class="sig-name descname"><span class="pre">MonitorHook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.6)"><span class="pre">Module</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#utils.io.MonitorHook" title="Permalink to this definition"></a></dt>
+<dd><p>Accumulates selected attribute data in memory on every forward call. Does not write to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.6)"><em>torch.nn.Module</em></a>) – Network component whose attributes should be buffered in memory.</p></li>
+<li><p><strong>attributes</strong> (<em>list</em><em> of </em><em>str</em>) – Instance attributes to be logged. Defaults to the full list <cite>component.loggable_props</cite>.</p></li>
+<li><p><strong>entries</strong> (<em>int</em>) – Expected number of simulation steps. Used to preallocate the buffer.
+If unknown, <cite>torch.vstack()</cite> is used, which may result in slower performance.</p></li>
+<li><p><strong>dtype</strong> – Data type.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.io.ensure_dir">
+<span class="sig-prename descclassname"><span class="pre">utils.io.</span></span><span class="sig-name descname"><span class="pre">ensure_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#utils.io.ensure_dir" title="Permalink to this definition"></a></dt>
+<dd><p>Ensures that a path is created if parts thereof do not exist yet and returns it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – File path to be verified or created.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>path</strong> – The same file path, so it can be used in the calling context (e.g., if <a class="reference internal" href="#utils.io.ensure_dir" title="utils.io.ensure_dir"><code class="xref py py-func docutils literal notranslate"><span class="pre">ensure_dir()</span></code></a>
+wraps an assignment).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.io.flatten">
+<span class="sig-prename descclassname"><span class="pre">utils.io.</span></span><span class="sig-name descname"><span class="pre">flatten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lst</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#utils.io.flatten" title="Permalink to this definition"></a></dt>
+<dd><p>Flattens a list.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.io.load_yaml">
+<span class="sig-prename descclassname"><span class="pre">utils.io.</span></span><span class="sig-name descname"><span class="pre">load_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#utils.io.load_yaml" title="Permalink to this definition"></a></dt>
+<dd><p>Parses the YAML at <cite>path</cite>, returning a dictionary.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.io.log_settings">
+<span class="sig-prename descclassname"><span class="pre">utils.io.</span></span><span class="sig-name descname"><span class="pre">log_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream:</span> <span class="pre">~_io.TextIOWrapper</span> <span class="pre">=</span> <span class="pre">&lt;_io.TextIOWrapper</span> <span class="pre">name='&lt;stdout&gt;'</span> <span class="pre">mode='w'</span> <span class="pre">encoding='utf-8'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">formatting:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'%(asctime)s</span> <span class="pre">[%(levelname)s]</span> <span class="pre">%(message)s'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#utils.io.log_settings" title="Permalink to this definition"></a></dt>
+<dd><p>Temporary basic logger configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>level</strong> (<em>int</em>) – Logger level, <cite>INFO</cite> by default.</p></li>
+<li><p><strong>stream</strong> – Destination stream, <cite>stdout</cite> by default.</p></li>
+<li><p><strong>file</strong> – Destination file, <cite>None</cite> by default.</p></li>
+<li><p><strong>formatting</strong> (<em>str</em>) – Message formatting.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.io.plot_tensorboard">
+<span class="sig-prename descclassname"><span class="pre">utils.io.</span></span><span class="sig-name descname"><span class="pre">plot_tensorboard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tb_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#utils.io.plot_tensorboard" title="Permalink to this definition"></a></dt>
+<dd><p>Loads simulation output data from disk and writes it to tensorboard for visual inspection.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.io.save_yaml">
+<span class="sig-prename descclassname"><span class="pre">utils.io.</span></span><span class="sig-name descname"><span class="pre">save_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#utils.io.save_yaml" title="Permalink to this definition"></a></dt>
+<dd><p>Saves a dictionary <cite>data</cite> to the YAML file specified by <cite>path</cite>.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="utils.integration.html" class="btn btn-neutral float-left" title="utils.integration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="utils.loggable.html" class="btn btn-neutral float-right" title="utils.loggable" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Roy Moyal, Matthew Einhorn, Jeremy Forest, Ayon Borthakur, Chen Yang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

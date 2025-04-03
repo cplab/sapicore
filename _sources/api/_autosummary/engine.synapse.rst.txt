@@ -1,0 +1,17 @@
+engine.synapse
+==============
+
+.. automodule:: engine.synapse
+   :members:
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   engine.synapse.STDP
+

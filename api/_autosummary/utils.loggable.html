@@ -1,0 +1,801 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>utils.loggable &mdash; Sapicore  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+
+  
+      <script src="../../_static/jquery.js"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+      <script src="../../_static/doctools.js"></script>
+      <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="utils.plotting" href="utils.plotting.html" />
+    <link rel="prev" title="utils.io" href="utils.io.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Sapicore
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html#engine">Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html#workflow">Workflow</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html#utilities">Utilities</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="utils.html">utils</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="utils.constants.html">utils.constants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.integration.html">utils.integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.io.html">utils.io</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">utils.loggable</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#loggable">Loggable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api">API</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.loggable.Loggable"><code class="docutils literal notranslate"><span class="pre">Loggable</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.loggable.NixLogReader"><code class="docutils literal notranslate"><span class="pre">NixLogReader</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.loggable.NixLogWriter"><code class="docutils literal notranslate"><span class="pre">NixLogWriter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.loggable.dump_loggable"><code class="docutils literal notranslate"><span class="pre">dump_loggable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.loggable.get_loggable_properties"><code class="docutils literal notranslate"><span class="pre">get_loggable_properties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.loggable.load_save_get_loggable_properties"><code class="docutils literal notranslate"><span class="pre">load_save_get_loggable_properties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.loggable.log_tensor_board"><code class="docutils literal notranslate"><span class="pre">log_tensor_board()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.loggable.read_loggable_from_file"><code class="docutils literal notranslate"><span class="pre">read_loggable_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.loggable.read_loggable_from_object"><code class="docutils literal notranslate"><span class="pre">read_loggable_from_object()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.loggable.update_loggable_from_object"><code class="docutils literal notranslate"><span class="pre">update_loggable_from_object()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="utils.plotting.html">utils.plotting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.seed.html">utils.seed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.signals.html">utils.signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.sweep.html">utils.sweep</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.tensorboard.html">utils.tensorboard</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Sapicore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Data</a></li>
+          <li class="breadcrumb-item"><a href="utils.html">utils</a></li>
+      <li class="breadcrumb-item active">utils.loggable</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/_autosummary/utils.loggable.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-utils.loggable">
+<span id="utils-loggable"></span><h1>utils.loggable<a class="headerlink" href="#module-utils.loggable" title="Permalink to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">Loggable</span></code> module provides tools for configuring the logging of Sapicore models.
+It supports logging simple properties to tensorboard as well as arbitrary properties,
+including tensors and arrays, to HDF5 files.</p>
+<p>Individual properties can be included or excluded from logging using a config
+dict that can be saved to a YAML, similarly to <code class="xref py py-mod docutils literal notranslate"><span class="pre">tree-config</span></code> configuration.</p>
+<section id="loggable">
+<h2>Loggable<a class="headerlink" href="#loggable" title="Permalink to this heading"></a></h2>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Loggable</span></code> defines an API for properties to support opting-in to logging.
+Users may list loggable properties by including them in <code class="xref py py-attr docutils literal notranslate"><span class="pre">_loggable_props_</span></code>
+on a per class basis.</p>
+<p>Subclassing extends <code class="xref py py-attr docutils literal notranslate"><span class="pre">_loggable_props_</span></code>, which are accumulated across
+all superclasses when <a class="reference internal" href="#utils.loggable.Loggable.loggable_props" title="utils.loggable.Loggable.loggable_props"><code class="xref py py-attr docutils literal notranslate"><span class="pre">loggable_props</span></code></a> is called. The latter also
+updates the cache list <code class="xref py py-attr docutils literal notranslate"><span class="pre">_loggable_props</span></code>.
+Setting <cite>utils.loggable.Loggable._loggable_props_</cite>, in and of itself, will NOT update the cache.</p>
+<p>To support the logging of nested objects, we use <code class="xref py py-attr docutils literal notranslate"><span class="pre">_loggable_children_</span></code>
+to list all objects that should be inspected for loggable properties. These are similarly listed in
+<a class="reference internal" href="#utils.loggable.Loggable.loggable_children" title="utils.loggable.Loggable.loggable_children"><code class="xref py py-attr docutils literal notranslate"><span class="pre">loggable_children</span></code></a>.</p>
+</section>
+<section id="api">
+<h2>API<a class="headerlink" href="#api" title="Permalink to this heading"></a></h2>
+<p>Users may obtain the loggable properties as YAML files, dictionaries, or flat lists of properties using
+the following functions:</p>
+<p><a class="reference internal" href="#utils.loggable.read_loggable_from_object" title="utils.loggable.read_loggable_from_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_loggable_from_object()</span></code></a>, <a class="reference internal" href="#utils.loggable.read_loggable_from_file" title="utils.loggable.read_loggable_from_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_loggable_from_file()</span></code></a>, <a class="reference internal" href="#utils.loggable.update_loggable_from_object" title="utils.loggable.update_loggable_from_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">update_loggable_from_object()</span></code></a>,
+<a class="reference internal" href="#utils.loggable.dump_loggable" title="utils.loggable.dump_loggable"><code class="xref py py-func docutils literal notranslate"><span class="pre">dump_loggable()</span></code></a>, <a class="reference internal" href="#utils.loggable.load_save_get_loggable_properties" title="utils.loggable.load_save_get_loggable_properties"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_save_get_loggable_properties()</span></code></a>, and <a class="reference internal" href="#utils.loggable.get_loggable_properties" title="utils.loggable.get_loggable_properties"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_loggable_properties()</span></code></a>.</p>
+<p>They all provide a mapping from the property name to a boolean indicting whether the property should be logged.</p>
+<p class="rubric">Example</p>
+<p>The following class inherits from Loggable:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">Example</span><span class="p">(</span><span class="n">Loggable</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">_loggable_props_</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;voltage&quot;</span><span class="p">,)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">voltage</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="bp">self</span><span class="o">.</span><span class="n">voltage</span> <span class="o">=</span> <span class="n">voltage</span>
+</pre></div>
+</div>
+<p>After instantiating an object, refresh the cache and obtain the loggable properties:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dummy</span> <span class="o">=</span> <span class="n">Example</span><span class="p">(</span><span class="n">voltage</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dummy</span><span class="o">.</span><span class="n">loggable_props</span><span class="p">)</span>
+<span class="go">[&#39;voltage&#39;]</span>
+</pre></div>
+</div>
+<p>To check which attributes are loggable:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">read_loggable_from_object</span><span class="p">(</span><span class="n">dummy</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="go">{&#39;voltage&#39;: True}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#utils.loggable.log_tensor_board" title="utils.loggable.log_tensor_board"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_tensor_board()</span></code></a> supports taking the flat list of properties and
+logging all the properties that are set to be logged to the tensorboard
+format on disk using a <code class="xref py py-class docutils literal notranslate"><span class="pre">SummaryWriter</span></code> instance.</p>
+<p>Similarly, <a class="reference internal" href="#utils.loggable.NixLogWriter" title="utils.loggable.NixLogWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">NixLogWriter</span></code></a> supports logging arbitrary tensors and numpy
+arrays to a nix HDF5 file. <a class="reference internal" href="#utils.loggable.NixLogReader" title="utils.loggable.NixLogReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">NixLogReader</span></code></a> can then be used to load the
+data from the nix file into scalars or numpy arrays of the original shape.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This module may change significantly in Sapicore &gt; 0.3.0.</p>
+</div>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="utils.loggable.Loggable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">utils.loggable.</span></span><span class="sig-name descname"><span class="pre">Loggable</span></span><a class="headerlink" href="#utils.loggable.Loggable" title="Permalink to this definition"></a></dt>
+<dd><p>The <a class="reference internal" href="#utils.loggable.Loggable" title="utils.loggable.Loggable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loggable</span></code></a> can be used as a base class for objects that need to control which
+of its properties can be logged.</p>
+<p>When getting loggable properties, <a class="reference internal" href="#utils.loggable.read_loggable_from_object" title="utils.loggable.read_loggable_from_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_loggable_from_object()</span></code></a> will call <a class="reference internal" href="#utils.loggable.Loggable.loggable_props" title="utils.loggable.Loggable.loggable_props"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loggable_props()</span></code></a> and
+<a class="reference internal" href="#utils.loggable.Loggable.loggable_children" title="utils.loggable.Loggable.loggable_children"><code class="xref py py-meth docutils literal notranslate"><span class="pre">loggable_children()</span></code></a>, which looks up all the properties from <code class="xref py py-attr docutils literal notranslate"><span class="pre">_loggable_props_</span></code> and
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">_loggable_children_</span></code>.</p>
+<p class="rubric">Example</p>
+<p>The following class has two loggable properties:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">LoggableModel</span><span class="p">(</span><span class="n">Loggable</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">_loggable_props_</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;frame&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">frame</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;square&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;blue&quot;</span>
+</pre></div>
+</div>
+<p>This snippet will return what they are after instantiating an object of this class:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">LoggableModel</span><span class="p">()</span><span class="o">.</span><span class="n">loggable_props</span>
+<span class="go">[&#39;frame&#39;, &#39;color&#39;]</span>
+</pre></div>
+</div>
+<p>To accumulate over loggable children as well:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">read_loggable_from_object</span><span class="p">(</span><span class="n">LoggableModel</span><span class="p">(),</span> <span class="kc">True</span><span class="p">)</span>
+<span class="go">{&#39;frame&#39;: True, &#39;color&#39;: True}</span>
+</pre></div>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="utils.loggable.Loggable.loggable_children">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loggable_children</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#utils.loggable.Loggable.loggable_children" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>A property containing a dictionary of loggable attribute names from derivative classes (i.e.,</dt><dd><p>listed in <cite>_loggable_children_</cite> of this class and its parent classes).</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">Thing</span><span class="p">(</span><span class="n">Loggable</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">_loggable_children_</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;useful&quot;</span><span class="p">:</span> <span class="s2">&quot;box&quot;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">box</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">Box</span><span class="p">(</span><span class="n">Loggable</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">Thing</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="n">Box</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">loggable_children</span>
+<span class="go">{&#39;useful&#39;: &#39;box&#39;}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="utils.loggable.Loggable.loggable_props">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loggable_props</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#utils.loggable.Loggable.loggable_props" title="Permalink to this definition"></a></dt>
+<dd><p>A property containing a list of instance attribute names that are loggable (i.e., listed in
+<cite>_loggable_props_</cite> of this class and its parent classes).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="utils.loggable.NixLogReader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">utils.loggable.</span></span><span class="sig-name descname"><span class="pre">NixLogReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#utils.loggable.NixLogReader" title="Permalink to this definition"></a></dt>
+<dd><p>A reader that can read and return the data written to a nix file using
+<a class="reference internal" href="#utils.loggable.NixLogWriter" title="utils.loggable.NixLogWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">NixLogWriter</span></code></a>.</p>
+<p>E.g.:</p>
+<p>. code-block:: python</p>
+<blockquote>
+<div><dl class="simple">
+<dt>with NixLogReader(‘log.h5’) as reader:</dt><dd><p>print(‘Logged experiments: ‘, reader.get_experiment_names())
+# prints e.g. <cite>Logged experiments:  [‘example’]</cite>
+print(‘Logged properties: ‘, reader.get_experiment_property_paths(‘example’))
+# prints e.g. <cite>Logged properties:  [(‘neuron_1’, ‘activation’), …</cite>
+print(‘Activation: ‘, reader.get_experiment_property_data(‘example’, (‘neuron_1’, ‘activation’)))
+# prints <cite>Activation:  (array([0, 1, 2], dtype=int64), [array([0…</cite></p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.loggable.NixLogReader.close_file">
+<span class="sig-name descname"><span class="pre">close_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.loggable.NixLogReader.close_file" title="Permalink to this definition"></a></dt>
+<dd><p>Closes the nix file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="utils.loggable.NixLogReader.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#utils.loggable.NixLogReader.filename" title="Permalink to this definition"></a></dt>
+<dd><p>The filename of the nix file that will be opened when
+<a class="reference internal" href="#utils.loggable.NixLogReader.open_file" title="utils.loggable.NixLogReader.open_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open_file()</span></code></a> is called.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.loggable.NixLogReader.get_experiment_names">
+<span class="sig-name descname"><span class="pre">get_experiment_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#utils.loggable.NixLogReader.get_experiment_names" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the list of block names found in the file that was created
+with <a class="reference internal" href="#utils.loggable.NixLogWriter.create_block" title="utils.loggable.NixLogWriter.create_block"><code class="xref py py-meth docutils literal notranslate"><span class="pre">NixLogWriter.create_block()</span></code></a>.</p>
+<p>E.g.:</p>
+<p>. code-block:: python</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">NixLogReader</span><span class="p">(</span><span class="s1">&#39;log.h5&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="nb">print</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">get_experiment_names</span><span class="p">())</span>
+<span class="go">[&#39;example&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.loggable.NixLogReader.get_experiment_property_data">
+<span class="sig-name descname"><span class="pre">get_experiment_property_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">property_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#utils.loggable.NixLogReader.get_experiment_property_data" title="Permalink to this definition"></a></dt>
+<dd><p>Returns all the data of a property previously logged with
+<a class="reference internal" href="#utils.loggable.NixLogWriter.log" title="utils.loggable.NixLogWriter.log"><code class="xref py py-meth docutils literal notranslate"><span class="pre">NixLogWriter.log()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – The name of the block that contains the data.</p></li>
+<li><p><strong>property_path</strong> – The full attribute path to the property, so we
+can locate it in the data. It is an item from the list returned by
+<a class="reference internal" href="#utils.loggable.NixLogReader.get_experiment_property_paths" title="utils.loggable.NixLogReader.get_experiment_property_paths"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_experiment_property_paths()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2-tuple of <code class="docutils literal notranslate"><span class="pre">(counter,</span> <span class="pre">data)</span></code>. <code class="docutils literal notranslate"><span class="pre">counter</span></code> and <code class="docutils literal notranslate"><span class="pre">data</span></code>,
+have the same length. <code class="docutils literal notranslate"><span class="pre">counter</span></code> is an array containing the count
+value that corresponds the each data item as passed to
+the <code class="docutils literal notranslate"><span class="pre">counter</span></code> parameter in <a class="reference internal" href="#utils.loggable.NixLogWriter.log" title="utils.loggable.NixLogWriter.log"><code class="xref py py-meth docutils literal notranslate"><span class="pre">NixLogWriter.log()</span></code></a>.
+<code class="docutils literal notranslate"><span class="pre">data</span></code> is a list of the values logged for this property, one item
+for each call to <a class="reference internal" href="#utils.loggable.NixLogWriter.log" title="utils.loggable.NixLogWriter.log"><code class="xref py py-meth docutils literal notranslate"><span class="pre">NixLogWriter.log()</span></code></a>. It can be scalars or
+numpy arrays.</p>
+</dd>
+</dl>
+<p>E.g.:</p>
+<p>. code-block:: python</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">NixLogReader</span><span class="p">(</span><span class="s1">&#39;log.h5&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="nb">print</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">get_experiment_property_data</span><span class="p">(</span>
+<span class="gp">... </span>          <span class="s1">&#39;example&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;neuron_1&#39;</span><span class="p">,</span> <span class="s1">&#39;activation&#39;</span><span class="p">)))</span>
+<span class="go">(array([0, 1, 2], dtype=int64), [</span>
+<span class="go">    array([0.56843126, 1.0845224 , 1.3985955 ], dtype=float32),</span>
+<span class="go">    array([0.40334684, 0.83802634, 0.7192576 ], dtype=float32),</span>
+<span class="go">    array([0.40334353, 0.59663534, 0.18203649], dtype=float32)</span>
+<span class="go">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.loggable.NixLogReader.get_experiment_property_paths">
+<span class="sig-name descname"><span class="pre">get_experiment_property_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#utils.loggable.NixLogReader.get_experiment_property_paths" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the list of properties found in the file that was created
+with <a class="reference internal" href="#utils.loggable.NixLogWriter.get_property_arrays" title="utils.loggable.NixLogWriter.get_property_arrays"><code class="xref py py-meth docutils literal notranslate"><span class="pre">NixLogWriter.get_property_arrays()</span></code></a>.</p>
+<p>Each item in the list is itself a tuple of strings. This tuple
+represents the path to the property starting from the root object (e.g.
+the model) as attributes. E.g. <code class="docutils literal notranslate"><span class="pre">model.child.prop</span></code> will be represented
+as <code class="docutils literal notranslate"><span class="pre">('model',</span> <span class="pre">'child',</span> <span class="pre">'prop')</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> – The name of the block to scan for properties.</p>
+</dd>
+</dl>
+<p>E.g.:</p>
+<p>. code-block:: python</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">NixLogReader</span><span class="p">(</span><span class="s1">&#39;log.h5&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="nb">print</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">get_experiment_property_paths</span><span class="p">(</span><span class="s1">&#39;example&#39;</span><span class="p">))</span>
+<span class="go">[(&#39;neuron_1&#39;, &#39;activation&#39;), (&#39;neuron_1&#39;, &#39;intensity&#39;),</span>
+<span class="go">(&#39;synapse&#39;, &#39;activation&#39;), (&#39;neuron_2&#39;, &#39;activation&#39;),</span>
+<span class="go">(&#39;neuron_2&#39;, &#39;intensity&#39;), (&#39;activation_sum&#39;,)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="utils.loggable.NixLogReader.nix_file">
+<span class="sig-name descname"><span class="pre">nix_file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">File</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#utils.loggable.NixLogReader.nix_file" title="Permalink to this definition"></a></dt>
+<dd><p>The internal nix file object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.loggable.NixLogReader.open_file">
+<span class="sig-name descname"><span class="pre">open_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.loggable.NixLogReader.open_file" title="Permalink to this definition"></a></dt>
+<dd><p>Opens the file named in <a class="reference internal" href="#utils.loggable.NixLogReader.filename" title="utils.loggable.NixLogReader.filename"><code class="xref py py-attr docutils literal notranslate"><span class="pre">filename</span></code></a> that was created with
+<a class="reference internal" href="#utils.loggable.NixLogWriter.create_file" title="utils.loggable.NixLogWriter.create_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">NixLogWriter.create_file()</span></code></a>.</p>
+<p><a class="reference internal" href="#utils.loggable.NixLogReader.close_file" title="utils.loggable.NixLogReader.close_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">close_file()</span></code></a> must be called after this to close the file.</p>
+<p>An alternative syntax is to use it as a context manager, which is a
+little safer:</p>
+<p>. code-block:: python</p>
+<blockquote>
+<div><dl class="simple">
+<dt>with NixLogReader(‘log.h5’) as reader:</dt><dd><p>…</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>This internally calls <a class="reference internal" href="#utils.loggable.NixLogReader.open_file" title="utils.loggable.NixLogReader.open_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open_file()</span></code></a> and <a class="reference internal" href="#utils.loggable.NixLogReader.close_file" title="utils.loggable.NixLogReader.close_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">close_file()</span></code></a> as
+needed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="utils.loggable.NixLogWriter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">utils.loggable.</span></span><span class="sig-name descname"><span class="pre">NixLogWriter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">git_hash</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Compression.Auto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#utils.loggable.NixLogWriter" title="Permalink to this definition"></a></dt>
+<dd><p>Writer that supports logging properties to a Nix HDF5 file.</p>
+<p>It supports logging arbitrary torch tensors, numpy arrays, and numerical
+scalars. The logged data can then be retrieved with <a class="reference internal" href="#utils.loggable.NixLogReader" title="utils.loggable.NixLogReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">NixLogReader</span></code></a>.</p>
+<p>A typical example is:</p>
+<p>. code-block:: python</p>
+<blockquote>
+<div><p>log_props = read_loggable_from_object(Model(), True)
+writer = NixLogWriter(h5_filename)
+# create the file
+writer.create_file()
+# create a section for this session
+writer.create_block(‘example’)
+# create the objects required for logging using the loggable properties
+property_arrays = writer.get_property_arrays(‘example’, log_props)
+do_work…
+# all the enabled loggable props will be logged
+writer.log(property_arrays, 0)
+do_more_work…
+writer.log(property_arrays, 1)
+# now close
+writer.close_file()</p>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.loggable.NixLogWriter.close_file">
+<span class="sig-name descname"><span class="pre">close_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#utils.loggable.NixLogWriter.close_file" title="Permalink to this definition"></a></dt>
+<dd><p>Closes the nix file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="utils.loggable.NixLogWriter.compression">
+<span class="sig-name descname"><span class="pre">compression</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Auto'</span></em><a class="headerlink" href="#utils.loggable.NixLogWriter.compression" title="Permalink to this definition"></a></dt>
+<dd><p>The compression to use in the file.</p>
+<p>It is one of <code class="docutils literal notranslate"><span class="pre">nix.Compression</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="utils.loggable.NixLogWriter.config_data">
+<span class="sig-name descname"><span class="pre">config_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#utils.loggable.NixLogWriter.config_data" title="Permalink to this definition"></a></dt>
+<dd><p>A dict of <a class="reference external" href="https://matham.github.io/tree-config/api.html#module-tree_config" title="(in tree-config)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tree_config</span></code></a> config data used to config the model that
+can be included in the file.</p>
+<p>It is saved to the file after being encoded using
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">yaml_dumps()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.loggable.NixLogWriter.create_block">
+<span class="sig-name descname"><span class="pre">create_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#utils.loggable.NixLogWriter.create_block" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a new block using the given that could subsequently be used
+with <a class="reference internal" href="#utils.loggable.NixLogWriter.get_property_arrays" title="utils.loggable.NixLogWriter.get_property_arrays"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_property_arrays()</span></code></a> to log to this block.</p>
+<p>It is used to organize the data into sessions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.loggable.NixLogWriter.create_file">
+<span class="sig-name descname"><span class="pre">create_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#utils.loggable.NixLogWriter.create_file" title="Permalink to this definition"></a></dt>
+<dd><p>Creates the file named in <a class="reference internal" href="#utils.loggable.NixLogWriter.filename" title="utils.loggable.NixLogWriter.filename"><code class="xref py py-attr docutils literal notranslate"><span class="pre">filename</span></code></a>. If it exists, an error
+is raised.</p>
+<p><a class="reference internal" href="#utils.loggable.NixLogWriter.close_file" title="utils.loggable.NixLogWriter.close_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">close_file()</span></code></a> must be called after this to close the file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="utils.loggable.NixLogWriter.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#utils.loggable.NixLogWriter.filename" title="Permalink to this definition"></a></dt>
+<dd><p>The filename of the nix file that will be created when
+<a class="reference internal" href="#utils.loggable.NixLogWriter.create_file" title="utils.loggable.NixLogWriter.create_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create_file()</span></code></a> is called.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.loggable.NixLogWriter.get_property_arrays">
+<span class="sig-name descname"><span class="pre">get_property_arrays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loggable_properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataArray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#utils.loggable.NixLogWriter.get_property_arrays" title="Permalink to this definition"></a></dt>
+<dd><p>Takes the list of properties to be logged and it creates a list of
+objects that can be used with <a class="reference internal" href="#utils.loggable.NixLogWriter.log" title="utils.loggable.NixLogWriter.log"><code class="xref py py-attr docutils literal notranslate"><span class="pre">log</span></code></a> to log all these properties.</p>
+<p>See the class for an example.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – The name of the block to which the properties will be
+logged. The block must have been created previously with
+<a class="reference internal" href="#utils.loggable.NixLogWriter.create_block" title="utils.loggable.NixLogWriter.create_block"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create_block()</span></code></a>.</p></li>
+<li><p><strong>loggable_properties</strong> – The list of properties (in the format of
+<a class="reference internal" href="#utils.loggable.get_loggable_properties" title="utils.loggable.get_loggable_properties"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_loggable_properties()</span></code></a>) to read and log.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of objects that can be passed to <a class="reference internal" href="#utils.loggable.NixLogWriter.log" title="utils.loggable.NixLogWriter.log"><code class="xref py py-meth docutils literal notranslate"><span class="pre">log()</span></code></a> to log
+the properties.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="utils.loggable.NixLogWriter.git_hash">
+<span class="sig-name descname"><span class="pre">git_hash</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#utils.loggable.NixLogWriter.git_hash" title="Permalink to this definition"></a></dt>
+<dd><p>An optional git hash that can be included in the file. It can be used
+to label the model version for example.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.loggable.NixLogWriter.log">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">property_arrays</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataArray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">counter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#utils.loggable.NixLogWriter.log" title="Permalink to this definition"></a></dt>
+<dd><p>Logs all the properties passed to <a class="reference internal" href="#utils.loggable.NixLogWriter.get_property_arrays" title="utils.loggable.NixLogWriter.get_property_arrays"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_property_arrays()</span></code></a>.</p>
+<p>See the class for an example.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>property_arrays</strong> – The list of objects returned by
+<a class="reference internal" href="#utils.loggable.NixLogWriter.get_property_arrays" title="utils.loggable.NixLogWriter.get_property_arrays"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_property_arrays()</span></code></a></p></li>
+<li><p><strong>counter</strong> – An arbitrary integer that gets logged with the
+properties that could be later used to identify the data,
+e.g. the epoch when it was logged.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="utils.loggable.NixLogWriter.metadata">
+<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#utils.loggable.NixLogWriter.metadata" title="Permalink to this definition"></a></dt>
+<dd><p>A dict of arbitrary metadata that can be included in the file.</p>
+<p>It is saved to the file after being encoded using
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">yaml_dumps()</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="utils.loggable.NixLogWriter.nix_file">
+<span class="sig-name descname"><span class="pre">nix_file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">File</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#utils.loggable.NixLogWriter.nix_file" title="Permalink to this definition"></a></dt>
+<dd><p>The internal nix file object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.loggable.dump_loggable">
+<span class="sig-prename descclassname"><span class="pre">utils.loggable.</span></span><span class="sig-name descname"><span class="pre">dump_loggable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#utils.loggable.dump_loggable" title="Permalink to this definition"></a></dt>
+<dd><p>Dumps the loggable data gotten with e.g.
+<a class="reference internal" href="#utils.loggable.read_loggable_from_object" title="utils.loggable.read_loggable_from_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_loggable_from_object()</span></code></a> to a yaml file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – The yaml filename.</p></li>
+<li><p><strong>data</strong> – The loggable data.</p></li>
+</ul>
+</dd>
+</dl>
+<p>E.g.:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="p">(</span><span class="n">Loggable</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">_config_props_</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;chair&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">read_loggable_from_object</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dump_config</span><span class="p">(</span><span class="s1">&#39;loggable.yaml&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;loggable.yaml&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Which prints <code class="docutils literal notranslate"><span class="pre">name:</span> <span class="pre">true</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.loggable.get_loggable_properties">
+<span class="sig-prename descclassname"><span class="pre">utils.loggable.</span></span><span class="sig-name descname"><span class="pre">get_loggable_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#utils.loggable.Loggable" title="utils.loggable.Loggable"><span class="pre">Loggable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">loggable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">property_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#utils.loggable.get_loggable_properties" title="Permalink to this definition"></a></dt>
+<dd><p>Takes the loggable data read with <a class="reference internal" href="#utils.loggable.read_loggable_from_object" title="utils.loggable.read_loggable_from_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_loggable_from_object()</span></code></a>
+or <a class="reference internal" href="#utils.loggable.read_loggable_from_file" title="utils.loggable.read_loggable_from_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_loggable_from_file()</span></code></a>, filters those properties that should
+be logged (i.e. those that are True) and flattens them into a single flat
+list.</p>
+<p>This list could be used to efficiently log all the properties that need
+to be logged, by iterating the list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> – The object from which to get the loggables.</p></li>
+<li><p><strong>loggable</strong> – The loggable data previously read with
+<a class="reference internal" href="#utils.loggable.read_loggable_from_object" title="utils.loggable.read_loggable_from_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_loggable_from_object()</span></code></a> or <a class="reference internal" href="#utils.loggable.read_loggable_from_file" title="utils.loggable.read_loggable_from_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_loggable_from_file()</span></code></a>.</p></li>
+<li><p><strong>property_path</strong> – <p>A list of strings, indicating the object children
+names, starting from some root object that lead to the <code class="docutils literal notranslate"><span class="pre">obj</span></code>.
+This can be used to reconstruct the full object path to each property
+starting from <code class="docutils literal notranslate"><span class="pre">obj</span></code>.</p>
+<p>Should just be None (default) in user code.</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of 4-tuples, each containing
+<code class="docutils literal notranslate"><span class="pre">(property_path,</span> <span class="pre">item,</span> <span class="pre">prop,</span> <span class="pre">value)</span></code>. <code class="docutils literal notranslate"><span class="pre">property_path</span></code> is the list
+of strings, indicating the object children names,
+starting from some root object that lead to the <code class="docutils literal notranslate"><span class="pre">item</span></code>. <code class="docutils literal notranslate"><span class="pre">item</span></code> is
+the object or child whose property <code class="docutils literal notranslate"><span class="pre">prop</span></code> is being considered.
+<code class="docutils literal notranslate"><span class="pre">value</span></code> is a bool indicating whether to log the property.</p>
+</dd>
+</dl>
+<p>E.g.:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="p">(</span><span class="n">Loggable</span><span class="p">):</span>
+
+    <span class="n">_loggable_props_</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="p">)</span>
+
+    <span class="n">_loggable_children_</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;the box&#39;</span><span class="p">:</span> <span class="s1">&#39;box&#39;</span><span class="p">}</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;chair&#39;</span>
+
+    <span class="n">box</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Box</span><span class="p">(</span><span class="n">Loggable</span><span class="p">):</span>
+
+    <span class="n">_loggable_props_</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;volume&#39;</span><span class="p">,</span> <span class="p">)</span>
+
+    <span class="n">volume</span> <span class="o">=</span> <span class="mi">12</span>
+</pre></div>
+</div>
+<p>then:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="n">Box</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">read_loggable_from_object</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="go">{&#39;the box&#39;: {&#39;volume&#39;: False}, &#39;name&#39;: False&#39;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;the box&#39;</span><span class="p">][</span><span class="s1">&#39;volume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_loggable_properties</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+<span class="go">[([&#39;the box&#39;, &#39;volume&#39;], &lt;Box at 0x16f0b2b5320&gt;, &#39;volume&#39;, True)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.loggable.load_save_get_loggable_properties">
+<span class="sig-prename descclassname"><span class="pre">utils.loggable.</span></span><span class="sig-name descname"><span class="pre">load_save_get_loggable_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#utils.loggable.load_save_get_loggable_properties" title="Permalink to this definition"></a></dt>
+<dd><p>Loads the loggable configuration from the yaml file (
+<a class="reference internal" href="#utils.loggable.read_loggable_from_file" title="utils.loggable.read_loggable_from_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_loggable_from_file()</span></code></a>, if the file doesn’t
+exist it creates it with <a class="reference internal" href="#utils.loggable.read_loggable_from_object" title="utils.loggable.read_loggable_from_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_loggable_from_object()</span></code></a> and
+<a class="reference internal" href="#utils.loggable.dump_loggable" title="utils.loggable.dump_loggable"><code class="xref py py-func docutils literal notranslate"><span class="pre">dump_loggable()</span></code></a>), updates it with <a class="reference internal" href="#utils.loggable.update_loggable_from_object" title="utils.loggable.update_loggable_from_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">update_loggable_from_object()</span></code></a>
+and then dumps it back to the yaml file with <a class="reference internal" href="#utils.loggable.dump_loggable" title="utils.loggable.dump_loggable"><code class="xref py py-func docutils literal notranslate"><span class="pre">dump_loggable()</span></code></a>. It also
+returns the flattened loggable properties using
+<a class="reference internal" href="#utils.loggable.get_loggable_properties" title="utils.loggable.get_loggable_properties"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_loggable_properties()</span></code></a>.</p>
+<p>This can be used to get the loggable properties, but also making sure the
+file contains the current loggables including any new properties not
+previously there.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> – The loggable object.</p></li>
+<li><p><strong>filename</strong> – The yaml filename.</p></li>
+<li><p><strong>default_value</strong> – A bool (True/False), indicating whether to default
+the new loggable properties to True (they are logged) or False (they are
+not logged). The individual properties can subsequently be set either
+way manually in the file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The loggable list returned by <a class="reference internal" href="#utils.loggable.get_loggable_properties" title="utils.loggable.get_loggable_properties"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_loggable_properties()</span></code></a>.</p>
+</dd>
+</dl>
+<p>E.x.:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="p">(</span><span class="n">Loggable</span><span class="p">):</span>
+
+    <span class="n">_config_props_</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="p">)</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;chair&#39;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ModelV2</span><span class="p">(</span><span class="n">Loggable</span><span class="p">):</span>
+
+    <span class="n">_config_props_</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;side&#39;</span><span class="p">)</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;chair&#39;</span>
+
+    <span class="n">side</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
+</pre></div>
+</div>
+<p>then:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">load_save_get_loggable_properties</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;loggable.yaml&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="go">[([&#39;name&#39;], &lt;Model at 0x16f0b2b5278&gt;, &#39;name&#39;, True)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># then later for v2 of the model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model_v2</span> <span class="o">=</span> <span class="n">ModelV2</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">load_save_get_loggable_properties</span><span class="p">(</span><span class="n">model_v2</span><span class="p">,</span> <span class="s1">&#39;loggable.yaml&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="go">[([&#39;name&#39;], &lt;ModelV2 at 0x16f0b2b5695&gt;, &#39;name&#39;, True),</span>
+<span class="go"> ([&#39;side&#39;], &lt;ModelV2 at 0x16f0b2b5695&gt;, &#39;side&#39;, True)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;loggable.yaml&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>this prints:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">name</span><span class="p">:</span> <span class="n">true</span>
+<span class="n">side</span><span class="p">:</span> <span class="n">true</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.loggable.log_tensor_board">
+<span class="sig-prename descclassname"><span class="pre">utils.loggable.</span></span><span class="sig-name descname"><span class="pre">log_tensor_board</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">writer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loggable_properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">walltime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#utils.loggable.log_tensor_board" title="Permalink to this definition"></a></dt>
+<dd><p>Logs the current value of all the given properties to the TensorBoard
+writer object for live display.</p>
+<p>Properties that are arrays are logged as a sequence of scalars, which is
+inefficient. It is suggested to use <a class="reference internal" href="#utils.loggable.NixLogWriter" title="utils.loggable.NixLogWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">NixLogWriter</span></code></a> for complex
+data and <a class="reference internal" href="#utils.loggable.log_tensor_board" title="utils.loggable.log_tensor_board"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_tensor_board()</span></code></a> only for scalars.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>writer</strong> – An instantiated <code class="docutils literal notranslate"><span class="pre">torch.utils.tensorboard.SummaryWriter</span></code>
+object to which the data will be written.</p></li>
+<li><p><strong>loggable_properties</strong> – The list of properties (in the format of
+<a class="reference internal" href="#utils.loggable.get_loggable_properties" title="utils.loggable.get_loggable_properties"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_loggable_properties()</span></code></a>) to read and log.</p></li>
+<li><p><strong>global_step</strong> – The optional global timestep, which must be
+monotonically increasing if providing.</p></li>
+<li><p><strong>walltime</strong> – The optional wall time.</p></li>
+<li><p><strong>prefix</strong> – An optional prefix used to log the data under.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.loggable.read_loggable_from_file">
+<span class="sig-prename descclassname"><span class="pre">utils.loggable.</span></span><span class="sig-name descname"><span class="pre">read_loggable_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#utils.loggable.read_loggable_from_file" title="Permalink to this definition"></a></dt>
+<dd><p>Reads and returns the dict indicating whether to log objects from a file
+that was previously dumped with <a class="reference internal" href="#utils.loggable.dump_loggable" title="utils.loggable.dump_loggable"><code class="xref py py-func docutils literal notranslate"><span class="pre">dump_loggable()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> – The filename to the yaml file.</p>
+</dd>
+</dl>
+<p>E.g.:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="p">(</span><span class="n">Loggable</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">_loggable_props_</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;chair&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">read_loggable_from_object</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dump_loggable</span><span class="p">(</span><span class="s1">&#39;loggable.yaml&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">read_loggable_from_file</span><span class="p">(</span><span class="s1">&#39;loggable.yaml&#39;</span><span class="p">)</span>
+<span class="go">{&#39;name&#39;: True}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.loggable.read_loggable_from_object">
+<span class="sig-prename descclassname"><span class="pre">utils.loggable.</span></span><span class="sig-name descname"><span class="pre">read_loggable_from_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#utils.loggable.Loggable" title="utils.loggable.Loggable"><span class="pre">Loggable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#utils.loggable.read_loggable_from_object" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a recursive dict containing all the loggable properties of the
+obj and its loggable children. Each item maps the item name to
+<code class="docutils literal notranslate"><span class="pre">default_value</span></code>, indicating whether to log the item by default.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> – The object from which to get the loggables.</p></li>
+<li><p><strong>default_value</strong> – A bool (True/False), indicating whether to default
+the loggable properties to True (they are logged) or False (they are
+not logged). The individual properties can subsequently be set either
+way manually in the dict.</p></li>
+</ul>
+</dd>
+</dl>
+<p>E.g.:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="p">(</span><span class="n">Loggable</span><span class="p">):</span>
+
+    <span class="n">_loggable_props_</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="p">)</span>
+
+    <span class="n">_loggable_children_</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;the box&#39;</span><span class="p">:</span> <span class="s1">&#39;box&#39;</span><span class="p">}</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;chair&#39;</span>
+
+    <span class="n">box</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Box</span><span class="p">(</span><span class="n">Loggable</span><span class="p">):</span>
+
+    <span class="n">_loggable_props_</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;volume&#39;</span><span class="p">,</span> <span class="p">)</span>
+
+    <span class="n">volume</span> <span class="o">=</span> <span class="mi">12</span>
+</pre></div>
+</div>
+<p>then:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="n">Box</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">loggables</span> <span class="o">=</span> <span class="n">read_loggable_from_object</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">loggables</span>
+<span class="go">{&#39;the box&#39;: {&#39;volume&#39;: False}, &#39;name&#39;: False&#39;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># to log name</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">loggables</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.loggable.update_loggable_from_object">
+<span class="sig-prename descclassname"><span class="pre">utils.loggable.</span></span><span class="sig-name descname"><span class="pre">update_loggable_from_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#utils.loggable.Loggable" title="utils.loggable.Loggable"><span class="pre">Loggable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">loggable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#utils.loggable.update_loggable_from_object" title="Permalink to this definition"></a></dt>
+<dd><p>Takes the loggable data read with <a class="reference internal" href="#utils.loggable.read_loggable_from_object" title="utils.loggable.read_loggable_from_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_loggable_from_object()</span></code></a>
+or <a class="reference internal" href="#utils.loggable.read_loggable_from_file" title="utils.loggable.read_loggable_from_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_loggable_from_file()</span></code></a> and creates a new loggable dict from it
+and updates it by adding any new loggable properties of the object, that has
+been added to the object or its children since the last time it was
+created.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> – The object from which to get the loggables.</p></li>
+<li><p><strong>loggable</strong> – The the loggable data read with
+<a class="reference internal" href="#utils.loggable.read_loggable_from_object" title="utils.loggable.read_loggable_from_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_loggable_from_object()</span></code></a> or <a class="reference internal" href="#utils.loggable.read_loggable_from_file" title="utils.loggable.read_loggable_from_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_loggable_from_file()</span></code></a>.</p></li>
+<li><p><strong>default_value</strong> – A bool (True/False), indicating whether to default
+the new loggable properties to True (they are logged) or False (they are
+not logged). The individual properties can subsequently be set either
+way manually in the dict.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The updated loggable dict.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="utils.io.html" class="btn btn-neutral float-left" title="utils.io" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="utils.plotting.html" class="btn btn-neutral float-right" title="utils.plotting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Roy Moyal, Matthew Einhorn, Jeremy Forest, Ayon Borthakur, Chen Yang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
