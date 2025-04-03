@@ -9,6 +9,7 @@ setup(
     version=__version__,
     description="A framework for spiking neural network modeling. ",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/cplab/sapicore",
     author="Roy Moyal, Matthew Einhorn, Ayon Borthakur, Thomas Cleland",
     author_email="rm875@cornell.edu, me263@cornell.edu, ayon.borthakur@ai.iith.ac.in, " "tac29@cornell.edu",
